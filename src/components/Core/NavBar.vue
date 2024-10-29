@@ -48,10 +48,10 @@
       </svg>
       <span class="flex flex-col flex-grow" >
         <span class="text-sm font-semibold sm:text-base lg:text-xl">
-          System
+          Issuance for Lease
         </span>
         <div class="text-sm font-bold sm:text-xl lg:text-2xl">
-          Subsystem
+          Billing and Service Invoice
         </div>
       </span>
     </div>

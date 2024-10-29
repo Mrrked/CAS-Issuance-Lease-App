@@ -30,7 +30,7 @@
           </svg>
         </div>
         <div class="text-2xl font-bold tracking-wide text-center sm:text-4xl text-surface-50">
-          System
+          Billing and Service Invoice
         </div>
       </div>
       <form v-focustrap @submit.prevent="handleExecuteLogin" class="flex flex-col justify-between flex-1 gap-7 p-7">

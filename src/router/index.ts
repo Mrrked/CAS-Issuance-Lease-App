@@ -3,11 +3,11 @@ import { RouteRecordRaw, createRouter, createWebHashHistory } from 'vue-router'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Main System',
+    name: 'Issuance for Lease System',
     component: () => import('../views/Protected/MainView.vue'),
     meta: {
       requiresAuth: true,
-      header: 'Main System'
+      header: 'Issuance for Lease System'
     }
   },
   {
@@ -49,7 +49,7 @@ router.beforeEach(async (to, _from, next,) => {
     return next('/');
   }
 
-  document.title = 'System'
+  document.title = 'CAS  | ' + (to.meta.header as string || 'Not Found')
   next()
 });
 

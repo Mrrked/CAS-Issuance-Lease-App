@@ -1,5 +1,10 @@
 import { JwtPayload } from "jwt-decode"
 
+export interface StringValueName {
+  value: string,
+  name: string
+}
+
 export interface IntValueName {
   value: number
   name: string

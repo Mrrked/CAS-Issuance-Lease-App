@@ -15,15 +15,15 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
+  import { usePerYearMonthStore } from '../../store/usePerYearMonthStore';
 
 
   const mainStore = useMainStore()
   const coreDataStore = useCoreDataStore()
+  const perYearMonthStore = usePerYearMonthStore()
+
 
   const {
-    isMainScreen,
-    invoiceDateForm,
-
     YEARS_OPTIONS,
     MONTHS_OPTIONS
   } = storeToRefs(mainStore);
@@ -41,7 +41,7 @@
 
 <template>
   <div class="flex flex-col w-full h-full gap-3 pt-4">
-    <Tabs v-if="!isMainScreen" value="0">
+    <Tabs value="0">
       <TabList>
         <Tab value="0">Per Bill Type / PBL</Tab>
         <Tab value="1">Per Year / Month (BATCH)</Tab>
@@ -89,7 +89,7 @@
                   </label>
                 </InputGroupAddon>
                 <Select
-                  v-model="invoiceDateForm.year"
+                  v-model="perYearMonthStore.invoiceDateForm.year"
                   :options="YEARS_OPTIONS"
                   filter
                   optionLabel="name"
@@ -104,7 +104,7 @@
                   </label>
                 </InputGroupAddon>
                 <Select
-                  v-model="invoiceDateForm.month"
+                  v-model="perYearMonthStore.invoiceDateForm.month"
                   :options="MONTHS_OPTIONS"
                   optionLabel="name"
                   placeholder="Select"

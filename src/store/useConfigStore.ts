@@ -2,6 +2,7 @@ import { onMounted, ref } from 'vue';
 
 import { AxiosError } from 'axios';
 import { ExtendedJWTPayload } from './types';
+import { PDFDocument } from 'pdf-lib';
 import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode';
 import { useToast } from 'primevue/usetoast';
@@ -49,9 +50,9 @@ export const useConfigStore = defineStore('config', () => {
 
     // Convert to 12-hour format
     if (hours === 0) {
-        hours = 12;  // Midnight case
+      hours = 12;  // Midnight case
     } else if (hours > 12) {
-        hours -= 12;  // Convert to 12-hour time
+      hours -= 12;  // Convert to 12-hour time
     }
 
     // Return formatted time string
@@ -188,6 +189,36 @@ export const useConfigStore = defineStore('config', () => {
     }
   };
 
+  async function mergeAndPreviewPDF(pdfBlob1: Blob, pdfBlob2: Blob, previewElement: HTMLIFrameElement) {
+    // Load the first and second PDF documents
+    const pdfDoc1 = await PDFDocument.load(await pdfBlob1.arrayBuffer());
+    const pdfDoc2 = await PDFDocument.load(await pdfBlob2.arrayBuffer());
+
+    // Create a new PDF document
+    const mergedPdfDoc = await PDFDocument.create();
+
+    // Copy pages from the first PDF
+    const pages1 = await mergedPdfDoc.copyPages(pdfDoc1, pdfDoc1.getPageIndices());
+    pages1.forEach((page) => mergedPdfDoc.addPage(page));
+
+    // Copy pages from the second PDF
+    const pages2 = await mergedPdfDoc.copyPages(pdfDoc2, pdfDoc2.getPageIndices());
+    pages2.forEach((page) => mergedPdfDoc.addPage(page));
+
+    // Save the merged PDF document as a Blob
+    const mergedPdfBytes = await mergedPdfDoc.save();
+    const mergedPdfBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+
+    // Create an Object URL and preview it
+    const pdfUrl = URL.createObjectURL(mergedPdfBlob);
+    if (previewElement) {
+      previewElement.src = pdfUrl;
+    }
+
+    return mergedPdfBlob;
+  }
+
+
   onMounted(() => {
     updateTime();
     setInterval(updateTime, 1000);
@@ -221,5 +252,7 @@ export const useConfigStore = defineStore('config', () => {
     getRoundedTwoDecimals,
 
     handleError,
+
+    mergeAndPreviewPDF,
   }
 })

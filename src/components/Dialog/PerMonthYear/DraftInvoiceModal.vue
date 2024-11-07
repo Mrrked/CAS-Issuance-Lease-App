@@ -5,6 +5,7 @@
   import { LeaseBill } from '../../../store/types';
   import LoadingModal from '../General/LoadingModal.vue'
   import { useDialog } from 'primevue/usedialog';
+  import Button from 'primevue/button';
 
   interface DialogRef  {
     data: {
@@ -18,7 +19,22 @@
 
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
 
+  const PDF_BLOB = ref<Blob>();
+
   const selectedCompany = ref<COMPANY_DETAILS>(COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS)
+
+  const handleDownload = () => {
+    console.log('BLOB', PDF_BLOB.value);
+
+    if (PDF_BLOB.value && dialogRef) {
+      const url = URL.createObjectURL(PDF_BLOB.value as Blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'DRAFT - ' + 'Service Invoice' + ' Single.pdf';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  }
 
   onMounted(async () => {
     if (dialogRef?.value) {
@@ -39,8 +55,6 @@
       const SELECTED_BILLING = dialogRef.value.data.bill
 
       // console.log('SELECTED_BILLING ', SELECTED_BILLING);
-
-      const FILE_NAME = 'DRAFT - Service Invoice #1234567890'
 
       const PAGE = `
         <div class="
@@ -434,7 +448,7 @@
 
       const CONFIGURATION = {
         margin: 0,
-        filename: FILE_NAME,
+        filename: 'DRAFT - ' + 'Service Invoice' + ' Single ' + SELECTED_BILLING.INDEX,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -448,6 +462,7 @@
         .output('blob')
         .then((pdfBlob: Blob) => {
           const pdfUrl = URL.createObjectURL(pdfBlob);
+          PDF_BLOB.value = pdfBlob
 
           if (previewElement) {
             previewElement.src = pdfUrl;
@@ -463,7 +478,8 @@
 
 
 <template>
-  <div>
-    <iframe id="pdf-preview" style="width: 100%; height: 600px;" class="border border-black"></iframe>
+  <div class="flex flex-col items-end gap-1">
+    <Button type="button" label="Download Draft as PDF" @click="handleDownload"></Button>
+    <iframe id="pdf-preview" style="width: 100%; height: 470px;" class="border border-black"></iframe>
   </div>
 </template>

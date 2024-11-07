@@ -6,6 +6,7 @@
   import LoadingModal from '../General/LoadingModal.vue'
   import { useConfigStore } from '../../../store/useConfigStore';
   import { useDialog } from 'primevue/usedialog';
+  import Button from 'primevue/button';
 
   interface DialogRef  {
     data: {
@@ -28,13 +29,13 @@
   const handleDownload = () => {
     console.log('BLOB', PDF_BLOB.value);
 
-    if (PDF_BLOB.value) {
+    if (PDF_BLOB.value && dialogRef) {
       const url = URL.createObjectURL(PDF_BLOB.value as Blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'TEST.pdf';
+      a.download = 'DRAFT - ' + 'Service Invoice' + ' Multiple ' + dialogRef.value.data.bills.length + '.pdf';
       a.click();
-      URL.revokeObjectURL(url); // Clean up the URL object
+      URL.revokeObjectURL(url);
     }
   }
 
@@ -472,7 +473,7 @@
 
       const CONFIGURATION = {
         margin: 0,
-        filename: 'DRAFT - Service Invoice - 11/04/2024',
+        filename: 'DRAFT - ' + 'Service Invoice' + ' Multiple' + dialogRef.value.data.bills.length,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
@@ -496,6 +497,7 @@
       if (previewElement) {
         previewElement.src = pdfUrl;
       }
+      PDF_BLOB.value = mergedPDFBlob
 
       loadingDialogRef.close()
     }
@@ -505,7 +507,8 @@
 
 
 <template>
-  <div>
-    <iframe id="pdf-preview" style="width: 100%; height: 600px;" class="border border-black"></iframe>
+  <div class="flex flex-col items-end gap-1">
+    <Button type="button" label="Download Drafts as PDF" @click="handleDownload"></Button>
+    <iframe id="pdf-preview" style="width: 100%; height: 470px;" class="border border-black"></iframe>
   </div>
 </template>

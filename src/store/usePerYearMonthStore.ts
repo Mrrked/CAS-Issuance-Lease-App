@@ -35,7 +35,12 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const billings = ref<LeaseBill[]>([])
 
   const billings_data = computed(():LeaseBill[] => {
-    return billings.value
+    return billings.value.map((bill, index) => {
+      return {
+        ...bill,
+        INDEX: index
+      }
+    })
   })
 
   const billings_column = computed((): Column[] => {
@@ -174,10 +179,6 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   }
 
   const handleExecutePrintFinalInvoices = () => {
-    
-  }
-
-  const createServiceInvoice = () => {
     
   }
 

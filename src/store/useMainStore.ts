@@ -5,9 +5,10 @@ import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useConfigStore } from './useConfigStore';
 import { useDialog } from 'primevue/usedialog';
-import { usePerBillTypeStore } from './usePerBillTypeStore';
 import { usePerYearMonthStore } from './usePerYearMonthStore';
-import { useToast } from 'primevue/usetoast';
+
+// import { usePerBillTypeStore } from './usePerBillTypeStore';
+
 
 export const useMainStore = defineStore('main', () => {
 
@@ -15,12 +16,11 @@ export const useMainStore = defineStore('main', () => {
 
   // STATES
 
-  const toast = useToast();
   const dialog = useDialog();
   const configStore = useConfigStore();
 
   const perYearMonthStore = usePerYearMonthStore()
-  const perBillTypeStore = usePerBillTypeStore()
+  // const perBillTypeStore = usePerBillTypeStore()
 
   // GETTERS
 

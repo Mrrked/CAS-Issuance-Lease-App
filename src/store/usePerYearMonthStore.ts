@@ -7,16 +7,11 @@ import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedB
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
-import { useMainStore } from './useMainStore';
-import { useToast } from 'primevue/usetoast';
 
 export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
-  const toast = useToast();
   const dialog = useDialog();
   const confirm = useConfirm();
-
-  const mainStore = useMainStore()
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();

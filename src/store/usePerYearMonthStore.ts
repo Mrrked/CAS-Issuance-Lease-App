@@ -16,7 +16,6 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const dialog = useDialog();
   const confirm = useConfirm();
 
-  const mainStore = useMainStore()
   const configStore = useConfigStore()
 
   const currentYear = new Date().getFullYear();

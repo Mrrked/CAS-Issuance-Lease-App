@@ -189,35 +189,20 @@ export const useConfigStore = defineStore('config', () => {
     }
   };
 
-  async function mergeAndPreviewPDF(pdfBlob1: Blob, pdfBlob2: Blob, previewElement: HTMLIFrameElement) {
-    // Load the first and second PDF documents
-    const pdfDoc1 = await PDFDocument.load(await pdfBlob1.arrayBuffer());
-    const pdfDoc2 = await PDFDocument.load(await pdfBlob2.arrayBuffer());
-
-    // Create a new PDF document
+  const mergePDF = async (pdfBlobs: Blob[]) => {
     const mergedPdfDoc = await PDFDocument.create();
 
-    // Copy pages from the first PDF
-    const pages1 = await mergedPdfDoc.copyPages(pdfDoc1, pdfDoc1.getPageIndices());
-    pages1.forEach((page) => mergedPdfDoc.addPage(page));
+    for (const pdfBlob of pdfBlobs) {
+        const pdfDoc = await PDFDocument.load(await pdfBlob.arrayBuffer());
+        const pages = await mergedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+        pages.forEach((page) => mergedPdfDoc.addPage(page));
+    }
 
-    // Copy pages from the second PDF
-    const pages2 = await mergedPdfDoc.copyPages(pdfDoc2, pdfDoc2.getPageIndices());
-    pages2.forEach((page) => mergedPdfDoc.addPage(page));
-
-    // Save the merged PDF document as a Blob
     const mergedPdfBytes = await mergedPdfDoc.save();
     const mergedPdfBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
 
-    // Create an Object URL and preview it
-    const pdfUrl = URL.createObjectURL(mergedPdfBlob);
-    if (previewElement) {
-      previewElement.src = pdfUrl;
-    }
-
     return mergedPdfBlob;
-  }
-
+  };
 
   onMounted(() => {
     updateTime();
@@ -253,6 +238,6 @@ export const useConfigStore = defineStore('config', () => {
 
     handleError,
 
-    mergeAndPreviewPDF,
+    mergePDF,
   }
 })

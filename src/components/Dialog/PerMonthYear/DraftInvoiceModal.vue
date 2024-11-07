@@ -3,6 +3,8 @@
   import { inject, onMounted, Ref, ref } from 'vue';
   import { COMPANY_DETAILS, COMPANIES } from './data';
   import { LeaseBill } from '../../../store/types';
+  import LoadingModal from '../General/LoadingModal.vue'
+  import { useDialog } from 'primevue/usedialog';
 
   interface DialogRef  {
     data: {
@@ -12,15 +14,31 @@
     }
   }
 
+  const dialog = useDialog();
+
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
 
   const selectedCompany = ref<COMPANY_DETAILS>(COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS)
 
-  onMounted(() => {
+  onMounted(async () => {
     if (dialogRef?.value) {
+
+      const loadingDialogRef = dialog.open(LoadingModal, {
+        data: {
+          label: 'Generating Draft...'
+        },
+        props: {
+          style: {
+            paddingTop: '1.5rem',
+          },
+          showHeader: false,
+          modal: true
+        }
+      })
+
       const SELECTED_BILLING = dialogRef.value.data.bill
 
-      console.log('SELECTED_BILLING ', SELECTED_BILLING);
+      // console.log('SELECTED_BILLING ', SELECTED_BILLING);
 
       const FILE_NAME = 'DRAFT - Service Invoice #1234567890'
 
@@ -421,6 +439,7 @@
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
       };
+
       const previewElement = document.getElementById('pdf-preview') as HTMLIFrameElement;
 
       html2pdf()
@@ -433,7 +452,10 @@
           if (previewElement) {
             previewElement.src = pdfUrl;
           }
-        });
+
+          loadingDialogRef.close()
+        })
+
     }
   })
 
@@ -442,6 +464,6 @@
 
 <template>
   <div>
-    <iframe id="pdf-preview" style="width: 100%; height: 500px;" class="border border-black"></iframe>
+    <iframe id="pdf-preview" style="width: 100%; height: 600px;" class="border border-black"></iframe>
   </div>
 </template>

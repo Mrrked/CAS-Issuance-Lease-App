@@ -3,7 +3,9 @@
   import { inject, onMounted, Ref, ref } from 'vue';
   import { COMPANY_DETAILS, COMPANIES } from './data';
   import { LeaseBill } from '../../../store/types';
+  import LoadingModal from '../General/LoadingModal.vue'
   import { useConfigStore } from '../../../store/useConfigStore';
+  import { useDialog } from 'primevue/usedialog';
 
   interface DialogRef  {
     data: {
@@ -14,19 +16,14 @@
     }
   }
 
+  const dialog = useDialog();
+
   const configStore = useConfigStore()
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
-
 
   const PDF_BLOB = ref<Blob>();
 
   const selectedCompany = ref<COMPANY_DETAILS>(COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS)
-
-  const handleMergePDFBlob = () => {
-    if (PDF_BLOB.value) {
-
-    }
-  }
 
   const handleDownload = () => {
     console.log('BLOB', PDF_BLOB.value);
@@ -41,15 +38,35 @@
     }
   }
 
-  onMounted(() => {
+  onMounted(async () => {
     if (dialogRef?.value) {
-      const SELECTED_BILLINGS = dialogRef.value.data.bills
 
-      console.log('SELECTED_BILLINGS ', SELECTED_BILLINGS);
+      const loadingDialogRef = dialog.open(LoadingModal, {
+        data: {
+          label: `Generating ${dialogRef.value.data.bills.length} Drafts...`
+        },
+        props: {
+          style: {
+            paddingTop: '1.5rem',
+          },
+          showHeader: false,
+          modal: true
+        }
+      })
 
-      let ALL_PAGES = ``
+      const chunkArray = (array: LeaseBill[], chunkSize: number): LeaseBill[][] => {
+        const result: LeaseBill[][] = [];
 
-      const FILE_NAME = 'DRAFT - Service Invoice - 11/04/2024'
+        for (let i = 0; i < array.length; i += chunkSize) {
+          result.push(array.slice(i, i + chunkSize));
+        }
+
+        return result;
+      }
+
+      const SELECTED_BILLINGS_2D: LeaseBill[][] = chunkArray(dialogRef.value.data.bills, 20)
+
+      // console.log('SELECTED_BILLINGS_2D ', SELECTED_BILLINGS_2D);
 
       const PAGE = `
         <div class="
@@ -441,41 +458,46 @@
         </div>
       `;
 
-      // SELECTED_BILLINGS.forEach((BILL, index) => {
-      //   if (index === 0) {
-      //     ALL_PAGES = PAGE
-      //   } else if(index <= 60) {
-      //     ALL_PAGES += PAGE
-      //   }
-      // })
+      const PAGES_2D: string[] = []
 
+      SELECTED_BILLINGS_2D.forEach((BILLS_2D) => {
+        let PAGES_1D = ``
+        BILLS_2D.forEach(() => {
+          PAGES_1D += PAGE
+        })
+        PAGES_2D.push(PAGES_1D)
+      })
 
-      for (let index = 0; index < 30; index++) {
-        ALL_PAGES += PAGE
-      }
+      // console.log('PAGES_2D ', PAGES_2D);
 
       const CONFIGURATION = {
         margin: 0,
-        filename: FILE_NAME,
+        filename: 'DRAFT - Service Invoice - 11/04/2024',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
       };
 
-      html2pdf()
-        .set(CONFIGURATION)
-        .from(ALL_PAGES)
-        .output('blob')
-        .then(async (pdfBlob: Blob) => {
-          const previewElement = document.getElementById('pdf-preview') as HTMLIFrameElement;
-          PDF_BLOB.value = await configStore.mergeAndPreviewPDF(pdfBlob, pdfBlob, previewElement)
-          console.log(PDF_BLOB.value);
+      const pdfBlobs: Blob[] = await Promise.all(
+        PAGES_2D.map(async (PAGES_1D) => {
+          return await html2pdf()
+            .set(CONFIGURATION)
+            .from(PAGES_1D)
+            .output('blob');
         })
+      );
 
-      // html2pdf()
-      //   .set(CONFIGURATION)
-      //   .from(ALL_PAGES)
-      //   .save()
+      const mergedPDFBlob = await configStore.mergePDF(pdfBlobs)
+
+      const previewElement = document.getElementById('pdf-preview') as HTMLIFrameElement;
+      // console.log(mergedPDFBlob);
+
+      const pdfUrl = URL.createObjectURL(mergedPDFBlob);
+      if (previewElement) {
+        previewElement.src = pdfUrl;
+      }
+
+      loadingDialogRef.close()
     }
   })
 
@@ -484,9 +506,6 @@
 
 <template>
   <div>
-    <div>
-      <button type="button" @click="handleDownload" > Download </button>
-    </div>
-    <iframe id="pdf-preview" style="width: 100%; height: 500px;" class="border border-black"></iframe>
+    <iframe id="pdf-preview" style="width: 100%; height: 600px;" class="border border-black"></iframe>
   </div>
 </template>

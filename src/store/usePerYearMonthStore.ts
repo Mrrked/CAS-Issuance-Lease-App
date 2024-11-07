@@ -69,8 +69,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
         },
         view1: () => {
           confirm.require({
-            message: 'Are you sure you want to print draft invoice?',
-            header: 'Confirm Print Invoice (DRAFT) ? ',
+            message: 'Are you sure you want to print draft invoices?',
+            header: 'Confirm Print Invoices (DRAFT) ? ',
             icon: 'pi pi-exclamation-triangle',
             rejectProps: {
               label: 'Cancel',

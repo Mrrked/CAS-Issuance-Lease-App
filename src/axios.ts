@@ -47,7 +47,42 @@ instance.interceptors.response.use(
     // Log the error for debugging
     console.log('MIDDLEWARE ERROR', error);
 
-    if (error.response?.status === 401) {
+    if (error.response?.status) {
+      if (error.response?.status === 401) {
+        const originalRequest = error.config;
+
+        // Avoid infinite loop
+        if (!originalRequest._retry) {
+          originalRequest._retry = true;
+
+          try {
+            // Try to refresh the access token
+            const newAccessToken = await refreshAccessToken();
+
+            if (newAccessToken) {
+              // Update the request headers with the new token
+              axios.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
+              originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+
+              // Retry the original request with the new token
+              return instance(originalRequest);
+            }
+          } catch (refreshError) {
+            // Handle errors during the token refresh process
+            console.log('Refresh Token Error:', refreshError);
+            // Clear tokens and redirect to login page
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+            router.push('/login');
+          }
+        } else {
+          // If the refresh token request also failed, redirect to login
+          localStorage.removeItem('access');
+          localStorage.removeItem('refresh');
+          router.push('/login');
+        }
+      }
+    } else {
       const originalRequest = error.config;
 
       // Avoid infinite loop

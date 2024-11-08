@@ -27,7 +27,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       name: String(currentYear)
     },
     month: {
-      value: currentMonth + 1,
+      value: currentMonth,
       name: `${String(currentMonth + 1).padStart(2, '0')} - ${new Date(0, currentMonth).toLocaleString('default', { month: 'long' })}`
     }
   })
@@ -149,399 +149,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       },
     })
 
-    // console.log('SELECTED_BILLING ', SELECTED_BILLING);
-
-    const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
-
-    const PAGE = `
-      <div class="
-          min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
-          flex flex-col text-black bg-white
-        "
-      >
-        <!-- HEADER -->
-        <div class="grid grid-cols-7 -mt-4 min-h-24 max-h-24">
-          <!-- LEFT -->
-          <div class="flex items-center h-full col-span-5">
-            <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-              <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
-            </div>
-            <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
-              <div class="font-semibold text-16">
-                ${ selectedCompany.CONAME }
-              </div>
-              <div class="flex flex-col tracking-tighter text-10">
-                <div class="text-wrap">
-                  ${ selectedCompany.ADDRESS }
-                </div>
-                <div>
-                  TEL. NO. ${ selectedCompany.TEL_NO }
-                </div>
-                <div>
-                  VAT REG TIN: ${ selectedCompany.TIN }
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- RIGHT -->
-          <div class="flex flex-col items-end justify-center h-full col-span-2 -mt-2">
-            <div class="font-semibold text-20 -mt-[12px]">
-              SERVICE INVOICE
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                No.
-              </div>
-              <div>
-                VI011331A000001
-              </div>
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                Date :
-              </div>
-              <div>
-                2021/12/01
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DESCRIPTION -->
-        <div class="grid items-end grid-cols-7 gap-10 mt-1">
-          <div class="flex flex-col col-span-4 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                SOLD TO
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                Juan Antonio D. Perez
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                ADDRESS
-              </div>
-              <div>
-                :
-              </div>
-              <div class="flex flex-col w-full">
-                <div>
-                  123 Mabini Street, Barangay Poblacion,
-                </div>
-                <div>
-                  Makati City, Metro Manila, Philippines
-                </div>
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                TIN
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                123-456-789-000
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col col-span-3 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                CLIENT KEY
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                CL310271 00
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                PROJECT
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                CITYNET CENTRAL
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                UNIT
-              </div>
-              <div>
-                :
-              </div>
-              <div class=""> L 0000</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="flex flex-col h-full mt-2 tracking-tighter text-10">
-          <!-- THEAD -->
-          <div class="grid grid-cols-11 font-bold border border-black" style="line-height: 11px;">
-            <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-              <div class="col-span-5 px-1 pb-3 border-r border-black -pt-4 text-wrap">
-                Item / Description
-              </div>
-              <div class="px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
-                Qty
-              </div>
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Unit Cost
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VATable Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VAT Exempt Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Zero Rated Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VAT
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Government Taxes
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Withholding Tax
-            </div>
-            <div class="px-1 pb-3 text-right -pt-4 text-wrap">
-              Amount Due
-            </div>
-          </div>
-          <!-- TBODY -->
-          <div class="flex flex-col justify-between flex-1 pb-3 border-b border-black border-x">
-            <!-- ROWS -->
-            <div class="flex flex-col">
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Pen. on Rental for September 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  1,619.09
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  1,445.62
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  173.47
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (28.91)
-                </div>
-                <div class="px-1 text-right text-wrap ">
-                  1,590.18
-                </div>
-              </div>
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Cusa for November 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (5,189.70)
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  254.295.30
-                </div>
-              </div>
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Pen. on Cusa for September 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  345.98
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  308.91
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  37.07
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (6.18)
-                </div>
-                <div class="px-1 text-right text-wrap ">
-                  339.80
-                </div>
-              </div>
-              <pre> </pre>
-            </div>
-
-            <!-- BREAKDOWN -->
-            <div class="grid items-end grid-cols-2 gap-16 px-2 tracking-normal text-12">
-              <!-- COL 1 -->
-              <div class="flex flex-col">
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VATable Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    1,754.53
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VAT Amount
-                  </div>
-                  <div class="col-span-2 text-right">
-                    210.54
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VAT Exempt Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    0.00
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Zero-Rated Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    259,485.00
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Government Taxes
-                  </div>
-                  <div class="col-span-2 text-right">
-                    0.00
-                  </div>
-                </div>
-              </div>
-              <!-- COL 2 -->
-              <div class="flex flex-col">
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Total Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    261,239.53
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Add: VAT
-                  </div>
-                  <div class="col-span-2 text-right">
-                    210.54
-                  </div>
-                </div>
-                <div class="grid grid-cols-5">
-                  <div class="col-span-2 font-bold text-left">
-                    Less: Withholding Tax
-                  </div>
-                  <div class="col-span-3 text-right">
-                    5,224.79
-                  </div>
-                </div>
-                <div class="mt-2 border-t border-black"></div>
-                <div class="grid grid-cols-3 -mt-1">
-                  <div class="col-span-1 font-bold text-left">
-                    Total Amount Due
-                  </div>
-                  <div class="col-span-2 text-right">
-                    256,225.28
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- GENERATE LABEL -->
-        <div class="flex flex-col mt-[100px] mb-[20px] ">
-          <div v-if="withBankCharges" class="w-full pb-2">
-            * Bank charges are to be remitted to the Bank.
-          </div>
-          <div class="italic text-center border-t border-black">
-            This document is computer generated, no signature required.
-          </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="flex flex-col tracking-normal">
-          <div>
-            Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
-          </div>
-          <div>
-            Date Issued : xxxx/xx/xx
-          </div>
-          <div>
-            Series Range : VI011331A000001 - VI011339Z999999
-          </div>
-          <div>
-            Timestamp : 12/01/2021 10:35:28 CELOISA
-          </div>
-        </div>
-      </div>
-    `;
+    const PAGE = handleGeneratePage(SELECTED_BILLING)
 
     const CONFIGURATION = {
       margin: 0,
@@ -589,7 +197,6 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       },
     })
   }
-
 
   const handleExecutePrintDraftInvoices = async () => {
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/DraftInvoiceModalFooter.vue'));
@@ -1083,6 +690,952 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const handleExecutePrintFinalInvoices = () => {
     
   }
+
+  // ServiceInvoice New
+  const handleGeneratePage = (SELECTED_BILLING: LeaseBill) => {
+    console.log('SELECTED_BILLING ', SELECTED_BILLING);
+
+    const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
+
+    const PAGE = `
+      <div class="
+          min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[72px] gap-[12px] text-12 font-helvetica
+          flex flex-col text-black bg-white
+        "
+      >
+        <!-- HEADER -->
+        <div class="grid grid-cols-8 -mt-4 min-h-24 max-h-24">
+          <!-- LEFT -->
+          <div class="flex items-center h-full col-span-5">
+            <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
+              <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
+            </div>
+            <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
+              <div class="font-semibold text-16 tracking-tight">
+                ${ selectedCompany.CONAME }
+              </div>
+              <div class="flex flex-col tracking-tighter text-10">
+                <div class="text-wrap">
+                  ${ selectedCompany.ADDRESS }
+                </div>
+                <div>
+                  TEL. NO. ${ selectedCompany.TEL_NO }
+                </div>
+                <div>
+                  VAT REG TIN: ${ selectedCompany.TIN }
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- RIGHT -->
+          <div class="flex flex-col items-end justify-center h-full col-span-3 -mt-2">
+            <div class="font-semibold text-20 -mt-[12px]">
+              SERVICE INVOICE
+            </div>
+            <div class="flex gap-3 font-semibold text-14">
+              <div>
+                No.
+              </div>
+              <div>
+                VI011331A000001
+              </div>
+            </div>
+            <div class="flex gap-3 font-semibold text-14">
+              <div>
+                Date :
+              </div>
+              <div>
+                2021/12/01
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="grid grid-cols-7 gap-10 mt-1">
+          <div class="flex flex-col col-span-4 shrink-0">
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                SOLD TO
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                Juan Antonio D. Perez
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
+                ADDRESS
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                TIN
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                123-456-789-000
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col col-span-3 shrink-0">
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                CLIENT KEY
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                CL310271 00
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                PROJECT
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                CITYNET CENTRAL
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                UNIT
+              </div>
+              <div>
+                :
+              </div>
+              <div class=""> L 0000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="flex flex-col h-full mt-2">
+          <!-- THEAD -->
+          <div class="grid grid-cols-16 font-bold border border-black" style="line-height: 11px;">
+            <div class="col-span-9 px-1 pb-3 border-r border-black -pt-4 text-wrap">
+              Item / Description
+            </div>
+            <div class="col-span-1 px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
+              Qty
+            </div>
+            <div class="col-span-2 px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              Unit Cost
+            </div>
+            <div class="col-span-2 px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              VAT Amount
+            </div>
+            <div class="col-span-2 px-1 pb-3 text-right -pt-4 text-wrap">
+              Amount
+            </div>
+          </div>
+          <!-- TBODY -->
+          <div class="flex flex-col justify-between flex-1 border-b border-black border-x">
+            <!-- ROWS -->
+            <div class="flex flex-col">
+              <div class="grid grid-cols-16">
+                <div class="col-span-9 px-1 text-wrap">
+                  PENALTY ON RENTAL (September 1 - 30, 2021) VATable
+                </div>
+                <div class="col-span-1 px-1 text-center text-wrap">
+                  1
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  1,445.62
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  173.47
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap ">
+                  1,619.09
+                </div>
+              </div>
+              <div class="grid grid-cols-16">
+                <div class="col-span-9 px-1 text-wrap">
+                  CUSA CHARGES (November 1 - 30, 2021) Zero-Rated
+                </div>
+                <div class="col-span-1 px-1 text-center text-wrap">
+                  1
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  259,485.00
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  259,485.00
+                </div>
+              </div>
+              <div class="grid grid-cols-16">
+                <div class="col-span-9 px-1 text-wrap">
+                  PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable
+                </div>
+                <div class="col-span-1 px-1 text-center text-wrap">
+                  1
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  308.91
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap">
+                  37.07
+                </div>
+                <div class="col-span-2 px-1 text-right text-wrap ">
+                  345.98
+                </div>
+              </div>
+            </div>
+
+            <!-- BOTTOM -->
+            <div class="flex flex-col gap-1">
+
+              <!-- 1 -->
+              <div class="grid items-end grid-cols-2 gap-8 px-2 pb-3 tracking-normal">
+
+                <!-- COL 1 -->
+                <div class="flex flex-col">
+
+                  <!-- MODE OF PAYMENT -->
+                  <div class="mt-3 -mb-1">
+                    <div class="flex flex-col tracking-normal">
+                      <div class="border border-black w-full px-2 pb-3 font-bold">
+                        MODE OF PAYMENT
+                      </div>
+                      <div class="grid grid-cols-7 border border-black border-t-[0px] pb-3 -mt-1">
+                        <!-- CASH -->
+                        <div class="col-span-5 pl-2 font-bold">
+                          Cash
+                        </div>
+                        <div class="col-span-2 text-right pr-2">
+                          0.00
+                          <!-- 256,225.28 -->
+                        </div>
+
+                        <!-- CHECK -->
+                        <div class="col-span-5 pl-2 font-bold">
+                          Check
+                        </div>
+                        <div class="col-span-2 text-right pr-2">
+                          
+                        </div>
+
+
+                        
+
+                        <div class="col-span-1 text-center text-[9px] font-bold">
+                          #
+                        </div>
+                        <div class="col-span-2 text-center text-[9px] font-bold">
+                          Cheque Details
+                        </div>
+                        <div class="col-span-2 text-center text-[9px] font-bold">
+                          Check Date
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px] font-bold">
+                          Amount
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          1
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          2
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          3
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          4
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          5
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          6
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          7
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          8
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          9
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.52
+                        </div>
+
+                        <div class="col-span-1 text-center text-[9px]">
+                          10
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          BDO 10 987654321
+                        </div>
+                        <div class="col-span-2 text-center text-[9px]">
+                          2021/12/01
+                        </div>
+                        <div class="col-span-2 text-right pr-2 text-[9px]">
+                          25,622.60
+                        </div>
+
+                        
+
+                        <div class="col-span-5 pl-2 font-bold mt-2">
+                          TOTAL
+                        </div>
+                        <div class="col-span-2 pr-2 text-right mt-2 font-bold">
+                          256,225.28
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+                </div>
+                <!-- COL 2 -->
+                <div class="flex flex-col">
+
+                  <!-- BREAKDOWN -->
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      VATable Sales
+                    </div>
+                    <div class="font-bold text-right">
+                      1,754.53
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      VAT Amount
+                    </div>
+                    <div class="font-bold text-right">
+                      210.54
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      VAT Exempt Sales
+                    </div>
+                    <div class="font-bold text-right">
+                      0.00
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      Zero-Rated Sales
+                    </div>
+                    <div class="font-bold text-right">
+                      259,485.00
+                    </div>
+                  </div>
+
+
+                  <div class="grid grid-cols-2 mt-5">
+                    <div class="text-left">
+                      Total Sales
+                    </div>
+                    <div class="text-right">
+                      261,450.07
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      Less: VAT
+                    </div>
+                    <div class="text-right">
+                      210.54
+                    </div>
+                  </div>
+                  <div class="mt-2 border-t border-black"></div>
+
+                  <div class="grid grid-cols-2 -mt-2">
+                    <div class="text-left">
+                      Amount: Net of VAT
+                    </div>
+                    <div class="text-right">
+                      261,239.53
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      Add: VAT
+                    </div>
+                    <div class="text-right">
+                      210.54
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2">
+                    <div class="text-left">
+                      Less: Withholding Tax
+                    </div>
+                    <div class="text-right">
+                      5,224.79
+                    </div>
+                  </div>
+                  <div class="mt-2 border-t border-black"></div>
+
+                  <div class="grid grid-cols-5 -mt-2">
+                    <div class="col-span-2 text-left">
+                      Total Amount Due
+                    </div>
+                    <div class="text-right">
+                      PHP
+                    </div>
+                    <div class="col-span-2 text-right font-bold">
+                      256,225.28
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MODE OF PAYMENT -->
+              <!-- <div class="flex flex-col pb-3 tracking-normal">
+                <div class="border-y border-black w-full px-2 pb-3 font-bold">
+                  MODE OF PAYMENT
+                </div>
+                <div class="h-32">
+
+                </div>
+              </div> -->
+            </div>
+
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-[15px] -mb-[30px]">
+          <div class="flex flex-col w-36 font-bold">
+            <div class="text-center">
+              CDKARINA
+            </div>
+            <div class="mt-2 border-t border-black"></div>
+            <div class="text-center -mt-2">
+              Authorized Signature
+            </div>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="flex flex-col tracking-normal">
+          <div>
+            Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
+          </div>
+          <div>
+            Date Issued : xxxx/xx/xx
+          </div>
+          <div>
+            Series Range : VI011331A000001 - VI011339Z999999
+          </div>
+          <div>
+            Timestamp : 12/01/2021 10:35:28
+          </div>
+        </div>
+      </div>
+    `;
+
+    return PAGE
+  }
+
+  // ServiceInvoice 1
+  const handleGeneratePage1 = (SELECTED_BILLING: LeaseBill) => {
+    console.log('SELECTED_BILLING ', SELECTED_BILLING);
+
+    const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
+
+    const PAGE = `
+      <div class="
+          min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
+          flex flex-col text-black bg-white
+        "
+      >
+        <!-- HEADER -->
+        <div class="grid grid-cols-7 -mt-4 min-h-24 max-h-24">
+          <!-- LEFT -->
+          <div class="flex items-center h-full col-span-5">
+            <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
+              <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
+            </div>
+            <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
+              <div class="font-semibold text-16">
+                ${ selectedCompany.CONAME }
+              </div>
+              <div class="flex flex-col tracking-tighter text-10">
+                <div class="text-wrap">
+                  ${ selectedCompany.ADDRESS }
+                </div>
+                <div>
+                  TEL. NO. ${ selectedCompany.TEL_NO }
+                </div>
+                <div>
+                  VAT REG TIN: ${ selectedCompany.TIN }
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- RIGHT -->
+          <div class="flex flex-col items-end justify-center h-full col-span-2 -mt-2">
+            <div class="font-semibold text-20 -mt-[12px]">
+              SERVICE INVOICE
+            </div>
+            <div class="flex gap-3 font-semibold text-14">
+              <div>
+                No.
+              </div>
+              <div>
+                VI011331A000001
+              </div>
+            </div>
+            <div class="flex gap-3 font-semibold text-14">
+              <div>
+                Date :
+              </div>
+              <div>
+                2021/12/01
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="grid items-end grid-cols-7 gap-10 mt-1">
+          <div class="flex flex-col col-span-4 shrink-0">
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                SOLD TO
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                Juan Antonio D. Perez
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
+                ADDRESS
+              </div>
+              <div>
+                :
+              </div>
+              <div class="flex flex-col w-full">
+                <div>
+                  123 Mabini Street, Barangay Poblacion,
+                </div>
+                <div>
+                  Makati City, Metro Manila, Philippines
+                </div>
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                TIN
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                123-456-789-000
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col col-span-3 shrink-0">
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                CLIENT KEY
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                CL310271 00
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                PROJECT
+              </div>
+              <div>
+                :
+              </div>
+              <div>
+                CITYNET CENTRAL
+              </div>
+            </div>
+            <div class="flex items-end gap-3">
+              <div class="w-24 font-semibold">
+                UNIT
+              </div>
+              <div>
+                :
+              </div>
+              <div class=""> L 0000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="flex flex-col h-full mt-2 tracking-tighter text-10">
+          <!-- THEAD -->
+          <div class="grid grid-cols-11 font-bold border border-black" style="line-height: 11px;">
+            <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+              <div class="col-span-5 px-1 pb-3 border-r border-black -pt-4 text-wrap">
+                Item / Description
+              </div>
+              <div class="px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
+                Qty
+              </div>
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              Unit Cost
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              VATable Sales
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              VAT Exempt Sales
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              Zero Rated Sales
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              VAT
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              Government Taxes
+            </div>
+            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+              Withholding Tax
+            </div>
+            <div class="px-1 pb-3 text-right -pt-4 text-wrap">
+              Amount Due
+            </div>
+          </div>
+          <!-- TBODY -->
+          <div class="flex flex-col justify-between flex-1 pb-3 border-b border-black border-x">
+            <!-- ROWS -->
+            <div class="flex flex-col">
+              <div class="grid grid-cols-11">
+                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+                  <div class="col-span-5 px-1 text-wrap">
+                    Pen. on Rental for September 1 - 30, 2021
+                  </div>
+                  <div class="px-1 text-center text-wrap">
+                    1
+                  </div>
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  1,619.09
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  1,445.62
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  173.47
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  (28.91)
+                </div>
+                <div class="px-1 text-right text-wrap ">
+                  1,590.18
+                </div>
+              </div>
+              <div class="grid grid-cols-11">
+                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+                  <div class="col-span-5 px-1 text-wrap">
+                    Cusa for November 1 - 30, 2021
+                  </div>
+                  <div class="px-1 text-center text-wrap">
+                    1
+                  </div>
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  259,485.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  259,485.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  (5,189.70)
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  254.295.30
+                </div>
+              </div>
+              <div class="grid grid-cols-11">
+                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+                  <div class="col-span-5 px-1 text-wrap">
+                    Pen. on Cusa for September 1 - 30, 2021
+                  </div>
+                  <div class="px-1 text-center text-wrap">
+                    1
+                  </div>
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  345.98
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  308.91
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  37.07
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  0.00
+                </div>
+                <div class="px-1 text-right text-wrap">
+                  (6.18)
+                </div>
+                <div class="px-1 text-right text-wrap ">
+                  339.80
+                </div>
+              </div>
+              <pre> </pre>
+            </div>
+
+            <!-- BREAKDOWN -->
+            <div class="grid items-end grid-cols-2 gap-16 px-2 tracking-normal text-12">
+              <!-- COL 1 -->
+              <div class="flex flex-col">
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    VATable Sales
+                  </div>
+                  <div class="col-span-2 text-right">
+                    1,754.53
+                  </div>
+                </div>
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    VAT Amount
+                  </div>
+                  <div class="col-span-2 text-right">
+                    210.54
+                  </div>
+                </div>
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    VAT Exempt Sales
+                  </div>
+                  <div class="col-span-2 text-right">
+                    0.00
+                  </div>
+                </div>
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    Zero-Rated Sales
+                  </div>
+                  <div class="col-span-2 text-right">
+                    259,485.00
+                  </div>
+                </div>
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    Government Taxes
+                  </div>
+                  <div class="col-span-2 text-right">
+                    0.00
+                  </div>
+                </div>
+              </div>
+              <!-- COL 2 -->
+              <div class="flex flex-col">
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    Total Sales
+                  </div>
+                  <div class="col-span-2 text-right">
+                    261,239.53
+                  </div>
+                </div>
+                <div class="grid grid-cols-3">
+                  <div class="col-span-1 font-bold text-left">
+                    Add: VAT
+                  </div>
+                  <div class="col-span-2 text-right">
+                    210.54
+                  </div>
+                </div>
+                <div class="grid grid-cols-5">
+                  <div class="col-span-2 font-bold text-left">
+                    Less: Withholding Tax
+                  </div>
+                  <div class="col-span-3 text-right">
+                    5,224.79
+                  </div>
+                </div>
+                <div class="mt-2 border-t border-black"></div>
+                <div class="grid grid-cols-3 -mt-1">
+                  <div class="col-span-1 font-bold text-left">
+                    Total Amount Due
+                  </div>
+                  <div class="col-span-2 text-right">
+                    256,225.28
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GENERATE LABEL -->
+        <div class="flex flex-col mt-[100px] mb-[20px] ">
+          <div v-if="withBankCharges" class="w-full pb-2">
+            * Bank charges are to be remitted to the Bank.
+          </div>
+          <div class="italic text-center border-t border-black">
+            This document is computer generated, no signature required.
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="flex flex-col tracking-normal">
+          <div>
+            Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
+          </div>
+          <div>
+            Date Issued : xxxx/xx/xx
+          </div>
+          <div>
+            Series Range : VI011331A000001 - VI011339Z999999
+          </div>
+          <div>
+            Timestamp : 12/01/2021 10:35:28 CELOISA
+          </div>
+        </div>
+      </div>
+    `;
+
+    return PAGE
+  }
+
 
   return {
     billings,

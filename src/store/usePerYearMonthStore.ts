@@ -697,6 +697,181 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
     const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
 
+    const CONTENT_VALUES = {
+      HEADER: {
+        img_url:        selectedCompany.IMG_URL,
+        company_name:   selectedCompany.CONAME,
+        address:        selectedCompany.ADDRESS,
+        tel_no:         selectedCompany.TEL_NO,
+        tin:            selectedCompany.TIN,
+
+        invoice_name:   'SERVICE INVOICE',
+        invoice_number: 'VI011331A000001',
+        invoice_date:   '2021/12/01',
+      },
+
+      DESC: {
+        client_name:    'Juan Antonio D. Perez',
+        address:        '123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines',
+        tin:            '123-456-789-000',
+        client_key:     'CL310271 00',
+        project:        'CITYNET CENTRAL',
+        unit:           'L 0000',
+      },
+
+      TABLE_ITEMS: [
+        {
+          item_name:    'PENALTY ON RENTAL (September 1 - 30, 2021) VATable',
+          qty:          1,
+          unit_cost:    '1,445.62',
+          vat_amount:   '173.47',
+          amount:       '1,619.09',
+        },
+        {
+          item_name:    'CUSA CHARGES (November 1 - 30, 2021) Zero-Rated',
+          qty:          1,
+          unit_cost:    '259,485.00',
+          vat_amount:   '0.00',
+          amount:       '259,485.00',
+        },
+        {
+          item_name:    'PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable',
+          qty:          1,
+          unit_cost:    '308.91',
+          vat_amount:   '37.07',
+          amount:       '345.98',
+        },
+      ],
+
+      MODE_OF_PAYMENT: {
+        cash:           '0.00',
+        // cash:           '256,225.28',
+        check: {
+          amount:       '',
+          list: [
+            {
+              number:   1,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.21',
+            },
+            {
+              number:   2,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.21',
+            },
+            {
+              number:   3,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.21',
+            },
+            {
+              number:   4,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.21',
+            },
+            {
+              number:   5,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.21',
+            },
+            {
+              number:   6,
+              details:  'BDO 10 987654321',
+              date:     '2021/12/01',
+              amount:   '42,704.23',
+            },
+          ],
+        },
+        total_amount:   '256,225.28',
+      },
+
+      BREAKDOWN: {
+        vatable_sales:    '1,754.53',
+        vat_amount:       '210.54',
+        vat_exempt_sales: '0.00',
+        zero_rated_sales: '259,485.00',
+
+        total_sales:      '261,450.07',
+        net_of_vat:       '261,239.53',
+        wht_tax:          '5,224.79',
+        total_amount_due: '265,225.28',
+      },
+
+      SIGNATORY: {
+        user_id:        'CDKARINA'
+      },
+
+      FOOTER: {
+        certificate_no: 'xxxxxxxxxxxx',
+        date_issued:    'xxxx/xx/xx',
+        series_range:   'VI011331A000001 - VI011339Z999999',
+        timestamp:      '12/01/2021 10:35:28'
+      }
+    }
+
+
+    var TABLE_ITEMS_COMPONENT = ``
+
+    CONTENT_VALUES.TABLE_ITEMS.forEach((item) => {
+      TABLE_ITEMS_COMPONENT += `
+        <div class="grid grid-cols-16">
+          <div class="col-span-9 px-1 text-wrap">
+            ${ item.item_name }
+          </div>
+          <div class="col-span-1 px-1 text-center text-wrap">
+            ${ item.qty }
+          </div>
+          <div class="col-span-2 px-1 text-right text-wrap">
+            ${ item.unit_cost }
+          </div>
+          <div class="col-span-2 px-1 text-right text-wrap">
+            ${ item.vat_amount }
+          </div>
+          <div class="col-span-2 px-1 text-right text-wrap ">
+            ${ item.amount }
+          </div>
+        </div>
+      `
+    })
+
+
+    var CHECKS_COMPONENT = `
+      <div class="col-span-1 text-center text-[9px] font-bold">
+        #
+      </div>
+      <div class="col-span-2 text-center text-[9px] font-bold">
+        Cheque Details
+      </div>
+      <div class="col-span-2 text-center text-[9px] font-bold">
+        Check Date
+      </div>
+      <div class="col-span-2 text-right pr-2 text-[9px] font-bold">
+        Amount
+      </div>
+    `
+
+    CONTENT_VALUES.MODE_OF_PAYMENT.check.list.forEach((check) => {
+      CHECKS_COMPONENT += `
+        <div class="col-span-1 text-center text-[9px]">
+          ${ check.number }
+        </div>
+        <div class="col-span-2 text-center text-[9px]">
+          ${ check.details }
+        </div>
+        <div class="col-span-2 text-center text-[9px]">
+          ${ check.date }
+        </div>
+        <div class="col-span-2 text-right pr-2 text-[9px]">
+          ${ check.amount }
+        </div>
+      `
+    })
+
     const PAGE = `
       <div class="
           min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[72px] gap-[12px] text-12 font-helvetica
@@ -708,21 +883,21 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           <!-- LEFT -->
           <div class="flex items-center h-full col-span-5">
             <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-              <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
+              <img src="${ CONTENT_VALUES.HEADER.img_url }" alt="logo" class="w-20">
             </div>
             <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
               <div class="font-semibold text-16 tracking-tight">
-                ${ selectedCompany.CONAME }
+                ${ CONTENT_VALUES.HEADER.company_name }
               </div>
               <div class="flex flex-col tracking-tighter text-10">
                 <div class="text-wrap">
-                  ${ selectedCompany.ADDRESS }
+                  ${ CONTENT_VALUES.HEADER.address }
                 </div>
                 <div>
-                  TEL. NO. ${ selectedCompany.TEL_NO }
+                  TEL. NO. ${ CONTENT_VALUES.HEADER.tel_no }
                 </div>
                 <div>
-                  VAT REG TIN: ${ selectedCompany.TIN }
+                  VAT REG TIN: ${ CONTENT_VALUES.HEADER.tin }
                 </div>
               </div>
             </div>
@@ -730,14 +905,14 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           <!-- RIGHT -->
           <div class="flex flex-col items-end justify-center h-full col-span-3 -mt-2">
             <div class="font-semibold text-20 -mt-[12px]">
-              SERVICE INVOICE
+              ${ CONTENT_VALUES.HEADER.invoice_name }
             </div>
             <div class="flex gap-3 font-semibold text-14">
               <div>
                 No.
               </div>
               <div>
-                VI011331A000001
+                ${ CONTENT_VALUES.HEADER.invoice_number }
               </div>
             </div>
             <div class="flex gap-3 font-semibold text-14">
@@ -745,7 +920,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 Date :
               </div>
               <div>
-                2021/12/01
+                ${ CONTENT_VALUES.HEADER.invoice_date }
               </div>
             </div>
           </div>
@@ -762,7 +937,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 :
               </div>
               <div>
-                Juan Antonio D. Perez
+                ${ CONTENT_VALUES.DESC.client_name }
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -773,7 +948,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 :
               </div>
               <div>
-                123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines
+                ${ CONTENT_VALUES.DESC.address }
               </div>
             </div>
             <div class="flex items-end gap-3">
@@ -784,7 +959,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 :
               </div>
               <div>
-                123-456-789-000
+                ${ CONTENT_VALUES.DESC.tin }
               </div>
             </div>
           </div>
@@ -797,7 +972,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 :
               </div>
               <div>
-                CL310271 00
+                ${ CONTENT_VALUES.DESC.client_key }
               </div>
             </div>
             <div class="flex items-end gap-3">
@@ -808,7 +983,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 :
               </div>
               <div>
-                CITYNET CENTRAL
+                ${ CONTENT_VALUES.DESC.project }
               </div>
             </div>
             <div class="flex items-end gap-3">
@@ -818,7 +993,9 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
               <div>
                 :
               </div>
-              <div class=""> L 0000</div>
+              <div>
+                ${ CONTENT_VALUES.DESC.unit }
+              </div>
             </div>
           </div>
         </div>
@@ -847,57 +1024,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           <div class="flex flex-col justify-between flex-1 border-b border-black border-x">
             <!-- ROWS -->
             <div class="flex flex-col">
-              <div class="grid grid-cols-16">
-                <div class="col-span-9 px-1 text-wrap">
-                  PENALTY ON RENTAL (September 1 - 30, 2021) VATable
-                </div>
-                <div class="col-span-1 px-1 text-center text-wrap">
-                  1
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  1,445.62
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  173.47
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap ">
-                  1,619.09
-                </div>
-              </div>
-              <div class="grid grid-cols-16">
-                <div class="col-span-9 px-1 text-wrap">
-                  CUSA CHARGES (November 1 - 30, 2021) Zero-Rated
-                </div>
-                <div class="col-span-1 px-1 text-center text-wrap">
-                  1
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-              </div>
-              <div class="grid grid-cols-16">
-                <div class="col-span-9 px-1 text-wrap">
-                  PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable
-                </div>
-                <div class="col-span-1 px-1 text-center text-wrap">
-                  1
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  308.91
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap">
-                  37.07
-                </div>
-                <div class="col-span-2 px-1 text-right text-wrap ">
-                  345.98
-                </div>
-              </div>
+              ${ TABLE_ITEMS_COMPONENT }
             </div>
 
             <!-- BOTTOM -->
@@ -921,8 +1048,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                           Cash
                         </div>
                         <div class="col-span-2 text-right pr-2">
-                          0.00
-                          <!-- 256,225.28 -->
+                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.cash }
                         </div>
 
                         <!-- CHECK -->
@@ -930,156 +1056,10 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                           Check
                         </div>
                         <div class="col-span-2 text-right pr-2">
-                          
+                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.check.amount }
                         </div>
 
-
-                        
-
-                        <div class="col-span-1 text-center text-[9px] font-bold">
-                          #
-                        </div>
-                        <div class="col-span-2 text-center text-[9px] font-bold">
-                          Cheque Details
-                        </div>
-                        <div class="col-span-2 text-center text-[9px] font-bold">
-                          Check Date
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px] font-bold">
-                          Amount
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          1
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          2
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          3
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          4
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          5
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          6
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          7
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          8
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          9
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.52
-                        </div>
-
-                        <div class="col-span-1 text-center text-[9px]">
-                          10
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          BDO 10 987654321
-                        </div>
-                        <div class="col-span-2 text-center text-[9px]">
-                          2021/12/01
-                        </div>
-                        <div class="col-span-2 text-right pr-2 text-[9px]">
-                          25,622.60
-                        </div>
-
-                        
+                        ${ CHECKS_COMPONENT }
 
                         <div class="col-span-5 pl-2 font-bold mt-2">
                           TOTAL
@@ -1103,7 +1083,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       VATable Sales
                     </div>
                     <div class="font-bold text-right">
-                      1,754.53
+                      ${ CONTENT_VALUES.BREAKDOWN.vatable_sales }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1111,7 +1091,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       VAT Amount
                     </div>
                     <div class="font-bold text-right">
-                      210.54
+                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1119,7 +1099,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       VAT Exempt Sales
                     </div>
                     <div class="font-bold text-right">
-                      0.00
+                      ${ CONTENT_VALUES.BREAKDOWN.vat_exempt_sales }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1127,7 +1107,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Zero-Rated Sales
                     </div>
                     <div class="font-bold text-right">
-                      259,485.00
+                      ${ CONTENT_VALUES.BREAKDOWN.zero_rated_sales }
                     </div>
                   </div>
 
@@ -1137,7 +1117,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Total Sales
                     </div>
                     <div class="text-right">
-                      261,450.07
+                      ${ CONTENT_VALUES.BREAKDOWN.total_sales }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1145,7 +1125,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Less: VAT
                     </div>
                     <div class="text-right">
-                      210.54
+                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -1155,7 +1135,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Amount: Net of VAT
                     </div>
                     <div class="text-right">
-                      261,239.53
+                      ${ CONTENT_VALUES.BREAKDOWN.net_of_vat }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1163,7 +1143,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Add: VAT
                     </div>
                     <div class="text-right">
-                      210.54
+                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1171,7 +1151,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Less: Withholding Tax
                     </div>
                     <div class="text-right">
-                      5,224.79
+                      ${ CONTENT_VALUES.BREAKDOWN.wht_tax }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -1184,7 +1164,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       PHP
                     </div>
                     <div class="col-span-2 text-right font-bold">
-                      256,225.28
+                      ${ CONTENT_VALUES.BREAKDOWN.total_amount_due }
                     </div>
                   </div>
                 </div>
@@ -1207,7 +1187,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
         <div class="flex justify-end mt-[15px] -mb-[30px]">
           <div class="flex flex-col w-36 font-bold">
             <div class="text-center">
-              CDKARINA
+              ${ CONTENT_VALUES.SIGNATORY.user_id }
             </div>
             <div class="mt-2 border-t border-black"></div>
             <div class="text-center -mt-2">
@@ -1219,16 +1199,16 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
         <!-- FOOTER -->
         <div class="flex flex-col tracking-normal">
           <div>
-            Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
+            Acknowledgement Certificate No. : ${ CONTENT_VALUES.FOOTER.certificate_no }
           </div>
           <div>
-            Date Issued : xxxx/xx/xx
+            Date Issued : ${ CONTENT_VALUES.FOOTER.date_issued }
           </div>
           <div>
-            Series Range : VI011331A000001 - VI011339Z999999
+            Series Range : ${ CONTENT_VALUES.FOOTER.series_range }
           </div>
           <div>
-            Timestamp : 12/01/2021 10:35:28
+            Timestamp : ${ CONTENT_VALUES.FOOTER.timestamp }
           </div>
         </div>
       </div>

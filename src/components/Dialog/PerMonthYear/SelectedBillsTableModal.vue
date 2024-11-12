@@ -88,13 +88,13 @@
             {{ slotProps.data['DESC'].client_name || '-' }}
           </div>
           <div v-else-if="col.header === 'Total Sales'">
-            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].total_sales) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].total_sales) : '-' }}
           </div>
           <div v-else-if="col.header === 'Withholding Tax'">
-            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].wht_tax) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].wht_tax) : '-' }}
           </div>
           <div v-else-if="col.header === 'Total Amount Due'">
-            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].total_amount_due) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].total_amount_due) : '-' }}
           </div>
           <div v-else>
             {{ slotProps.data[col.field] || '-' }}

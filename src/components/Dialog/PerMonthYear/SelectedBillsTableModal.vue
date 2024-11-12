@@ -78,32 +78,23 @@
         :header="col.header"
       >
         <template #body="slotProps">
-          <div v-if="col.header === 'Bill Type'">
-            <span
-              class="pr-3 whitespace-pre"
-              v-tooltip.right="{
-                value: slotProps.data['BDESC'] ,
-              }"
-            >
-              {{ slotProps.data[col.field] ? configStore.fillNumberWithZeroes(slotProps.data[col.field], 2) + '  /  ' + slotProps.data['BDESC'] : '-' }}
-            </span>
-          </div>
-          <div v-else-if="['Billing Amount', 'Amount Due', 'VAT Sales', 'Zero-Rated', 'VAT Exempt', 'Govt. Tax', 'VAT', 'Withholding Tax'].includes(col.header)">
-            {{ slotProps.data[col.field] ? configStore.formatFloatNumber1(slotProps.data[col.field]) : '-' }}
-          </div>
-          <div v-else-if="['Due Date'].includes(col.header)">
-            {{ slotProps.data[col.field] ? configStore.formatDate2(slotProps.data[col.field]) : '-' }}
-          </div>
-          <div v-else-if="col.header === ''">
-            <svg v-if="slotProps.data[col.field] === 1" class="w-6 h-6 text-primary-light" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-              <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z" clip-rule="evenodd"/>
-            </svg>
-            <svg v-else-if="slotProps.data[col.field] === 0" class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-          </div>
-          <div v-else-if="col.header === 'PBL'" class="whitespace-pre">
+          <div v-if="col.header === 'Project/Block/Lot'" class="whitespace-pre">
             {{ slotProps.data[col.field] || '-' }}
+          </div>
+          <div v-else-if="col.header === 'Temp. Client #'">
+            {{ slotProps.data[col.field] || '-' }}
+          </div>
+          <div v-else-if="col.header === 'Client Name'">
+            {{ slotProps.data['DESC'].client_name || '-' }}
+          </div>
+          <div v-else-if="col.header === 'Total Sales'">
+            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].total_sales) : '-' }}
+          </div>
+          <div v-else-if="col.header === 'Withholding Tax'">
+            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].wht_tax) : '-' }}
+          </div>
+          <div v-else-if="col.header === 'Total Amount Due'">
+            {{ slotProps.data['BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['BREAKDOWN'].total_amount_due) : '-' }}
           </div>
           <div v-else>
             {{ slotProps.data[col.field] || '-' }}

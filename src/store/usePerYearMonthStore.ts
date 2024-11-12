@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
-import { Column, InvoiceDateForm, LeaseBill } from './types';
+import { Column, InvoiceDateForm, InvoiceRecord, LeaseBill } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import DraftInvoiceModal from '../components/Dialog/PerMonthYear/DraftInvoiceModal.vue';
@@ -9,6 +9,7 @@ import { defineStore } from 'pinia';
 import html2pdf from 'html2pdf.js';
 import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
+import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
 
 export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
@@ -17,6 +18,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const confirm = useConfirm();
 
   const configStore = useConfigStore()
+  const coreDataStore = useCoreDataStore()
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
@@ -36,29 +38,182 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
   const billings_data = computed(():LeaseBill[] => {
     return billings.value.map((bill, index) => {
+      const BT_UNIQUE_STYPE = [1, 4, 2]
+
+      const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+        bill.SALTYP === 'VAT'  ? 'V' :
+        bill.SALTYP === 'NVAT' ? 'N' : ''
+
+      const VAT_RATE = bill.VAT_RATE ? bill.VAT_RATE / 100 : 0
+      const WHTAX_RATE = bill.WHTAX_RATE ? bill.WHTAX_RATE / 100 : 0
+
+      const GROSS = bill.BALAMT
+      const GROSS_VAT_RATE = 1 + VAT_RATE
+
+      let VAT_SALES = 0
+      let VAT_EXEMPT = 0
+      let ZERO_RATE = 0
+
+      const VAT = configStore.getRoundedTwoDecimals((GROSS / GROSS_VAT_RATE) * VAT_RATE)
+      const TEMP = configStore.getRoundedTwoDecimals(GROSS - VAT)
+      const WHTAX = configStore.getRoundedTwoDecimals(TEMP * WHTAX_RATE)
+
+      if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
+        ZERO_RATE = TEMP
+      } else {
+        VAT_SALES = TEMP
+      }
+
+      const TOTAL_AMOUNT = configStore.getRoundedTwoDecimals(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
+
       return {
         ...bill,
-        INDEX: index
+        INDEX: index++,
+
+        UNIT_COST: TEMP,
+        AMOUNT: GROSS,
+
+        VAT_SALES: VAT_SALES,
+        VAT_EXEMPT: VAT_EXEMPT,
+        ZERO_RATE: ZERO_RATE,
+
+        // ADD
+        GOVT_TAX: 0,
+        VAT: VAT,
+
+        // LESS
+        WITHHOLDING_TAX: WHTAX,
+
+        TOTAL_AMOUNT: TOTAL_AMOUNT,
       }
     })
   })
 
-  const billings_column = computed((): Column[] => {
+  const invoice_records_data = computed((): InvoiceRecord[] => {
+
+    const mergedMap: { [key: string]: InvoiceRecord } = {};
+
+    billings_data.value.forEach((bill) => {
+      const key = bill.ID;
+
+      if (mergedMap[key]) {
+        mergedMap[key] = {
+          ...mergedMap[key],
+          BILLINGS: [
+            ...mergedMap[key].BILLINGS,
+            bill
+          ],
+
+          TABLE_ITEMS: [
+            ...mergedMap[key].TABLE_ITEMS,
+            {
+              item_name:      'string',
+              qty:            1,
+              unit_cost:      'string',
+              vat_amount:     'string',
+              amount:         'string',
+            }
+          ],
+          // MODE_OF_PAYMENT: {
+          //   check: {
+          //     list: []
+          //   },
+          // },
+        }
+      } else {
+        const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
+        const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS
+
+        mergedMap[key] = {
+          PBL_KEY:          bill.PBL_KEY,
+          TCLTNO:           bill.TCLTNO,
+          CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW,
+          COMPCD:           bill.COMPCD,
+
+          BILLINGS:         [],
+
+          HEADER: {
+            img_url:        selectedCompany?.IMG_URL,
+            company_name:   selectedCompany?.CONAME,
+            address:        selectedCompany?.ADDRESS,
+            tel_no:         selectedCompany?.TEL_NO,
+            tin:            selectedCompany?.TIN,
+
+            invoice_name:   'SERVICE INVOICE',
+            invoice_number: 'VI01133xxxxxxxx',
+            invoice_date:   'xxxx/xx/xx',
+          },
+
+          DESC: {
+            client_name:    bill.CLIENT_NAME,
+            address:        bill.CLIENT_ADDRESS,
+            tin:            bill.CLIENT_TIN,
+            client_key:     bill.CLIENT_KEY,
+            project:        selectedProject ? selectedProject.PTITLE : '-',
+            unit:           bill.CLIENT_UNIT,
+          },
+
+          TABLE_ITEMS:      [],
+
+          MODE_OF_PAYMENT: {
+            cash:           '0.00',
+            check: {
+              amount:       '',
+              list:         [],
+            },
+            total_amount:   '0.00',
+          },
+
+          BREAKDOWN: {
+            vatable_sales:    '0.00',
+            vat_amount:       '0.00',
+            vat_exempt_sales: '0.00',
+            zero_rated_sales: '0.00',
+
+            total_sales:      '0.00',
+            net_of_vat:       '0.00',
+            wht_tax:          '0.00',
+            total_amount_due: '0.00',
+          },
+
+          SIGNATORY: {
+            user_id:        'xxxxxxxx'
+          },
+
+          FOOTER: {
+            certificate_no: 'xxxxxxxxxxxx',
+            date_issued:    'xxxx/xx/xx',
+            series_range:   'VI01133xxxxxxxx - VI01133xxxxxxxx',
+            timestamp:      'xx/xx/xxxx xx:xx:xx'
+          }
+        }
+      }
+
+    })
+
+    console.log('INVOICE RECORDS', mergedMap);
+
+    return [...Object.values(mergedMap)] as InvoiceRecord[]
+  })
+
+  const invoice_records_column = computed((): Column[] => {
     return [
-      { field: 'PBL_KEY',  header: 'PBL' },
-      { field: 'CLIENT_NAME',  header: 'Client Name' },
-      { field: 'BILL_TYPE', header: 'Bill Type' },
-      { field: 'DATDUE', header: 'Due Date'},
-      { field: 'PERIOD', header: 'Billing Period' },
+      { field: 'PBL_KEY',  header: 'Project/Block/Lot' },
+      { field: 'TCLTNO',  header: 'Temp. Client #' },
+      { field: 'DESC.client_name',  header: 'Client Name' },
+      // { field: 'BILL_TYPE', header: 'Bill Type' },
+      // { field: 'DATDUE', header: 'Due Date'},
+      // { field: 'PERIOD', header: 'Billing Period' },
       // { field: 'BILAMT',  header: 'Billing Amount' },
-      { field: 'BALAMT', header: 'Amount Due' },
+      // { field: 'BALAMT', header: 'Amount Due' },
       // { field: 'VAT_SALES', header: 'VAT Sales' },
       // { field: 'ZERO_RATE', header: 'Zero-Rated' },
       // { field: 'VAT_EXEMPT', header: 'VAT Exempt' },
       // { field: 'VAT', header: 'VAT' },
       // { field: 'GOVT_TAX', header: 'Govt. Tax' },
-      { field: 'WITHHOLDING_TAX', header: 'Withholding Tax' },
-      { field: 'TOTAL_AMOUNT', header: 'Total Amount Due' },
+      { field: 'BREAKDOWN.total_sales', header: 'Total Sales' },
+      { field: 'BREAKDOWN.wht_tax', header: 'Withholding Tax' },
+      { field: 'BREAKDOWN.total_amount_due', header: 'Total Amount Due' },
     ]
   })
 
@@ -67,10 +222,10 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SelectedBillsTableModalFooter.vue'));
     const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
       data: {
-        table_data : billings_data.value,
-        table_column: billings_column.value,
-        view: (selectedBilling: LeaseBill) => {
-          handleGenerateDraftInvoice(selectedBilling)
+        table_data : invoice_records_data.value,
+        table_column: invoice_records_column.value,
+        view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
+          handleGenerateDraftInvoice(SELECTED_INVOICE_RECORD)
         },
         view1: () => {
           confirm.require({
@@ -117,7 +272,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
         }
       },
       props: {
-        header: 'Selected Billings for Issuance of Invoice' ,
+        header: 'For Issuance of Invoice' ,
         style: {
           width: '75vw'
         },
@@ -134,7 +289,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
     })
   }
 
-  const handleGenerateDraftInvoice = async (SELECTED_BILLING: LeaseBill) => {
+  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
+
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/DraftInvoiceModalFooter.vue'));
     const loadingDialogRef = dialog.open(LoadingModal, {
       data: {
@@ -149,11 +305,11 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       },
     })
 
-    const PAGE = handleGeneratePage(SELECTED_BILLING)
+    const PAGE = handleGeneratePage(SELECTED_INVOICE_RECORD)
 
     const CONFIGURATION = {
       margin: 0,
-      filename: 'DRAFT - ' + 'Service Invoice' + ' Single ' + SELECTED_BILLING.INDEX,
+      filename: 'DRAFT - ' + 'Service Invoice' + ' Single',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -201,11 +357,11 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const handleExecutePrintDraftInvoices = async () => {
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/DraftInvoiceModalFooter.vue'));
 
-    const SELECTED_BILLINGS_1D = billings_data.value
+    const SELECTED_INVOICES_1D = invoice_records_data.value
 
     const loadingDialogRef = dialog.open(LoadingModal, {
       data: {
-        label: `Generating ${SELECTED_BILLINGS_1D.length} Drafts...`
+        label: `Generating ${SELECTED_INVOICES_1D.length} Drafts...`
       },
       props: {
         style: {
@@ -216,8 +372,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       }
     })
 
-    const chunkArray = (array: LeaseBill[], chunkSize: number): LeaseBill[][] => {
-      const result: LeaseBill[][] = [];
+    const chunkArray = (array: InvoiceRecord[], chunkSize: number): InvoiceRecord[][] => {
+      const result: InvoiceRecord[][] = [];
 
       for (let i = 0; i < array.length; i += chunkSize) {
         result.push(array.slice(i, i + chunkSize));
@@ -226,408 +382,444 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       return result;
     }
 
-    const SELECTED_BILLINGS_2D: LeaseBill[][] = chunkArray(SELECTED_BILLINGS_1D, 20)
+    const SELECTED_INVOICES_2D: InvoiceRecord[][] = chunkArray(SELECTED_INVOICES_1D, 20)
 
     // console.log('SELECTED_BILLINGS_2D ', SELECTED_BILLINGS_2D);
 
-    const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
+    // const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
+    // const PAGE = `
+    //   <div class="
+    //       min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
+    //       flex flex-col text-black bg-white
+    //     "
+    //   >
+    //     <!-- HEADER -->
+    //     <div class="grid grid-cols-7 -mt-4 min-h-24 max-h-24">
+    //       <!-- LEFT -->
+    //       <div class="flex items-center h-full col-span-5">
+    //         <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
+    //           <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
+    //         </div>
+    //         <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
+    //           <div class="font-semibold text-16">
+    //             ${ selectedCompany.CONAME }
+    //           </div>
+    //           <div class="flex flex-col tracking-tighter text-10">
+    //             <div class="text-wrap">
+    //               ${ selectedCompany.ADDRESS }
+    //             </div>
+    //             <div>
+    //               TEL. NO. ${ selectedCompany.TEL_NO }
+    //             </div>
+    //             <div>
+    //               VAT REG TIN: ${ selectedCompany.TIN }
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+    //       <!-- RIGHT -->
+    //       <div class="flex flex-col items-end justify-center h-full col-span-2 -mt-2">
+    //         <div class="font-semibold text-20 -mt-[12px]">
+    //           SERVICE INVOICE
+    //         </div>
+    //         <div class="flex gap-3 font-semibold text-14">
+    //           <div>
+    //             No.
+    //           </div>
+    //           <div>
+    //             VI011331A000001
+    //           </div>
+    //         </div>
+    //         <div class="flex gap-3 font-semibold text-14">
+    //           <div>
+    //             Date :
+    //           </div>
+    //           <div>
+    //             2021/12/01
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </div>
 
-    const PAGE = `
-      <div class="
-          min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
-          flex flex-col text-black bg-white
-        "
-      >
-        <!-- HEADER -->
-        <div class="grid grid-cols-7 -mt-4 min-h-24 max-h-24">
-          <!-- LEFT -->
-          <div class="flex items-center h-full col-span-5">
-            <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-              <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
-            </div>
-            <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
-              <div class="font-semibold text-16">
-                ${ selectedCompany.CONAME }
-              </div>
-              <div class="flex flex-col tracking-tighter text-10">
-                <div class="text-wrap">
-                  ${ selectedCompany.ADDRESS }
-                </div>
-                <div>
-                  TEL. NO. ${ selectedCompany.TEL_NO }
-                </div>
-                <div>
-                  VAT REG TIN: ${ selectedCompany.TIN }
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- RIGHT -->
-          <div class="flex flex-col items-end justify-center h-full col-span-2 -mt-2">
-            <div class="font-semibold text-20 -mt-[12px]">
-              SERVICE INVOICE
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                No.
-              </div>
-              <div>
-                VI011331A000001
-              </div>
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                Date :
-              </div>
-              <div>
-                2021/12/01
-              </div>
-            </div>
-          </div>
-        </div>
+    //     <!-- DESCRIPTION -->
+    //     <div class="grid items-end grid-cols-7 gap-10 mt-1">
+    //       <div class="flex flex-col col-span-4 shrink-0">
+    //         <div class="flex items-end gap-3">
+    //           <div class="w-24 font-semibold">
+    //             SOLD TO
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div>
+    //             Juan Antonio D. Perez
+    //           </div>
+    //         </div>
+    //         <div class="flex items-start gap-3">
+    //           <div class="w-24 font-semibold shrink-0">
+    //             ADDRESS
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div class="flex flex-col w-full">
+    //             <div>
+    //               123 Mabini Street, Barangay Poblacion,
+    //             </div>
+    //             <div>
+    //               Makati City, Metro Manila, Philippines
+    //             </div>
+    //           </div>
+    //         </div>
+    //         <div class="flex items-end gap-3">
+    //           <div class="w-24 font-semibold">
+    //             TIN
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div>
+    //             123-456-789-000
+    //           </div>
+    //         </div>
+    //       </div>
+    //       <div class="flex flex-col col-span-3 shrink-0">
+    //         <div class="flex items-end gap-3">
+    //           <div class="w-24 font-semibold">
+    //             CLIENT KEY
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div>
+    //             CL310271 00
+    //           </div>
+    //         </div>
+    //         <div class="flex items-end gap-3">
+    //           <div class="w-24 font-semibold">
+    //             PROJECT
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div>
+    //             CITYNET CENTRAL
+    //           </div>
+    //         </div>
+    //         <div class="flex items-end gap-3">
+    //           <div class="w-24 font-semibold">
+    //             UNIT
+    //           </div>
+    //           <div>
+    //             :
+    //           </div>
+    //           <div class=""> L 0000</div>
+    //         </div>
+    //       </div>
+    //     </div>
 
-        <!-- DESCRIPTION -->
-        <div class="grid items-end grid-cols-7 gap-10 mt-1">
-          <div class="flex flex-col col-span-4 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                SOLD TO
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                Juan Antonio D. Perez
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                ADDRESS
-              </div>
-              <div>
-                :
-              </div>
-              <div class="flex flex-col w-full">
-                <div>
-                  123 Mabini Street, Barangay Poblacion,
-                </div>
-                <div>
-                  Makati City, Metro Manila, Philippines
-                </div>
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                TIN
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                123-456-789-000
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col col-span-3 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                CLIENT KEY
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                CL310271 00
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                PROJECT
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                CITYNET CENTRAL
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                UNIT
-              </div>
-              <div>
-                :
-              </div>
-              <div class=""> L 0000</div>
-            </div>
-          </div>
-        </div>
+    //     <!-- TABLE -->
+    //     <div class="flex flex-col h-full mt-2 tracking-tighter text-10">
+    //       <!-- THEAD -->
+    //       <div class="grid grid-cols-11 font-bold border border-black" style="line-height: 11px;">
+    //         <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+    //           <div class="col-span-5 px-1 pb-3 border-r border-black -pt-4 text-wrap">
+    //             Item / Description
+    //           </div>
+    //           <div class="px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
+    //             Qty
+    //           </div>
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           Unit Cost
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           VATable Sales
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           VAT Exempt Sales
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           Zero Rated Sales
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           VAT
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           Government Taxes
+    //         </div>
+    //         <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
+    //           Withholding Tax
+    //         </div>
+    //         <div class="px-1 pb-3 text-right -pt-4 text-wrap">
+    //           Amount Due
+    //         </div>
+    //       </div>
+    //       <!-- TBODY -->
+    //       <div class="flex flex-col justify-between flex-1 pb-3 border-b border-black border-x">
+    //         <!-- ROWS -->
+    //         <div class="flex flex-col">
+    //           <div class="grid grid-cols-11">
+    //             <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+    //               <div class="col-span-5 px-1 text-wrap">
+    //                 Pen. on Rental for September 1 - 30, 2021
+    //               </div>
+    //               <div class="px-1 text-center text-wrap">
+    //                 1
+    //               </div>
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               1,619.09
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               1,445.62
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               173.47
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               (28.91)
+    //             </div>
+    //             <div class="px-1 text-right text-wrap ">
+    //               1,590.18
+    //             </div>
+    //           </div>
+    //           <div class="grid grid-cols-11">
+    //             <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+    //               <div class="col-span-5 px-1 text-wrap">
+    //                 Cusa for November 1 - 30, 2021
+    //               </div>
+    //               <div class="px-1 text-center text-wrap">
+    //                 1
+    //               </div>
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               259,485.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               259,485.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               (5,189.70)
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               254.295.30
+    //             </div>
+    //           </div>
+    //           <div class="grid grid-cols-11">
+    //             <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
+    //               <div class="col-span-5 px-1 text-wrap">
+    //                 Pen. on Cusa for September 1 - 30, 2021
+    //               </div>
+    //               <div class="px-1 text-center text-wrap">
+    //                 1
+    //               </div>
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               345.98
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               308.91
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               37.07
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               0.00
+    //             </div>
+    //             <div class="px-1 text-right text-wrap">
+    //               (6.18)
+    //             </div>
+    //             <div class="px-1 text-right text-wrap ">
+    //               339.80
+    //             </div>
+    //           </div>
+    //           <pre> </pre>
+    //         </div>
 
-        <!-- TABLE -->
-        <div class="flex flex-col h-full mt-2 tracking-tighter text-10">
-          <!-- THEAD -->
-          <div class="grid grid-cols-11 font-bold border border-black" style="line-height: 11px;">
-            <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-              <div class="col-span-5 px-1 pb-3 border-r border-black -pt-4 text-wrap">
-                Item / Description
-              </div>
-              <div class="px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
-                Qty
-              </div>
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Unit Cost
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VATable Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VAT Exempt Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Zero Rated Sales
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VAT
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Government Taxes
-            </div>
-            <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Withholding Tax
-            </div>
-            <div class="px-1 pb-3 text-right -pt-4 text-wrap">
-              Amount Due
-            </div>
-          </div>
-          <!-- TBODY -->
-          <div class="flex flex-col justify-between flex-1 pb-3 border-b border-black border-x">
-            <!-- ROWS -->
-            <div class="flex flex-col">
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Pen. on Rental for September 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  1,619.09
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  1,445.62
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  173.47
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (28.91)
-                </div>
-                <div class="px-1 text-right text-wrap ">
-                  1,590.18
-                </div>
-              </div>
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Cusa for November 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  259,485.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (5,189.70)
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  254.295.30
-                </div>
-              </div>
-              <div class="grid grid-cols-11">
-                <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-                  <div class="col-span-5 px-1 text-wrap">
-                    Pen. on Cusa for September 1 - 30, 2021
-                  </div>
-                  <div class="px-1 text-center text-wrap">
-                    1
-                  </div>
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  345.98
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  308.91
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  37.07
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  0.00
-                </div>
-                <div class="px-1 text-right text-wrap">
-                  (6.18)
-                </div>
-                <div class="px-1 text-right text-wrap ">
-                  339.80
-                </div>
-              </div>
-              <pre> </pre>
-            </div>
+    //         <!-- BREAKDOWN -->
+    //         <div class="grid items-end grid-cols-2 gap-16 px-2 tracking-normal text-12">
+    //           <!-- COL 1 -->
+    //           <div class="flex flex-col">
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 VATable Sales
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 1,754.53
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 VAT Amount
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 210.54
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 VAT Exempt Sales
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 0.00
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 Zero-Rated Sales
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 259,485.00
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 Government Taxes
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 0.00
+    //               </div>
+    //             </div>
+    //           </div>
+    //           <!-- COL 2 -->
+    //           <div class="flex flex-col">
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 Total Sales
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 261,239.53
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-3">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 Add: VAT
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 210.54
+    //               </div>
+    //             </div>
+    //             <div class="grid grid-cols-5">
+    //               <div class="col-span-2 font-bold text-left">
+    //                 Less: Withholding Tax
+    //               </div>
+    //               <div class="col-span-3 text-right">
+    //                 5,224.79
+    //               </div>
+    //             </div>
+    //             <div class="mt-2 border-t border-black"></div>
+    //             <div class="grid grid-cols-3 -mt-1">
+    //               <div class="col-span-1 font-bold text-left">
+    //                 Total Amount Due
+    //               </div>
+    //               <div class="col-span-2 text-right">
+    //                 256,225.28
+    //               </div>
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </div>
 
-            <!-- BREAKDOWN -->
-            <div class="grid items-end grid-cols-2 gap-16 px-2 tracking-normal text-12">
-              <!-- COL 1 -->
-              <div class="flex flex-col">
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VATable Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    1,754.53
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VAT Amount
-                  </div>
-                  <div class="col-span-2 text-right">
-                    210.54
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    VAT Exempt Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    0.00
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Zero-Rated Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    259,485.00
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Government Taxes
-                  </div>
-                  <div class="col-span-2 text-right">
-                    0.00
-                  </div>
-                </div>
-              </div>
-              <!-- COL 2 -->
-              <div class="flex flex-col">
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Total Sales
-                  </div>
-                  <div class="col-span-2 text-right">
-                    261,239.53
-                  </div>
-                </div>
-                <div class="grid grid-cols-3">
-                  <div class="col-span-1 font-bold text-left">
-                    Add: VAT
-                  </div>
-                  <div class="col-span-2 text-right">
-                    210.54
-                  </div>
-                </div>
-                <div class="grid grid-cols-5">
-                  <div class="col-span-2 font-bold text-left">
-                    Less: Withholding Tax
-                  </div>
-                  <div class="col-span-3 text-right">
-                    5,224.79
-                  </div>
-                </div>
-                <div class="mt-2 border-t border-black"></div>
-                <div class="grid grid-cols-3 -mt-1">
-                  <div class="col-span-1 font-bold text-left">
-                    Total Amount Due
-                  </div>
-                  <div class="col-span-2 text-right">
-                    256,225.28
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    //     <!-- GENERATE LABEL -->
+    //     <div class="flex flex-col mt-[100px] mb-[20px] ">
+    //       <div v-if="withBankCharges" class="w-full pb-2">
+    //         * Bank charges are to be remitted to the Bank.
+    //       </div>
+    //       <div class="italic text-center border-t border-black">
+    //         This document is computer generated, no signature required.
+    //       </div>
+    //     </div>
 
-        <!-- GENERATE LABEL -->
-        <div class="flex flex-col mt-[100px] mb-[20px] ">
-          <div v-if="withBankCharges" class="w-full pb-2">
-            * Bank charges are to be remitted to the Bank.
-          </div>
-          <div class="italic text-center border-t border-black">
-            This document is computer generated, no signature required.
-          </div>
-        </div>
+    //     <!-- FOOTER -->
+    //     <div class="flex flex-col tracking-normal">
+    //       <div>
+    //         Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
+    //       </div>
+    //       <div>
+    //         Date Issued : xxxx/xx/xx
+    //       </div>
+    //       <div>
+    //         Series Range : VI011331A000001 - VI011339Z999999
+    //       </div>
+    //       <div>
+    //         Timestamp : 12/01/2021 10:35:28 CELOISA
+    //       </div>
+    //     </div>
+    //   </div>
+    // `;
 
-        <!-- FOOTER -->
-        <div class="flex flex-col tracking-normal">
-          <div>
-            Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
-          </div>
-          <div>
-            Date Issued : xxxx/xx/xx
-          </div>
-          <div>
-            Series Range : VI011331A000001 - VI011339Z999999
-          </div>
-          <div>
-            Timestamp : 12/01/2021 10:35:28 CELOISA
-          </div>
-        </div>
-      </div>
-    `;
+    // const PAGE1 = `
+    //   <div class="
+    //       min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
+    //       flex flex-col text-black bg-white
+    //     "
+    //   >
+
+    //     <!-- GENERATE LABEL -->
+    //     <div class="flex flex-col mt-[100px] mb-[20px] ">
+    //       <div v-if="withBankCharges" class="w-full pb-2">
+    //         * Bank charges are to be remitted to the Bank.
+    //       </div>
+    //       <div class="italic text-center border-t border-black">
+    //         This document is computer generated, no signature required.
+    //       </div>
+    //     </div>
+
+    //     <!-- FOOTER -->
+    //     <div class="flex flex-col tracking-normal">
+    //       <div>
+    //         Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
+    //       </div>
+    //       <div>
+    //         Date Issued : xxxx/xx/xx
+    //       </div>
+    //       <div>
+    //         Series Range : VI011331A000001 - VI011339Z999999
+    //       </div>
+    //       <div>
+    //         Timestamp : 12/01/2021 10:35:28 CELOISA
+    //       </div>
+    //     </div>
+    //   </div>
+    // `;
 
     const PAGES_2D: string[] = []
 
-    SELECTED_BILLINGS_2D.forEach((BILLS_2D) => {
+    console.log('CREATING 2D SELECTED BILLINGS');
+
+    SELECTED_INVOICES_2D.forEach((INVOICE_2D) => {
       let PAGES_1D = ``
-      BILLS_2D.forEach(() => {
-        PAGES_1D += PAGE
+      INVOICE_2D.forEach((INVOICE_RECORD) => {
+        PAGES_1D += handleGeneratePage(INVOICE_RECORD)
       })
       PAGES_2D.push(PAGES_1D)
     })
@@ -636,11 +828,15 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
     const CONFIGURATION = {
       margin: 0,
-      filename: 'DRAFT - ' + 'Service Invoice' + ' Multiple' + SELECTED_BILLINGS_1D.length,
+      filename: 'DRAFT - ' + 'Service Invoice' + ' Multiple' + SELECTED_INVOICES_2D.length,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
     };
+
+    console.log('GENERATING PDF BLOBS');
+
+    console.log(PAGES_2D);
 
     const pdfBlobs: Blob[] = await Promise.all(
       PAGES_2D.map(async (PAGES_1D) => {
@@ -650,6 +846,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           .output('blob');
       })
     );
+
+    console.log('MERGING PDF BLOBS');
 
     const MERGED_PDF_BLOB = await configStore.mergePDF(pdfBlobs)
 
@@ -663,7 +861,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           const url = URL.createObjectURL(MERGED_PDF_BLOB);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'DRAFT - ' + 'Service Invoice' + ' Multiple ' + SELECTED_BILLINGS_1D.length + '.pdf';
+          a.download = 'DRAFT - ' + 'Service Invoice' + ' Multiple ' + SELECTED_INVOICES_1D.length + '.pdf';
           a.click();
           URL.revokeObjectURL(url);
         },
@@ -691,129 +889,136 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
     
   }
 
-  // ServiceInvoice New
-  const handleGeneratePage = (SELECTED_BILLING: LeaseBill) => {
-    console.log('SELECTED_BILLING ', SELECTED_BILLING);
+  const handleGeneratePage = (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
 
-    const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
+    // OLD
+    // const selectedCompany = COMPANIES.find((c) => c.COMPCD === SELECTED_INVOICE_RECORD.COMPCD) as COMPANY_DETAILS
+    // const CONTENT_VALUES: InvoiceRecord = {
+    //   PBL_KEY:          'CL3 L 0000  ',
+    //   TCLTNO:           0,
+    //   COMPCD:           2,
 
-    const CONTENT_VALUES = {
-      HEADER: {
-        img_url:        selectedCompany.IMG_URL,
-        company_name:   selectedCompany.CONAME,
-        address:        selectedCompany.ADDRESS,
-        tel_no:         selectedCompany.TEL_NO,
-        tin:            selectedCompany.TIN,
+    //   BILLINGS:         [],
 
-        invoice_name:   'SERVICE INVOICE',
-        invoice_number: 'VI011331A000001',
-        invoice_date:   '2021/12/01',
-      },
+    //   HEADER: {
+    //     img_url:        selectedCompany.IMG_URL,
+    //     company_name:   selectedCompany.CONAME,
+    //     address:        selectedCompany.ADDRESS,
+    //     tel_no:         selectedCompany.TEL_NO,
+    //     tin:            selectedCompany.TIN,
 
-      DESC: {
-        client_name:    'Juan Antonio D. Perez',
-        address:        '123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines',
-        tin:            '123-456-789-000',
-        client_key:     'CL310271 00',
-        project:        'CITYNET CENTRAL',
-        unit:           'L 0000',
-      },
+    //     invoice_name:   'SERVICE INVOICE',
+    //     invoice_number: 'VI011331A000001',
+    //     invoice_date:   '2021/12/01',
+    //   },
 
-      TABLE_ITEMS: [
-        {
-          item_name:    'PENALTY ON RENTAL (September 1 - 30, 2021) VATable',
-          qty:          1,
-          unit_cost:    '1,445.62',
-          vat_amount:   '173.47',
-          amount:       '1,619.09',
-        },
-        {
-          item_name:    'CUSA CHARGES (November 1 - 30, 2021) Zero-Rated',
-          qty:          1,
-          unit_cost:    '259,485.00',
-          vat_amount:   '0.00',
-          amount:       '259,485.00',
-        },
-        {
-          item_name:    'PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable',
-          qty:          1,
-          unit_cost:    '308.91',
-          vat_amount:   '37.07',
-          amount:       '345.98',
-        },
-      ],
+    //   DESC: {
+    //     client_name:    'Juan Antonio D. Perez',
+    //     address:        '123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines',
+    //     tin:            '123-456-789-000',
+    //     client_key:     'CL310271 00',
+    //     project:        'CITYNET CENTRAL',
+    //     unit:           'L 0000',
+    //   },
 
-      MODE_OF_PAYMENT: {
-        cash:           '0.00',
-        // cash:           '256,225.28',
-        check: {
-          amount:       '',
-          list: [
-            {
-              number:   1,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.21',
-            },
-            {
-              number:   2,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.21',
-            },
-            {
-              number:   3,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.21',
-            },
-            {
-              number:   4,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.21',
-            },
-            {
-              number:   5,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.21',
-            },
-            {
-              number:   6,
-              details:  'BDO 10 987654321',
-              date:     '2021/12/01',
-              amount:   '42,704.23',
-            },
-          ],
-        },
-        total_amount:   '256,225.28',
-      },
+    //   TABLE_ITEMS: [
+    //     {
+    //       item_name:    'PENALTY ON RENTAL (September 1 - 30, 2021) VATable',
+    //       qty:          1,
+    //       unit_cost:    '1,445.62',
+    //       vat_amount:   '173.47',
+    //       amount:       '1,619.09',
+    //     },
+    //     {
+    //       item_name:    'CUSA CHARGES (November 1 - 30, 2021) Zero-Rated',
+    //       qty:          1,
+    //       unit_cost:    '259,485.00',
+    //       vat_amount:   '0.00',
+    //       amount:       '259,485.00',
+    //     },
+    //     {
+    //       item_name:    'PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable',
+    //       qty:          1,
+    //       unit_cost:    '308.91',
+    //       vat_amount:   '37.07',
+    //       amount:       '345.98',
+    //     },
+    //   ],
 
-      BREAKDOWN: {
-        vatable_sales:    '1,754.53',
-        vat_amount:       '210.54',
-        vat_exempt_sales: '0.00',
-        zero_rated_sales: '259,485.00',
+    //   MODE_OF_PAYMENT: {
+    //     cash:           '0.00',
+    //     // cash:           '256,225.28',
+    //     check: {
+    //       amount:       '',
+    //       list: [
+    //         {
+    //           number:   1,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.21',
+    //         },
+    //         {
+    //           number:   2,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.21',
+    //         },
+    //         {
+    //           number:   3,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.21',
+    //         },
+    //         {
+    //           number:   4,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.21',
+    //         },
+    //         {
+    //           number:   5,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.21',
+    //         },
+    //         {
+    //           number:   6,
+    //           details:  'BDO 10 987654321',
+    //           date:     '2021/12/01',
+    //           amount:   '42,704.23',
+    //         },
+    //       ],
+    //     },
+    //     total_amount:   '256,225.28',
+    //   },
 
-        total_sales:      '261,450.07',
-        net_of_vat:       '261,239.53',
-        wht_tax:          '5,224.79',
-        total_amount_due: '265,225.28',
-      },
+    //   BREAKDOWN: {
+    //     vatable_sales:    '1,754.53',
+    //     vat_amount:       '210.54',
+    //     vat_exempt_sales: '0.00',
+    //     zero_rated_sales: '259,485.00',
 
-      SIGNATORY: {
-        user_id:        'CDKARINA'
-      },
+    //     total_sales:      '261,450.07',
+    //     net_of_vat:       '261,239.53',
+    //     wht_tax:          '5,224.79',
+    //     total_amount_due: '265,225.28',
+    //   },
 
-      FOOTER: {
-        certificate_no: 'xxxxxxxxxxxx',
-        date_issued:    'xxxx/xx/xx',
-        series_range:   'VI011331A000001 - VI011339Z999999',
-        timestamp:      '12/01/2021 10:35:28'
-      }
-    }
+    //   SIGNATORY: {
+    //     user_id:        'CDKARINA'
+    //   },
 
+    //   FOOTER: {
+    //     certificate_no: 'xxxxxxxxxxxx',
+    //     date_issued:    'xxxx/xx/xx',
+    //     series_range:   'VI011331A000001 - VI011339Z999999',
+    //     timestamp:      '12/01/2021 10:35:28'
+    //   }
+    // }
+
+    console.log('SELECTED_INVOICE_RECORD ', SELECTED_INVOICE_RECORD)
+
+    const CONTENT_VALUES: InvoiceRecord = SELECTED_INVOICE_RECORD
 
     var TABLE_ITEMS_COMPONENT = ``
 
@@ -886,7 +1091,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
               <img src="${ CONTENT_VALUES.HEADER.img_url }" alt="logo" class="w-20">
             </div>
             <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
-              <div class="font-semibold text-16 tracking-tight">
+              <div class="font-semibold text-16 tracking-tighter">
                 ${ CONTENT_VALUES.HEADER.company_name }
               </div>
               <div class="flex flex-col tracking-tighter text-10">
@@ -975,8 +1180,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 ${ CONTENT_VALUES.DESC.client_key }
               </div>
             </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
                 PROJECT
               </div>
               <div>
@@ -1065,7 +1270,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                           TOTAL
                         </div>
                         <div class="col-span-2 pr-2 text-right mt-2 font-bold">
-                          256,225.28
+                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.total_amount }
                         </div>
                       </div>
                     </div>
@@ -1216,405 +1421,6 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
     return PAGE
   }
-
-  // ServiceInvoice 1
-  // const handleGeneratePage1 = (SELECTED_BILLING: LeaseBill) => {
-  //   console.log('SELECTED_BILLING ', SELECTED_BILLING);
-
-  //   const selectedCompany = COMPANIES.find((c) => c.COMPCD === 1) as COMPANY_DETAILS
-
-  //   const PAGE = `
-  //     <div class="
-  //         min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[36px] gap-[12px] text-12 font-helvetica
-  //         flex flex-col text-black bg-white
-  //       "
-  //     >
-  //       <!-- HEADER -->
-  //       <div class="grid grid-cols-7 -mt-4 min-h-24 max-h-24">
-  //         <!-- LEFT -->
-  //         <div class="flex items-center h-full col-span-5">
-  //           <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-  //             <img src="${selectedCompany.IMG_URL}" alt="logo" class="w-20">
-  //           </div>
-  //           <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
-  //             <div class="font-semibold text-16">
-  //               ${ selectedCompany.CONAME }
-  //             </div>
-  //             <div class="flex flex-col tracking-tighter text-10">
-  //               <div class="text-wrap">
-  //                 ${ selectedCompany.ADDRESS }
-  //               </div>
-  //               <div>
-  //                 TEL. NO. ${ selectedCompany.TEL_NO }
-  //               </div>
-  //               <div>
-  //                 VAT REG TIN: ${ selectedCompany.TIN }
-  //               </div>
-  //             </div>
-  //           </div>
-  //         </div>
-  //         <!-- RIGHT -->
-  //         <div class="flex flex-col items-end justify-center h-full col-span-2 -mt-2">
-  //           <div class="font-semibold text-20 -mt-[12px]">
-  //             SERVICE INVOICE
-  //           </div>
-  //           <div class="flex gap-3 font-semibold text-14">
-  //             <div>
-  //               No.
-  //             </div>
-  //             <div>
-  //               VI011331A000001
-  //             </div>
-  //           </div>
-  //           <div class="flex gap-3 font-semibold text-14">
-  //             <div>
-  //               Date :
-  //             </div>
-  //             <div>
-  //               2021/12/01
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <!-- DESCRIPTION -->
-  //       <div class="grid items-end grid-cols-7 gap-10 mt-1">
-  //         <div class="flex flex-col col-span-4 shrink-0">
-  //           <div class="flex items-end gap-3">
-  //             <div class="w-24 font-semibold">
-  //               SOLD TO
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div>
-  //               Juan Antonio D. Perez
-  //             </div>
-  //           </div>
-  //           <div class="flex items-start gap-3">
-  //             <div class="w-24 font-semibold shrink-0">
-  //               ADDRESS
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div class="flex flex-col w-full">
-  //               <div>
-  //                 123 Mabini Street, Barangay Poblacion,
-  //               </div>
-  //               <div>
-  //                 Makati City, Metro Manila, Philippines
-  //               </div>
-  //             </div>
-  //           </div>
-  //           <div class="flex items-end gap-3">
-  //             <div class="w-24 font-semibold">
-  //               TIN
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div>
-  //               123-456-789-000
-  //             </div>
-  //           </div>
-  //         </div>
-  //         <div class="flex flex-col col-span-3 shrink-0">
-  //           <div class="flex items-end gap-3">
-  //             <div class="w-24 font-semibold">
-  //               CLIENT KEY
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div>
-  //               CL310271 00
-  //             </div>
-  //           </div>
-  //           <div class="flex items-end gap-3">
-  //             <div class="w-24 font-semibold">
-  //               PROJECT
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div>
-  //               CITYNET CENTRAL
-  //             </div>
-  //           </div>
-  //           <div class="flex items-end gap-3">
-  //             <div class="w-24 font-semibold">
-  //               UNIT
-  //             </div>
-  //             <div>
-  //               :
-  //             </div>
-  //             <div class=""> L 0000</div>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <!-- TABLE -->
-  //       <div class="flex flex-col h-full mt-2 tracking-tighter text-10">
-  //         <!-- THEAD -->
-  //         <div class="grid grid-cols-11 font-bold border border-black" style="line-height: 11px;">
-  //           <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-  //             <div class="col-span-5 px-1 pb-3 border-r border-black -pt-4 text-wrap">
-  //               Item / Description
-  //             </div>
-  //             <div class="px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
-  //               Qty
-  //             </div>
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             Unit Cost
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             VATable Sales
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             VAT Exempt Sales
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             Zero Rated Sales
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             VAT
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             Government Taxes
-  //           </div>
-  //           <div class="px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-  //             Withholding Tax
-  //           </div>
-  //           <div class="px-1 pb-3 text-right -pt-4 text-wrap">
-  //             Amount Due
-  //           </div>
-  //         </div>
-  //         <!-- TBODY -->
-  //         <div class="flex flex-col justify-between flex-1 pb-3 border-b border-black border-x">
-  //           <!-- ROWS -->
-  //           <div class="flex flex-col">
-  //             <div class="grid grid-cols-11">
-  //               <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-  //                 <div class="col-span-5 px-1 text-wrap">
-  //                   Pen. on Rental for September 1 - 30, 2021
-  //                 </div>
-  //                 <div class="px-1 text-center text-wrap">
-  //                   1
-  //                 </div>
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 1,619.09
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 1,445.62
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 173.47
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 (28.91)
-  //               </div>
-  //               <div class="px-1 text-right text-wrap ">
-  //                 1,590.18
-  //               </div>
-  //             </div>
-  //             <div class="grid grid-cols-11">
-  //               <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-  //                 <div class="col-span-5 px-1 text-wrap">
-  //                   Cusa for November 1 - 30, 2021
-  //                 </div>
-  //                 <div class="px-1 text-center text-wrap">
-  //                   1
-  //                 </div>
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 259,485.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 259,485.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 (5,189.70)
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 254.295.30
-  //               </div>
-  //             </div>
-  //             <div class="grid grid-cols-11">
-  //               <div class="grid grid-cols-6 col-span-3 px-1 text-wrap">
-  //                 <div class="col-span-5 px-1 text-wrap">
-  //                   Pen. on Cusa for September 1 - 30, 2021
-  //                 </div>
-  //                 <div class="px-1 text-center text-wrap">
-  //                   1
-  //                 </div>
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 345.98
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 308.91
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 37.07
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 0.00
-  //               </div>
-  //               <div class="px-1 text-right text-wrap">
-  //                 (6.18)
-  //               </div>
-  //               <div class="px-1 text-right text-wrap ">
-  //                 339.80
-  //               </div>
-  //             </div>
-  //             <pre> </pre>
-  //           </div>
-
-  //           <!-- BREAKDOWN -->
-  //           <div class="grid items-end grid-cols-2 gap-16 px-2 tracking-normal text-12">
-  //             <!-- COL 1 -->
-  //             <div class="flex flex-col">
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   VATable Sales
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   1,754.53
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   VAT Amount
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   210.54
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   VAT Exempt Sales
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   0.00
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   Zero-Rated Sales
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   259,485.00
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   Government Taxes
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   0.00
-  //                 </div>
-  //               </div>
-  //             </div>
-  //             <!-- COL 2 -->
-  //             <div class="flex flex-col">
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   Total Sales
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   261,239.53
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-3">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   Add: VAT
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   210.54
-  //                 </div>
-  //               </div>
-  //               <div class="grid grid-cols-5">
-  //                 <div class="col-span-2 font-bold text-left">
-  //                   Less: Withholding Tax
-  //                 </div>
-  //                 <div class="col-span-3 text-right">
-  //                   5,224.79
-  //                 </div>
-  //               </div>
-  //               <div class="mt-2 border-t border-black"></div>
-  //               <div class="grid grid-cols-3 -mt-1">
-  //                 <div class="col-span-1 font-bold text-left">
-  //                   Total Amount Due
-  //                 </div>
-  //                 <div class="col-span-2 text-right">
-  //                   256,225.28
-  //                 </div>
-  //               </div>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-
-  //       <!-- GENERATE LABEL -->
-  //       <div class="flex flex-col mt-[100px] mb-[20px] ">
-  //         <div v-if="withBankCharges" class="w-full pb-2">
-  //           * Bank charges are to be remitted to the Bank.
-  //         </div>
-  //         <div class="italic text-center border-t border-black">
-  //           This document is computer generated, no signature required.
-  //         </div>
-  //       </div>
-
-  //       <!-- FOOTER -->
-  //       <div class="flex flex-col tracking-normal">
-  //         <div>
-  //           Acknowledgement Certificate No. : xxxxxxxxxxxxxxx
-  //         </div>
-  //         <div>
-  //           Date Issued : xxxx/xx/xx
-  //         </div>
-  //         <div>
-  //           Series Range : VI011331A000001 - VI011339Z999999
-  //         </div>
-  //         <div>
-  //           Timestamp : 12/01/2021 10:35:28 CELOISA
-  //         </div>
-  //       </div>
-  //     </div>
-  //   `;
-
-  //   return PAGE
-  // }
 
 
   return {

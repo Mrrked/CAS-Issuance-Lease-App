@@ -1,8 +1,9 @@
-import { computed, ref } from 'vue'
+import { BillTypeRecord, CompanyRecord, MotherBillTypeRecord, ProjectRecord } from './types';
 
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 import { useConfigStore } from './useConfigStore';
 import { useDialog } from 'primevue/usedialog';
 
@@ -11,6 +12,11 @@ export const useCoreDataStore = defineStore('coreData', () => {
 
   const dialog = useDialog();
   const configStore = useConfigStore();
+
+  const project_codes = ref<ProjectRecord[]>([])
+  const company_codes = ref<CompanyRecord[]>([])
+  const bill_types = ref<BillTypeRecord[]>([])
+  const mother_bill_types = ref<MotherBillTypeRecord[]>([])
 
   const fetchData = () => {
     const loadingDialogRef = dialog.open(LoadingModal, {
@@ -27,22 +33,26 @@ export const useCoreDataStore = defineStore('coreData', () => {
     });
 
     Promise.all([
-      // axios.get('verification/core/project_codes/')
-      //   .then((response) => {
-      //     // console.log('RESPONSE', response);
-      //   }),
-      // axios.get('verification/core/company_codes/')
-      //   .then((response) => {
-      //     // console.log('RESPONSE', response);
-      //   }),
-      // axios.get('verification/core/bill_types/')
-      //   .then((response) => {
-      //     // console.log('RESPONSE', response);
-      //   }),
-      // axios.get('verification/core/mother_bill_types/')
-      //   .then((response) => {
-      //     // console.log('RESPONSE', response);
-      //   })
+      axios.get('issuance_lease/core/project_codes/')
+        .then((response) => {
+          // console.log('RESPONSE', response);
+          project_codes.value = response.data as ProjectRecord[];
+        }),
+      axios.get('issuance_lease/core/company_codes/')
+        .then((response) => {
+          // console.log('RESPONSE', response);
+          company_codes.value = response.data as CompanyRecord[];
+        }),
+      axios.get('issuance_lease/core/bill_types/')
+        .then((response) => {
+          // console.log('RESPONSE', response);
+          bill_types.value = response.data as BillTypeRecord[];
+        }),
+      axios.get('issuance_lease/core/mother_bill_types/')
+        .then((response) => {
+          // console.log('RESPONSE', response);
+          mother_bill_types.value = response.data as MotherBillTypeRecord[];
+        })
     ])
     .catch(configStore.handleError)
     .finally(() => {
@@ -51,6 +61,11 @@ export const useCoreDataStore = defineStore('coreData', () => {
   };
 
   return {
+    project_codes,
+    company_codes,
+    bill_types,
+    mother_bill_types,
+
     fetchData,
   }
 })

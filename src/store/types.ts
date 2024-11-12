@@ -10,6 +10,69 @@ export interface IntValueName {
   name: string
 }
 
+export interface ProjectRecord {
+  PROJCD: string
+  PTITLE: string
+  PJINIT: string
+  PCSTIR: number
+  PENRAT: number
+  DPCODE: number
+  TERM: number
+  TERM1: number
+  TERM2: number
+  TERM3: number
+  TERM4: number
+  TERM5: number
+  TERM6: number
+  INTRTE: number
+  BASEP: number
+  CATGRY: string
+  PCLTNO: number
+}
+
+export interface CompanyRecord {
+  COMPCD: number;   // COMPANY CODE
+  CONAME: string;   // COMPANY NAME - LA
+  COMIDD: string;   // COMPANY NAME - MA
+  COINIT: string;   // COMPANY INITIALS
+  TIN: string;      // TAX ACCT. NO.
+  RCNO: string;     // RCNO
+  PLACE: string;    // PLACE
+  DATRES: number;   // DATE RESERVED
+}
+
+export interface MotherBillTypeRecord {
+  BTYPE: number;         // BILL TYPE, Zoned(2,0)
+  MBTYPE: number;        // MOTHER BILL TYPE, Zoned(2,0)
+  MBDESC: string;        // MOTHER BILL TYPE DESCRIPTION, Char(30)
+  FILL1: number;         // AMT FILL1, Packed(11,2)
+  FILL2: number;         // AMT FILL2, Packed(11,2)
+  FILL3: number;         // AMT FILL3, Packed(11,2)
+  FILL4: string;         // TAG FILL4, Char(1)
+  FILL5: string;         // CHAR FILL4, Char(5)
+}
+
+export interface BillTypeRecord {
+  BTYPE: number;         // BILL TYPE, Zoned(2,0)
+  BDESC: string;         // BILL TYPE DESCRIPTION, Char(30)
+  ORDER: number;         // ORDER OF APPLICATION, Zoned(2,0)
+  PENRAT: number;        // PENALTY RATE, Zoned(5,2)
+  INTRAT: number;        // INTEREST RATE, Zoned(5,2)
+  ORTYPE: string;        // RECEIPT TYPE, Char(1)
+  FIXPEN: string;        // FIXED PENALTY?, Char(1)
+  WTHPEN: string;        // WITH PENALTY?, Char(1)
+  MOTACT: number;        // MOTHER ACCOUNT, Zoned(4,0)
+  PRJACT: string;        // PROJECT CODE ACCOUNT, Char(3)
+  DEPACT: number;        // DEPT. CODE ACCOUNT, Zoned(2,0)
+  GENACT: number;        // GENERAL CODE ACCOUNT, Zoned(3,0)
+  SUBACT: number;        // SUB-CODE ACCOUNT, Zoned(2,0)
+  FILL1: number;         // AMT FILL1, Packed(11,2)
+  FILL2: number;         // AMT FILL2, Packed(11,2)
+  FILL3: number;         // AMT FILL3, Packed(11,2)
+  FILL4: string;         // TAG FILL4, Char(1)
+  FILL5: string;         // CHAR FILL4, Char(5)
+}
+
 export interface InvoiceDateForm {
   year: IntValueName
   month: IntValueName
@@ -102,42 +165,35 @@ export interface OutstandingBill {
   TIMUPD: number;      // TIME UPDATED, Zoned(6,0)
 }
 
-export interface LeaseBillingBreakdown {
-  ID: string
-  YYYYMM: string
-
-  MBILL_TYPE: number
-  BILL_TYPE: number
-
-  RECORD_COUNTER?: number
-  FROM_BILL: number
-  TO_BILL: number
-
-  BIL_AMOUNT: number
-  BAL_AMOUNT: number
-  NET_VAT: number
-  VAT_AMOUNT: number
-  GROSS: number
-
-  PREPAID_TAX: number
-  AMOUNT_PAID: number
-}
-
 export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   INDEX: number
+
   ID: string
-  STATE: number
-  // IS_SELECTABLE: boolean
+  PBL_KEY: string
+  TCLTNO: number
+  CLIENT_NAME: string
+  CLIENT_ADDRESS: string
+  CLIENT_TIN: string
+  CLIENT_KEY: string
+  CLIENT_KEY_RAW: string
+  CLIENT_PROJECT_CODE: string
+  CLIENT_UNIT: string
+  COMPCD: number
+
   IS_ALREADY_VERIFIED: boolean
 
   IS_VATABLE: string
   VAT_RATE: number
   WHTAX_RATE: number
+  SALTYP: string
 
   YYYYMM: string
   BILL_TYPE: number
   OLD_BILL_TYPE: number
   OLD_BILL_TYPE_DESC: string
+
+  UNIT_COST: number
+  AMOUNT: number
 
   VAT_SALES: number
   VAT_EXEMPT: number
@@ -150,8 +206,80 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   // LESS
   WITHHOLDING_TAX: number
 
-  BREAKDOWN_NEW: LeaseBillingBreakdown[]
-  // BREAKDOWN_EXISTING: LeaseBillingBreakdown[]
-
   TOTAL_AMOUNT: number
+}
+
+export interface InvoiceRecord {
+  PBL_KEY:          string
+  TCLTNO:           number
+  CLIENT_KEY_RAW?:  string
+  COMPCD:           number
+
+  BILLINGS:         LeaseBill[]
+
+  HEADER: {
+    img_url:        string,
+    company_name:   string,
+    address:        string,
+    tel_no:         string,
+    tin:            string,
+
+    invoice_name:   string,
+    invoice_number: string,
+    invoice_date:   string,
+  },
+
+  DESC: {
+    client_name:    string,
+    address:        string,
+    tin:            string,
+    client_key:     string,
+    project:        string,
+    unit:           string,
+  },
+
+  TABLE_ITEMS: {
+    item_name:      string,
+    qty:            number,
+    unit_cost:      string,
+    vat_amount:     string,
+    amount:         string,
+  }[],
+
+  MODE_OF_PAYMENT: {
+    cash:           string,
+    check: {
+      amount:       string,
+      list: {
+        number:     number,
+        details:    string,
+        date:       string,
+        amount:     string,
+      }[],
+    },
+    total_amount:   string,
+  },
+
+  BREAKDOWN: {
+    vatable_sales:    string,
+    vat_amount:       string,
+    vat_exempt_sales: string,
+    zero_rated_sales: string,
+
+    total_sales:      string,
+    net_of_vat:       string,
+    wht_tax:          string,
+    total_amount_due: string,
+  },
+
+  SIGNATORY: {
+    user_id:        string,
+  },
+
+  FOOTER: {
+    certificate_no: string,
+    date_issued:    string,
+    series_range:   string,
+    timestamp:      string,
+  }
 }

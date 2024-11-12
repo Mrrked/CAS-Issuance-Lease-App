@@ -247,19 +247,19 @@ export interface InvoiceRecord {
     amount:         number,
   }[],
 
-  MODE_OF_PAYMENT: {
-    cash:           number,
-    check: {
-      amount:       number,
-      list: {
-        no:         number,
-        details:    string,
-        date:       string,
-        amount:     number,
-      }[],
-    },
-    total_amount:   number,
-  },
+  // MODE_OF_PAYMENT: {
+  //   cash:           number,
+  //   check: {
+  //     amount:       number,
+  //     list: {
+  //       no:         number,
+  //       details:    string,
+  //       date:       string,
+  //       amount:     number,
+  //     }[],
+  //   },
+  //   total_amount:   number,
+  // },
 
   BREAKDOWN: {
     vatable_sales:    number,

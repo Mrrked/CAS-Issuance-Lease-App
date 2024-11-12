@@ -238,7 +238,7 @@ export interface InvoiceRecord {
     unit:           string,
   },
 
-  TABLE_ITEMS: {
+  TABLE_ITEM_BREAKDOWNS: {
     item_no:        number,
     item_name:      string,
     qty:            number,
@@ -261,7 +261,7 @@ export interface InvoiceRecord {
   //   total_amount:   number,
   // },
 
-  BREAKDOWN: {
+  TOTAL_BREAKDOWN: {
     vatable_sales:    number,
     vat_exempt_sales: number,
     zero_rated_sales: number,

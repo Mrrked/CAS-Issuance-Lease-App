@@ -107,11 +107,12 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           TABLE_ITEMS: [
             ...mergedMap[key].TABLE_ITEMS,
             {
-              item_name:      'string',
+              item_no:        1,
+              item_name:      'Item Name',
               qty:            1,
-              unit_cost:      'string',
-              vat_amount:     'string',
-              amount:         'string',
+              unit_cost:      1000,
+              vat_amount:     2000,
+              amount:         3000,
             }
           ],
           // MODE_OF_PAYMENT: {
@@ -156,24 +157,24 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           TABLE_ITEMS:      [],
 
           MODE_OF_PAYMENT: {
-            cash:           '0.00',
+            cash:           1000,
             check: {
-              amount:       '',
+              amount:       1000,
               list:         [],
             },
-            total_amount:   '0.00',
+            total_amount:   1000,
           },
 
           BREAKDOWN: {
-            vatable_sales:    '0.00',
-            vat_amount:       '0.00',
-            vat_exempt_sales: '0.00',
-            zero_rated_sales: '0.00',
+            vatable_sales:    1000,
+            vat_amount:       1000,
+            vat_exempt_sales: 1000,
+            zero_rated_sales: 1000,
 
-            total_sales:      '0.00',
-            net_of_vat:       '0.00',
-            wht_tax:          '0.00',
-            total_amount_due: '0.00',
+            total_sales:      1000,
+            net_of_vat:       1000,
+            wht_tax:          1000,
+            total_amount_due: 1000,
           },
 
           SIGNATORY: {
@@ -1063,7 +1064,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
     CONTENT_VALUES.MODE_OF_PAYMENT.check.list.forEach((check) => {
       CHECKS_COMPONENT += `
         <div class="col-span-1 text-center text-[9px]">
-          ${ check.number }
+          ${ check.no }
         </div>
         <div class="col-span-2 text-center text-[9px]">
           ${ check.details }

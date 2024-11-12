@@ -239,37 +239,38 @@ export interface InvoiceRecord {
   },
 
   TABLE_ITEMS: {
+    item_no:        number,
     item_name:      string,
     qty:            number,
-    unit_cost:      string,
-    vat_amount:     string,
-    amount:         string,
+    unit_cost:      number,
+    vat_amount:     number,
+    amount:         number,
   }[],
 
   MODE_OF_PAYMENT: {
-    cash:           string,
+    cash:           number,
     check: {
-      amount:       string,
+      amount:       number,
       list: {
-        number:     number,
+        no:         number,
         details:    string,
         date:       string,
-        amount:     string,
+        amount:     number,
       }[],
     },
-    total_amount:   string,
+    total_amount:   number,
   },
 
   BREAKDOWN: {
-    vatable_sales:    string,
-    vat_amount:       string,
-    vat_exempt_sales: string,
-    zero_rated_sales: string,
+    vatable_sales:    number,
+    vat_exempt_sales: number,
+    zero_rated_sales: number,
+    vat_amount:       number,
 
-    total_sales:      string,
-    net_of_vat:       string,
-    wht_tax:          string,
-    total_amount_due: string,
+    total_sales:      number,
+    net_of_vat:       number,
+    wht_tax:          number,
+    total_amount_due: number,
   },
 
   SIGNATORY: {

@@ -104,22 +104,28 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
             bill
           ],
 
-          TABLE_ITEMS: [
-            ...mergedMap[key].TABLE_ITEMS,
+          TABLE_ITEM_BREAKDOWNS: [
+            ...mergedMap[key].TABLE_ITEM_BREAKDOWNS,
             {
-              item_no:        1,
-              item_name:      'Item Name',
+              item_no:        mergedMap[key].TABLE_ITEM_BREAKDOWNS.length + 1,
+              item_name:      bill.BDESC,
               qty:            1,
-              unit_cost:      1000,
-              vat_amount:     2000,
-              amount:         3000,
+              unit_cost:      bill.UNIT_COST,
+              vat_amount:     bill.VAT,
+              amount:         bill.TOTAL_AMOUNT,
             }
           ],
-          // MODE_OF_PAYMENT: {
-          //   check: {
-          //     list: []
-          //   },
-          // },
+          TOTAL_BREAKDOWN: {
+            vatable_sales:    configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vatable_sales + bill.VAT_SALES),
+            vat_amount:       configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vat_amount + bill.VAT),
+            vat_exempt_sales: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vat_exempt_sales + bill.VAT_EXEMPT),
+            zero_rated_sales: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.zero_rated_sales + bill.ZERO_RATE),
+
+            total_sales:      configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.total_sales + bill.AMOUNT),
+            net_of_vat:       configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.net_of_vat + bill.UNIT_COST),
+            wht_tax:          configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.wht_tax + bill.WITHHOLDING_TAX),
+            total_amount_due: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.total_amount_due + bill.TOTAL_AMOUNT),
+          },
         }
       } else {
         const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
@@ -131,7 +137,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW,
           COMPCD:           bill.COMPCD,
 
-          BILLINGS:         [],
+          BILLINGS:         [ bill ],
 
           HEADER: {
             img_url:        selectedCompany?.IMG_URL,
@@ -154,27 +160,27 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
             unit:           bill.CLIENT_UNIT,
           },
 
-          TABLE_ITEMS:      [],
+          TABLE_ITEM_BREAKDOWNS: [
+            {
+              item_no:        1,
+              item_name:      bill.BDESC,
+              qty:            1,
+              unit_cost:      bill.UNIT_COST,
+              vat_amount:     bill.VAT,
+              amount:         bill.TOTAL_AMOUNT,
+            }
+          ],
 
-          MODE_OF_PAYMENT: {
-            cash:           1000,
-            check: {
-              amount:       1000,
-              list:         [],
-            },
-            total_amount:   1000,
-          },
+          TOTAL_BREAKDOWN: {
+            vatable_sales:    bill.VAT_SALES,
+            vat_amount:       bill.VAT,
+            vat_exempt_sales: bill.VAT_EXEMPT,
+            zero_rated_sales: bill.ZERO_RATE,
 
-          BREAKDOWN: {
-            vatable_sales:    1000,
-            vat_amount:       1000,
-            vat_exempt_sales: 1000,
-            zero_rated_sales: 1000,
-
-            total_sales:      1000,
-            net_of_vat:       1000,
-            wht_tax:          1000,
-            total_amount_due: 1000,
+            total_sales:      bill.AMOUNT,
+            net_of_vat:       bill.UNIT_COST,
+            wht_tax:          bill.WITHHOLDING_TAX,
+            total_amount_due: bill.TOTAL_AMOUNT,
           },
 
           SIGNATORY: {
@@ -191,8 +197,6 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
       }
 
     })
-
-    console.log('INVOICE RECORDS', mergedMap);
 
     return [...Object.values(mergedMap)] as InvoiceRecord[]
   })
@@ -220,6 +224,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
 
   const handleOpenMainDialogBox = () => {
+    console.log('INVOICE RECORDS', invoice_records_data.value);
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SelectedBillsTableModalFooter.vue'));
     const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
       data: {
@@ -1023,57 +1028,24 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
     var TABLE_ITEMS_COMPONENT = ``
 
-    CONTENT_VALUES.TABLE_ITEMS.forEach((item) => {
+    CONTENT_VALUES.TABLE_ITEM_BREAKDOWNS.forEach((item) => {
       TABLE_ITEMS_COMPONENT += `
         <div class="grid grid-cols-16">
           <div class="col-span-9 px-1 text-wrap">
-            ${ item.item_name }
+            ${ item.item_name || '-' }
           </div>
           <div class="col-span-1 px-1 text-center text-wrap">
-            ${ item.qty }
+            ${ item.qty || '0' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.unit_cost }
+            ${ item.unit_cost ? configStore.formatFloatNumber1(item.unit_cost) : '0.00' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.vat_amount }
+            ${ item.vat_amount ? configStore.formatFloatNumber1(item.vat_amount) : '0.00' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap ">
-            ${ item.amount }
+            ${ item.amount ? configStore.formatFloatNumber1(item.amount) : '0.00' }
           </div>
-        </div>
-      `
-    })
-
-
-    var CHECKS_COMPONENT = `
-      <div class="col-span-1 text-center text-[9px] font-bold">
-        #
-      </div>
-      <div class="col-span-2 text-center text-[9px] font-bold">
-        Cheque Details
-      </div>
-      <div class="col-span-2 text-center text-[9px] font-bold">
-        Check Date
-      </div>
-      <div class="col-span-2 text-right pr-2 text-[9px] font-bold">
-        Amount
-      </div>
-    `
-
-    CONTENT_VALUES.MODE_OF_PAYMENT.check.list.forEach((check) => {
-      CHECKS_COMPONENT += `
-        <div class="col-span-1 text-center text-[9px]">
-          ${ check.no }
-        </div>
-        <div class="col-span-2 text-center text-[9px]">
-          ${ check.details }
-        </div>
-        <div class="col-span-2 text-center text-[9px]">
-          ${ check.date }
-        </div>
-        <div class="col-span-2 text-right pr-2 text-[9px]">
-          ${ check.amount }
         </div>
       `
     })
@@ -1242,54 +1214,13 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 <!-- COL 1 -->
                 <div class="flex flex-col">
 
-                  <!-- MODE OF PAYMENT -->
-                  <div class="mt-3 -mb-1">
-                    <div class="flex flex-col tracking-normal">
-                      <div class="border border-black w-full px-2 pb-3 font-bold">
-                        MODE OF PAYMENT
-                      </div>
-                      <div class="grid grid-cols-7 border border-black border-t-[0px] pb-3 -mt-1">
-                        <!-- CASH -->
-                        <div class="col-span-5 pl-2 font-bold">
-                          Cash
-                        </div>
-                        <div class="col-span-2 text-right pr-2">
-                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.cash }
-                        </div>
-
-                        <!-- CHECK -->
-                        <div class="col-span-5 pl-2 font-bold">
-                          Check
-                        </div>
-                        <div class="col-span-2 text-right pr-2">
-                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.check.amount }
-                        </div>
-
-                        ${ CHECKS_COMPONENT }
-
-                        <div class="col-span-5 pl-2 font-bold mt-2">
-                          TOTAL
-                        </div>
-                        <div class="col-span-2 pr-2 text-right mt-2 font-bold">
-                          ${ CONTENT_VALUES.MODE_OF_PAYMENT.total_amount }
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-
-                </div>
-                <!-- COL 2 -->
-                <div class="flex flex-col">
-
                   <!-- BREAKDOWN -->
                   <div class="grid grid-cols-2">
                     <div class="text-left">
                       VATable Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.vatable_sales }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vatable_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vatable_sales) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1297,7 +1228,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       VAT Amount
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1305,7 +1236,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       VAT Exempt Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.vat_exempt_sales }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_exempt_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_exempt_sales) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1313,17 +1244,20 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Zero-Rated Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.zero_rated_sales }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.zero_rated_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.zero_rated_sales) : '0.00' }
                     </div>
                   </div>
+                </div>
 
+                <!-- COL 2 -->
+                <div class="flex flex-col">
 
                   <div class="grid grid-cols-2 mt-5">
                     <div class="text-left">
                       Total Sales
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.total_sales }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.total_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.total_sales) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1331,7 +1265,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Less: VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -1341,7 +1275,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Amount: Net of VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.net_of_vat }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.net_of_vat ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.net_of_vat) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1349,7 +1283,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Add: VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.vat_amount }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -1357,7 +1291,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       Less: Withholding Tax
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.BREAKDOWN.wht_tax }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.wht_tax ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.wht_tax) : '0.00' }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -1370,7 +1304,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                       PHP
                     </div>
                     <div class="col-span-2 text-right font-bold">
-                      ${ CONTENT_VALUES.BREAKDOWN.total_amount_due }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.total_amount_due ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.total_amount_due) : '0.00' }
                     </div>
                   </div>
                 </div>
@@ -1426,6 +1360,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
   return {
     billings,
+    invoice_records_data,
     invoiceDateForm,
     handleOpenMainDialogBox,
   }

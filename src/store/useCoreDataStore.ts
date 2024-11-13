@@ -1,9 +1,9 @@
 import { BillTypeRecord, CompanyRecord, MotherBillTypeRecord, ProjectRecord } from './types';
+import { computed, ref } from 'vue'
 
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import { useConfigStore } from './useConfigStore';
 import { useDialog } from 'primevue/usedialog';
 
@@ -17,6 +17,18 @@ export const useCoreDataStore = defineStore('coreData', () => {
   const company_codes = ref<CompanyRecord[]>([])
   const bill_types = ref<BillTypeRecord[]>([])
   const mother_bill_types = ref<MotherBillTypeRecord[]>([])
+
+  // GETTERS
+
+  const project_code_options = computed(() => {
+    return project_codes.value
+    .map((code) => {
+      return { value: code.PROJCD, name: `${code.PROJCD} - ${code.PTITLE}`}
+    })
+    .filter((code) => {
+      return code.value !== '000'
+    })
+  })
 
   const fetchData = () => {
     const loadingDialogRef = dialog.open(LoadingModal, {
@@ -65,6 +77,8 @@ export const useCoreDataStore = defineStore('coreData', () => {
     company_codes,
     bill_types,
     mother_bill_types,
+
+    project_code_options,
 
     fetchData,
   }

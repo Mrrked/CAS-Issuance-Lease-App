@@ -896,133 +896,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   }
 
   const handleGeneratePage = (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
-
-    // OLD
-    // const selectedCompany = COMPANIES.find((c) => c.COMPCD === SELECTED_INVOICE_RECORD.COMPCD) as COMPANY_DETAILS
-    // const CONTENT_VALUES: InvoiceRecord = {
-    //   PBL_KEY:          'CL3 L 0000  ',
-    //   TCLTNO:           0,
-    //   COMPCD:           2,
-
-    //   BILLINGS:         [],
-
-    //   HEADER: {
-    //     img_url:        selectedCompany.IMG_URL,
-    //     company_name:   selectedCompany.CONAME,
-    //     address:        selectedCompany.ADDRESS,
-    //     tel_no:         selectedCompany.TEL_NO,
-    //     tin:            selectedCompany.TIN,
-
-    //     invoice_name:   'SERVICE INVOICE',
-    //     invoice_number: 'VI011331A000001',
-    //     invoice_date:   '2021/12/01',
-    //   },
-
-    //   DESC: {
-    //     client_name:    'Juan Antonio D. Perez',
-    //     address:        '123 Mabini Street, Barangay Poblacion, Makati City, Metro Manila, Philippines',
-    //     tin:            '123-456-789-000',
-    //     client_key:     'CL310271 00',
-    //     project:        'CITYNET CENTRAL',
-    //     unit:           'L 0000',
-    //   },
-
-    //   TABLE_ITEMS: [
-    //     {
-    //       item_name:    'PENALTY ON RENTAL (September 1 - 30, 2021) VATable',
-    //       qty:          1,
-    //       unit_cost:    '1,445.62',
-    //       vat_amount:   '173.47',
-    //       amount:       '1,619.09',
-    //     },
-    //     {
-    //       item_name:    'CUSA CHARGES (November 1 - 30, 2021) Zero-Rated',
-    //       qty:          1,
-    //       unit_cost:    '259,485.00',
-    //       vat_amount:   '0.00',
-    //       amount:       '259,485.00',
-    //     },
-    //     {
-    //       item_name:    'PEN. ON CUSA CHARGES (September 1 - 30, 2021) VATable',
-    //       qty:          1,
-    //       unit_cost:    '308.91',
-    //       vat_amount:   '37.07',
-    //       amount:       '345.98',
-    //     },
-    //   ],
-
-    //   MODE_OF_PAYMENT: {
-    //     cash:           '0.00',
-    //     // cash:           '256,225.28',
-    //     check: {
-    //       amount:       '',
-    //       list: [
-    //         {
-    //           number:   1,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.21',
-    //         },
-    //         {
-    //           number:   2,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.21',
-    //         },
-    //         {
-    //           number:   3,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.21',
-    //         },
-    //         {
-    //           number:   4,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.21',
-    //         },
-    //         {
-    //           number:   5,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.21',
-    //         },
-    //         {
-    //           number:   6,
-    //           details:  'BDO 10 987654321',
-    //           date:     '2021/12/01',
-    //           amount:   '42,704.23',
-    //         },
-    //       ],
-    //     },
-    //     total_amount:   '256,225.28',
-    //   },
-
-    //   BREAKDOWN: {
-    //     vatable_sales:    '1,754.53',
-    //     vat_amount:       '210.54',
-    //     vat_exempt_sales: '0.00',
-    //     zero_rated_sales: '259,485.00',
-
-    //     total_sales:      '261,450.07',
-    //     net_of_vat:       '261,239.53',
-    //     wht_tax:          '5,224.79',
-    //     total_amount_due: '265,225.28',
-    //   },
-
-    //   SIGNATORY: {
-    //     user_id:        'CDKARINA'
-    //   },
-
-    //   FOOTER: {
-    //     certificate_no: 'xxxxxxxxxxxx',
-    //     date_issued:    'xxxx/xx/xx',
-    //     series_range:   'VI011331A000001 - VI011339Z999999',
-    //     timestamp:      '12/01/2021 10:35:28'
-    //   }
-    // }
-
-    console.log('SELECTED_INVOICE_RECORD ', SELECTED_INVOICE_RECORD)
+    console.log('SELECTED_INVOICE_RECORD', SELECTED_INVOICE_RECORD)
 
     const CONTENT_VALUES: InvoiceRecord = SELECTED_INVOICE_RECORD
 
@@ -1107,8 +981,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
         <!-- DESCRIPTION -->
         <div class="grid grid-cols-7 gap-10 mt-1">
           <div class="flex flex-col col-span-4 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
                 SOLD TO
               </div>
               <div>
@@ -1142,8 +1016,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
             </div>
           </div>
           <div class="flex flex-col col-span-3 shrink-0">
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
                 CLIENT KEY
               </div>
               <div>
@@ -1164,8 +1038,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
                 ${ CONTENT_VALUES.DESC.project }
               </div>
             </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
+            <div class="flex items-start gap-3">
+              <div class="w-24 font-semibold shrink-0">
                 UNIT
               </div>
               <div>
@@ -1352,7 +1226,7 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
           </div>
         </div>
       </div>
-    `;
+    `
 
     return PAGE
   }

@@ -25,7 +25,7 @@ const routes: Array<RouteRecordRaw> = [
     name: '404 Not Found',
     component: () => import('../views/NotFoundView.vue'),
     meta: {
-      requiresAuth: false
+      requiresAuth: true
     }
   }
 ]

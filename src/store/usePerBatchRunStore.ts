@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
-import { Column, InvoiceDateForm, InvoiceRecord, LeaseBill } from './types';
+import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import DraftInvoiceModal from '../components/Dialog/PerMonthYear/DraftInvoiceModal.vue';
@@ -12,7 +12,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
 
-export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
+export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const dialog = useDialog();
   const confirm = useConfirm();
@@ -20,18 +20,8 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
   const configStore = useConfigStore()
   const coreDataStore = useCoreDataStore()
 
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth();
-
-  const invoiceDateForm = ref<InvoiceDateForm>({
-    year: {
-      value: currentYear,
-      name: String(currentYear)
-    },
-    month: {
-      value: currentMonth,
-      name: `${String(currentMonth + 1).padStart(2, '0')} - ${new Date(0, currentMonth).toLocaleString('default', { month: 'long' })}`
-    }
+  const perBatchRunForm = ref<PerBatchRunForm>({
+    invoiceDate: new Date()
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -1233,9 +1223,11 @@ export const usePerYearMonthStore = defineStore('2_PerYearMonth', () => {
 
 
   return {
+    perBatchRunForm,
     billings,
+
     invoice_records_data,
-    invoiceDateForm,
+
     handleOpenMainDialogBox,
   }
 })

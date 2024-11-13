@@ -1,14 +1,11 @@
-import { IntValueName } from './types';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
-import { computed } from 'vue'
 import { defineStore } from 'pinia'
 import { useConfigStore } from './useConfigStore';
 import { useDialog } from 'primevue/usedialog';
-import { usePerYearMonthStore } from './usePerYearMonthStore';
-
-// import { usePerBillTypeStore } from './usePerBillTypeStore';
-
+import { usePerBatchRunStore } from './usePerBatchRunStore';
+import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
+import { useToast } from 'primevue/usetoast';
 
 export const useMainStore = defineStore('main', () => {
 
@@ -16,48 +13,12 @@ export const useMainStore = defineStore('main', () => {
 
   // STATES
 
+  const toast = useToast()
   const dialog = useDialog();
   const configStore = useConfigStore();
 
-  const perYearMonthStore = usePerYearMonthStore()
-  // const perBillTypeStore = usePerBillTypeStore()
-
-  // GETTERS
-
-  const YEARS_OPTIONS = computed((): IntValueName[] => {
-    const currentYear = new Date().getFullYear();
-    const startYear = 1900;
-
-    let options:IntValueName[] = []
-
-    for (let year = currentYear; year >= startYear; year--) {
-      const option = {
-        value: year,
-        name: `${year}`,
-      }
-
-      options.push(option);
-    }
-    return options
-  })
-
-  const MONTHS_OPTIONS = computed((): IntValueName[] => {
-    return [
-      { value: 1,  name: '01 - January' },
-      { value: 2,  name: '02 - February' },
-      { value: 3,  name: '03 - March' },
-      { value: 4,  name: '04 - April' },
-      { value: 5,  name: '05 - May' },
-      { value: 6,  name: '06 - June' },
-      { value: 7,  name: '07 - July' },
-      { value: 8,  name: '08 - August' },
-      { value: 9,  name: '09 - September' },
-      { value: 10, name: '10 - October' },
-      { value: 11, name: '11 - November' },
-      { value: 12, name: '12 - December' }
-    ]
-  })
-
+  const perBatchRunStore = usePerBatchRunStore()
+  const perBillTypeRunStore = usePerBillTypeRunStore()
 
   // ACTIONS
 
@@ -66,37 +27,46 @@ export const useMainStore = defineStore('main', () => {
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-        
+
         break;
 
       // Per Year / Month (BATCH)
       case 2:
-        const loadingDialogRef = dialog.open(LoadingModal, {
-          data: {
-            label: 'Fetching ...'
-          },
-          props: {
-            style: {
-              paddingTop: '1.5rem',
+        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          const loadingDialogRef = dialog.open(LoadingModal, {
+            data: {
+              label: 'Fetching ...'
             },
-            showHeader: false,
-            modal: true
-          }
-        })
-        const data = {
-          year: perYearMonthStore.invoiceDateForm.year.value,
-          month: perYearMonthStore.invoiceDateForm.month.value,
+            props: {
+              style: {
+                paddingTop: '1.5rem',
+              },
+              showHeader: false,
+              modal: true
+            }
+          })
+          const data = {
+            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
+          };
+          axios.post(`issuance_lease/month_year/`, data)
+          .then((response) => {
+            console.log(response.data);
+            perBatchRunStore.billings = response.data;
+            perBatchRunStore.handleOpenMainDialogBox()
+          })
+          .catch(configStore.handleError)
+          .finally(() => {
+            loadingDialogRef.close()
+          })
+        } else {
+          toast.add({
+            severity: 'warn',
+            summary: 'Missing Invoice Date',
+            detail: 'Please enter a valid invoice date!',
+            life: 3000
+          })
         }
-        axios.post(`issuance_lease/month_year/`, data)
-        .then((response) => {
-          console.log(response.data);
-          perYearMonthStore.billings = response.data;
-          perYearMonthStore.handleOpenMainDialogBox()
-        })
-        .catch(configStore.handleError)
-        .finally(() => {
-          loadingDialogRef.close()
-        })
         break;
 
       default:
@@ -109,23 +79,14 @@ export const useMainStore = defineStore('main', () => {
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-        
+        perBillTypeRunStore.perBillTypeRunForm = {
+          invoiceDate: new Date()
+        }
         break;
 
       // Per Year / Month (BATCH)
       case 2:
-        const currentYear = new Date().getFullYear();
-        const currentMonth = new Date().getMonth();
-        perYearMonthStore.invoiceDateForm = {
-          year: {
-            value: currentYear,
-            name: String(currentYear)
-          },
-          month: {
-            value: currentMonth + 1,
-            name: `${String(currentMonth + 1).padStart(2, '0')} - ${new Date(0, currentMonth).toLocaleString('default', { month: 'long' })}`
-          }
-        }
+        perBatchRunStore.perBatchRunForm.invoiceDate = new Date()
         break;
 
       default:
@@ -134,9 +95,6 @@ export const useMainStore = defineStore('main', () => {
   }
 
   return {
-    YEARS_OPTIONS,
-    MONTHS_OPTIONS,
-
 
     handleExecuteSearch,
     handleExecuteReset,

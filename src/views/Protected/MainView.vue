@@ -61,21 +61,6 @@
               </InputGroup>
               <InputGroup>
                 <InputGroupAddon>
-                  <label for="project_code" class="font-bold w-28 text-content-background">
-                    Project
-                  </label>
-                </InputGroupAddon>
-                <Select
-                  v-model="perBillTypeRunStore.perBillTypeRunForm.projectCode"
-                  :options="coreDataStore.project_code_options"
-                  filter
-                  optionLabel="name"
-                  placeholder="Select..."
-                  autofocus
-                ></Select>
-              </InputGroup>
-              <InputGroup>
-                <InputGroupAddon>
                   <label for="bill_Type" class="font-bold w-28 text-content-background">
                     Bill Type
                   </label>
@@ -89,6 +74,142 @@
                   autofocus
                 ></Select>
               </InputGroup>
+              <InputGroup>
+                <InputGroupAddon>
+                  <label for="project_code" class="font-bold w-28 text-content-background">
+                    Project
+                  </label>
+                </InputGroupAddon>
+                <Select
+                  v-model="perBillTypeRunStore.perBillTypeRunForm.projectCode"
+                  :options="coreDataStore.project_code_options"
+                  filter
+                  optionLabel="name"
+                  placeholder="Select..."
+                  autofocus
+                ></Select>
+              </InputGroup>
+
+              <div v-if="perBillTypeRunStore.showPBLForm" class="grid grid-cols-23 gap-4 mt-3 max-w-[50rem]">
+                <div class="flex flex-col items-center justify-center col-span-3 gap-2">
+                  <label name="pcs_code" class="font-bold text-center">
+                    PCS Code
+                  </label>
+                  <InputText
+                    name="pcs_code"
+                    maxlength="1"
+                    class="font-semibold text-center uppercase w-11"
+                    size="large"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-3 gap-2">
+                  <label name="phase" class="font-bold text-center">
+                    Phase
+                  </label>
+                  <InputText
+                    name="phase"
+                    maxlength="1"
+                    class="font-semibold text-center uppercase w-11"
+                    size="large"
+                    autocomplete="off"
+                  />
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-4 gap-2">
+                  <label name="block" class="font-bold text-center">
+                    Block
+                  </label>
+                  <div class="flex gap-1">
+                    <InputText
+                      name="block"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                    <InputText
+                      name="block"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-1 gap-2 font-bold">
+                  <div>
+                    /
+                  </div>
+                  <div class="flex items-center h-full">
+                    /
+                  </div>
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-7 gap-2">
+                  <label name="lot" class="font-bold text-center">
+                    Lot
+                  </label>
+                  <div class="flex gap-1">
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-1 gap-2 font-bold">
+                  <div>
+                    /
+                  </div>
+                  <div class="flex items-center h-full">
+                    /
+                  </div>
+                </div>
+                <div class="flex flex-col items-center justify-center col-span-4 gap-2">
+                  <label name="unit_code" class="font-bold text-center">
+                    Unit Code
+                  </label>
+                  <div class="flex gap-1">
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                    <InputText
+                      name="lot"
+                      maxlength="1"
+                      class="font-semibold text-center uppercase w-11"
+                      size="large"
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+              </div>
+
               <div class="flex justify-between w-full gap-3 mt-3">
                 <Button @click="handleExecuteReset(1)"
                   raised
@@ -138,181 +259,5 @@
         </TabPanel>
       </TabPanels>
     </Tabs>
-
-
-    <!-- Hide -->
-    <div class="flex-col items-center hidden gap-3 p-5 rounded-sm shadow-sm w-fit shadow-gray-800 ">
-      <!-- FORM -->
-      <!-- handleExecuteSearch(activateCallback) -->
-      <form @submit.prevent="()=>{}" class="flex flex-col gap-3">
-
-        <Fieldset legend="UNIT QUERY">
-          <div class="flex flex-col gap-5">
-            <InputGroup>
-              <InputGroupAddon>
-                <label for="project_code" class="font-bold text-content-background">
-                  Project Code
-                </label>
-              </InputGroupAddon>
-              <Select
-                filter
-                optionLabel="name"
-                placeholder="Select one"
-                class="w-full md:w-56"
-                autofocus
-              ></Select>
-            </InputGroup>
-            <InputGroup>
-              <InputGroupAddon>
-                <label for="payment_type" class="font-bold text-content-background">
-                  Payment Type
-                </label>
-              </InputGroupAddon>
-              <Select
-                filter
-                optionLabel="name"
-                placeholder="Select one"
-                class="w-full md:w-56"
-              >
-              </Select>
-            </InputGroup>
-            <div class="grid grid-cols-23 gap-4 max-w-[50rem]">
-              <div class="flex flex-col items-center justify-center col-span-3 gap-2">
-                <label name="pcs_code" class="font-bold text-center">
-                  PCS Code
-                </label>
-                <InputText
-                  name="pcs_code"
-                  maxlength="1"
-                  class="font-semibold text-center uppercase w-11"
-                  size="large"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-3 gap-2">
-                <label name="phase" class="font-bold text-center">
-                  Phase
-                </label>
-                <InputText
-                  name="phase"
-                  maxlength="1"
-                  class="font-semibold text-center uppercase w-11"
-                  size="large"
-                  autocomplete="off"
-                />
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-4 gap-2">
-                <label name="block" class="font-bold text-center">
-                  Block
-                </label>
-                <div class="flex gap-1">
-                  <InputText
-                    name="block"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                  <InputText
-                    name="block"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-1 gap-2 font-bold">
-                <div>
-                  /
-                </div>
-                <div class="flex items-center h-full">
-                  /
-                </div>
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-7 gap-2">
-                <label name="lot" class="font-bold text-center">
-                  Lot
-                </label>
-                <div class="flex gap-1">
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-1 gap-2 font-bold">
-                <div>
-                  /
-                </div>
-                <div class="flex items-center h-full">
-                  /
-                </div>
-              </div>
-              <div class="flex flex-col items-center justify-center col-span-4 gap-2">
-                <label name="unit_code" class="font-bold text-center">
-                  Unit Code
-                </label>
-                <div class="flex gap-1">
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                  <InputText
-                    name="lot"
-                    maxlength="1"
-                    class="font-semibold text-center uppercase w-11"
-                    size="large"
-                    autocomplete="off"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </Fieldset>
-        <!-- ACTION -->
-        <div class="flex justify-between w-full gap-3">
-          <!-- handleExecuteReset(activateCallback) -->
-          <Button @click="()=>{}"
-            raised
-            type="reset"
-            label="Reset"
-          />
-          <Button
-            raised
-            type="submit"
-            label="Search"
-            icon="pi pi-search"
-          />
-        </div>
-      </form>
-    </div>
   </div>
 </template>

@@ -32,6 +32,10 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   const billings = ref<LeaseBill[]>([])
 
+  const showPBLForm = computed((): boolean => {
+    return perBillTypeRunForm.value.billType?.value === 'Rental and CUSA'
+  });
+
   const billings_data = computed(():LeaseBill[] => {
     return billings.value.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
@@ -1232,9 +1236,11 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
     BILL_TYPE_OPTIONS,
 
     perBillTypeRunForm,
-
     billings,
+
+    showPBLForm,
     invoice_records_data,
+
     handleOpenMainDialogBox,
   }
 })

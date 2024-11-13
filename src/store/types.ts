@@ -73,29 +73,32 @@ export interface BillTypeRecord {
   FILL5: string;         // CHAR FILL4, Char(5)
 }
 
-export interface InvoiceDateForm {
-  year: IntValueName
-  month: IntValueName
+export interface PerBatchRunForm {
+  invoiceDate: Date
 }
 
-export interface UnitForm {
-  payment_type: StringValueName
-  project_code: StringValueName
-  pcs_code: string
-  phase: string
-  block: {
-    1: string
-    2: string
-  }
-  lot: {
-    1: string
-    2: string
-    3: string
-    4: string
-  }
-  unit_code: {
-    1: string
-    2: string
+export interface PerBillTypeRunForm {
+  invoiceDate: Date
+  projectCode?: StringValueName
+  billType?:    StringValueName
+
+  PBL?: {
+    pcs_code: string
+    phase: string
+    block: {
+      1: string
+      2: string
+    }
+    lot: {
+      1: string
+      2: string
+      3: string
+      4: string
+    }
+    unit_code: {
+      1: string
+      2: string
+    }
   }
 }
 

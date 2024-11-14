@@ -27,7 +27,41 @@ export const useMainStore = defineStore('main', () => {
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-
+        // if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+        //   const loadingDialogRef = dialog.open(LoadingModal, {
+        //     data: {
+        //       label: 'Fetching ...'
+        //     },
+        //     props: {
+        //       style: {
+        //         paddingTop: '1.5rem',
+        //       },
+        //       showHeader: false,
+        //       modal: true
+        //     }
+        //   })
+        //   const data = {
+        //     year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+        //     month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
+        //   };
+        //   axios.post(`issuance_lease/per_batch/`, data)
+        //   .then((response) => {
+        //     console.log('FETCHED OPEN BILLINGS', response.data);
+        //     perBatchRunStore.billings = response.data;
+        //     perBatchRunStore.handleOpenMainDialogBox()
+        //   })
+        //   .catch(configStore.handleError)
+        //   .finally(() => {
+        //     loadingDialogRef.close()
+        //   })
+        // } else {
+        //   toast.add({
+        //     severity: 'warn',
+        //     summary: 'Missing Invoice Date',
+        //     detail: 'Please enter a valid invoice date!',
+        //     life: 3000
+        //   })
+        // }
         break;
 
       // Per Year / Month (BATCH)
@@ -49,7 +83,7 @@ export const useMainStore = defineStore('main', () => {
             year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
             month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
           };
-          axios.post(`issuance_lease/month_year/`, data)
+          axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
             console.log('FETCHED OPEN BILLINGS', response.data);
             perBatchRunStore.billings = response.data;

@@ -222,8 +222,9 @@ export interface InvoiceRecord {
 
   BILLINGS:         LeaseBill[]
 
-  // COMPUTE VALUES DURING LOADING [FRONTEND]
+
   HEADER: {
+    // COMPUTE VALUES DURING LOADING [FRONTEND]
     img_url:        string,
     company_name:   string,
     address:        string,
@@ -231,7 +232,7 @@ export interface InvoiceRecord {
     tin:            string,
 
     invoice_name:   string,
-    invoice_number: string,
+    invoice_number: string,       // PLACE VALUES DURING PROCESSING [BACKEND]
     invoice_date:   string,
   },
 
@@ -293,5 +294,235 @@ export interface InvoiceRecord {
     date_issued:    string,
     series_range:   string,
     timestamp:      string,
+  }
+}
+
+export interface InvoiceDetails {
+  // KEY
+  RECTYP: string; // RECEIPT TYPE         (2 chars)
+  ORNUM: string;  // OFFICIAL RECEIPT #   (13 chars)
+
+  // REFERENCE
+  PAYTYP: string; // PAYMENT TYPE         (1 char)
+  PIBIG: string;  // PAGIBIG CODE         (1 char)
+  SLSTYP: string; // SALE TYPE            (1 char)
+  DATVAL: number; // VALUE DATE           (8 zoned digits)
+
+  // COMPANY INFO
+  COMPCD: number; // COMPANY CODE         (2 zoned digits)
+  TELNO: string;  // TELEPHONE #          (9 chars)
+  REGTIN: string; // VAT REG TIN          (15 chars)
+
+  // CLIENT INFO
+  CLTNME: string; // CLIENT NAME          (35 chars)
+  RADDR1: string; // CLIENT ADDRESS #1    (80 chars)
+  RADDR2: string; // CLIENT ADDRESS #2    (80 chars)
+  CLTTIN: string; // CLIENT TIN           (15 chars)
+  CLTKEY: string; // CLIENT KEY           (5 chars)
+  PRJNAM: string; // PROJECT NAME         (3 chars)
+  UNIT: string;   // UNIT NUMBER          (4 chars)
+
+  // FOOTER
+  AUTHSG: string; // AUTHORIZED SIGNATURE (8 chars)
+  DATSTP: number; // DATE STAMP           (8 zoned digits)
+  TIMSTP: number; // TIME STAMP           (8 zoned digits)
+
+  // TRACKING
+  STATUS: string; // STATUS               (1 char)
+  RUNDAT: number; // RUNNING DATE         (8 zoned digits)
+  RUNTME: number; // RUNNING TIME         (6 zoned digits)
+  RUNBY: string;  // USER                 (8 chars)
+
+  RPDATE: number; // REPRINT DATE         (8 zoned digits)
+  RPTIME: number; // REPRINT TIME         (6 zoned digits)
+  REPRBY: string; // REPRINTED BY         (8 chars)
+}
+
+export interface InvoiceItemBreakdown {
+  // KEY
+  RECTYP: string; // RECEIPT TYPE         (2 chars)
+  ORNUM: string;  // OFFICIAL RECEIPT #   (13 chars)
+
+  // TRACKING
+  ITEMNO: number; // ITEM NUMBER          (3 zoned digits)
+  BILTYP: number; // BILL TYPE            (2 zoned digits)
+  ITEM: string;   // ITEM/DESCRIPTION     (120 chars)
+  QTY: number;    // QUANTITY             (3 zoned digits)
+
+  // VALUES
+  UNTCST: number; // UNIT COST            (13 zoned digits with 2 decimals)
+  VATAMT: number; // VAT AMOUNT           (13 zoned digits with 2 decimals)
+  VATSAL: number; // VAT SALES            (13 zoned digits with 2 decimals)
+  VATEXM: number; // VAT EXEMPT           (13 zoned digits with 2 decimals)
+  ZERSAL: number; // ZERO-RATED SALES     (13 zoned digits with 2 decimals)
+  NETVAT: number; // NET OF VAT           (13 zoned digits with 2 decimals)
+  WTHTAX: number; // WITHHOLDING TAX      (13 zoned digits with 2 decimals)
+  GOVTAX: number; // GOVERNMENT TAX       (13 zoned digits with 2 decimals)
+  WTXRAT: number; // WITHHOLDING TAX RATE (5 zoned digits with 2 decimals)
+  AMTDUE: number; // TOTAL AMOUNT DUE     (13 zoned digits with 2 decimals)
+
+  // PERIOD
+  FRDATE: number; // BILLING FROM DATE    (8 zoned digits)
+  TODATE: number; // BILLING TO DATE      (8 zoned digits)
+  DUEDAT: number; // BILLING DUE DATE     (8 zoned digits)
+}
+
+export interface InvoiceTotalBreakdown {
+  // KEY
+  RECTYP: string; // RECEIPT TYPE         (2 chars)
+  ORNUM:  string; // OFFICIAL RECEIPT #   (13 chars)
+
+  BILTYP: number; // BILL TYPE            (2 zoned digits)
+
+  // AMOUNTS
+  VATSAL: number; // VAT SALES            (13 zoned digits with 2 decimals)
+  VATEXM: number; // VAT EXEMPT           (13 zoned digits with 2 decimals)
+  ZERSAL: number; // ZERO-RATED SALES     (13 zoned digits with 2 decimals)
+  GOVTAX: number; // GOVERNMENT TAX       (13 zoned digits with 2 decimals)
+
+  TOTSAL: number; // TOTAL SALES          (13 zoned digits with 2 decimals)
+  NETVAT: number; // NET OF VAT           (13 zoned digits with 2 decimals)
+  VATAMT: number; // VAT AMOUNT           (13 zoned digits with 2 decimals)
+  PRDTAX: number; // PREPAID TAX          (13 zoned digits with 2 decimals)
+  AMTDUE: number; // TOTAL AMOUNT DUE     (13 zoned digits with 2 decimals)
+}
+
+export interface InvoiceRecordNew {
+  PBL_KEY: string
+  TCLTNO: number
+  CLIENT_KEY_RAW?:  string
+  COMPCD:   number
+  BILLINGS: LeaseBill[]
+
+  // COMPUTED
+  HEADER: {
+    COMPANY_NAME:   string
+    ADDRESS:        string
+    LOGO_URL:       string
+
+    INVOICE_NAME:   string
+    INVOICE_NUMBER: string
+    INVOICE_DATE:   string
+  },
+
+  // Main Details (Invoice and Client)
+  DETAILS: InvoiceDetails
+
+  // Item Breakdowns
+  ITEM_BREAKDOWNS: InvoiceItemBreakdown[]
+
+  // Total / Overall Breakdown
+  TOTAL_BREAKDOWN: InvoiceTotalBreakdown
+}
+
+const SAMPLE: InvoiceRecordNew = {
+
+  PBL_KEY:          'CL3 L 0000  ',
+  TCLTNO:           0,
+  COMPCD:           0,
+
+  BILLINGS:         [],
+
+  // COMPUTED
+  HEADER: {
+    COMPANY_NAME:   'selectedCompany.CONAME',
+    ADDRESS:        'selectedCompany.ADDRESS',
+    LOGO_URL:       'selectedCompany.CONAME',
+
+    INVOICE_NAME:   'SERVICE INVOICE',
+    INVOICE_NUMBER: 'VI011331A000001',
+    INVOICE_DATE:   '2021/12/01',
+  },
+
+  // CIRCLTPF
+  DETAILS: {
+    // KEY
+    RECTYP: 'VI',
+    ORNUM:  '01133A 008310',
+
+    PAYTYP: 'Y',
+    PIBIG:  '',
+    SLSTYP: 'V',
+    DATVAL: 20231114,
+
+    // COMPANY INFO
+    COMPCD: 2,
+    TELNO:  '8893-6060',
+    REGTIN: '000-527-103-00000',
+
+    // CLIENT INFO
+    CLTNME: 'John Doe Industries',
+    RADDR1: '123 Business Rd.',
+    RADDR2: 'Suite 100',
+    CLTTIN: '987654321012345',
+    CLTKEY: '12345678910',
+    PRJNAM: 'CITYNET CENTRAL',
+    UNIT:   'L 0000',
+
+    // FOOTER
+    DATSTP: 20231114,
+    TIMSTP: 143200,
+    AUTHSG: 'JD123456',
+
+    // TRACKING
+    STATUS: '',
+    RUNDAT: 20231114,
+    RUNTME: 152500,
+    RUNBY: 'USER1234',
+
+    RPDATE: 0,
+    RPTIME: 0,
+    REPRBY: '',
+  },
+  // CIRBRKPF
+  ITEM_BREAKDOWNS: [
+    {
+      // KEY
+      RECTYP: "01",
+      ORNUM: "0000123456789",
+
+      // TRACKING
+      ITEMNO: 1,
+      BILTYP: 4,
+      ITEM:   "RENTAL (September 1 - 30, 2001) VATable",
+      QTY:    1,
+
+      // VALUES
+      UNTCST: 1500.25,
+      VATAMT: 180.03,
+      VATSAL: 1200.10,
+      VATEXM: 0.00,
+      ZERSAL: 0.00,
+      NETVAT: 1020.07,
+      WTHTAX: 50.00,
+      GOVTAX: 25.00,
+      WTXRAT: 2.50,
+      AMTDUE: 1775.35,
+
+      // PERIOD
+      FRDATE: 20240101,
+      TODATE: 20240131,
+      DUEDAT: 20240215
+    }
+  ],
+  // CIRVATPF
+  TOTAL_BREAKDOWN: {
+    // KEY
+    RECTYP: "01",
+    ORNUM:  "0000123456789",
+
+    BILTYP: 0,
+
+    // VALUES
+    VATSAL: 1200.10,
+    VATEXM: 0.00,
+    ZERSAL: 0.00,
+    GOVTAX: 25.00,
+
+    TOTSAL: 1380.13,
+    NETVAT: 1020.07,
+    VATAMT: 180.03,
+    PRDTAX: 50.00,
+    AMTDUE: 1475.20
   }
 }

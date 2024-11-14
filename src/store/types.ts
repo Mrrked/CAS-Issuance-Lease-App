@@ -213,6 +213,8 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
 }
 
 export interface InvoiceRecord {
+
+  // COMPUTE VALUES DURING LOADING [FRONTEND]
   PBL_KEY:          string
   TCLTNO:           number
   CLIENT_KEY_RAW?:  string
@@ -220,6 +222,7 @@ export interface InvoiceRecord {
 
   BILLINGS:         LeaseBill[]
 
+  // COMPUTE VALUES DURING LOADING [FRONTEND]
   HEADER: {
     img_url:        string,
     company_name:   string,
@@ -232,6 +235,7 @@ export interface InvoiceRecord {
     invoice_date:   string,
   },
 
+  // COMPUTE VALUES DURING LOADING [FRONTEND]
   DESC: {
     client_name:    string,
     address:        string,
@@ -241,6 +245,7 @@ export interface InvoiceRecord {
     unit:           string,
   },
 
+  // COMPUTE VALUES DURING LOADING [FRONTEND]
   TABLE_ITEM_BREAKDOWNS: {
     item_no:        number,
     item_name:      string,
@@ -264,6 +269,7 @@ export interface InvoiceRecord {
   //   total_amount:   number,
   // },
 
+  // PLACE VALUES DURING LOADING [FRONTEND]
   TOTAL_BREAKDOWN: {
     vatable_sales:    number,
     vat_exempt_sales: number,
@@ -276,10 +282,12 @@ export interface InvoiceRecord {
     total_amount_due: number,
   },
 
+  // PLACE VALUES DURING PROCESSING [BACKEND]
   SIGNATORY: {
     user_id:        string,
   },
 
+  // PLACE VALUES DURING PROCESSING [BACKEND]
   FOOTER: {
     certificate_no: string,
     date_issued:    string,

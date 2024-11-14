@@ -278,7 +278,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
         }
       },
       props: {
-        header: 'Per Bill Type: Issuance of Invoice' ,
+        header: 'Issuance of Invoice (Per Bill Type)' ,
         style: {
           width: '75vw'
         },

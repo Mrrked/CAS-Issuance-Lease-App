@@ -11,7 +11,6 @@
       table_data: any[],
       table_column: any[],
       view: Function
-      view1: Function
       submit: Function
       cancel: Function
     },

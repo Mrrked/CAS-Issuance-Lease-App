@@ -7,7 +7,6 @@
       table_data: any[],
       table_column: any[],
       view: Function
-      view1: Function
       submit: Function
       cancel: Function
     },
@@ -19,13 +18,15 @@
 
 
 <template>
-  <div class="flex justify-between w-full">
-    <div class="flex gap-2">
-      <Button type="button" label="PRINT DRAFT" @click="dialogRef?.data.view1()"></Button>
+  <div class="flex items-end justify-between w-full">
+    <div class="">
+      Found
+      <span class="font-bold">{{ dialogRef?.data.table_data.length }}</span>
+      records for issuance
     </div>
     <div class="flex gap-2">
       <Button type="button" label="Close" severity="secondary" @click="dialogRef?.data.cancel()"></Button>
-      <Button type="button" label="PRINT FINAL" autofocus @click="dialogRef?.data.submit()"></Button>
+      <Button type="button" label="GENERATE INVOICE" autofocus @click="dialogRef?.data.submit()"></Button>
     </div>
   </div>
 </template>

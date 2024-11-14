@@ -1,3 +1,4 @@
+import { InvoiceRecord } from './types';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -128,9 +129,29 @@ export const useMainStore = defineStore('main', () => {
     }
   }
 
+  const handleExecuteIssueFinalInvoices = (
+    data: {
+      type: string
+      invoices: InvoiceRecord[]
+    },
+    callback: Function,
+    closeLoading: Function
+  ) => {
+    axios.post('issuance_lease/invoice/', data)
+    .then((response) => {
+      callback(response)
+    })
+    .catch(configStore.handleError)
+    .finally(() => {
+      closeLoading()
+    })
+  }
+
   return {
 
     handleExecuteSearch,
     handleExecuteReset,
+
+    handleExecuteIssueFinalInvoices,
   }
 })

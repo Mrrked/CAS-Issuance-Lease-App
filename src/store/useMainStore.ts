@@ -51,7 +51,7 @@ export const useMainStore = defineStore('main', () => {
           };
           axios.post(`issuance_lease/month_year/`, data)
           .then((response) => {
-            console.log(response.data);
+            console.log('FETCHED OPEN BILLINGS', response.data);
             perBatchRunStore.billings = response.data;
             perBatchRunStore.handleOpenMainDialogBox()
           })

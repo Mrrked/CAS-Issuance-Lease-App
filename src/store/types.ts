@@ -212,91 +212,6 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   TOTAL_AMOUNT: number
 }
 
-export interface InvoiceRecord {
-
-  // COMPUTE VALUES DURING LOADING [FRONTEND]
-  PBL_KEY:          string
-  TCLTNO:           number
-  CLIENT_KEY_RAW?:  string
-  COMPCD:           number
-
-  BILLINGS:         LeaseBill[]
-
-
-  HEADER: {
-    // COMPUTE VALUES DURING LOADING [FRONTEND]
-    img_url:        string,
-    company_name:   string,
-    address:        string,
-    tel_no:         string,
-    tin:            string,
-
-    invoice_name:   string,
-    invoice_number: string,       // PLACE VALUES DURING PROCESSING [BACKEND]
-    invoice_date:   string,
-  },
-
-  // COMPUTE VALUES DURING LOADING [FRONTEND]
-  DESC: {
-    client_name:    string,
-    address:        string,
-    tin:            string,
-    client_key:     string,
-    project:        string,
-    unit:           string,
-  },
-
-  // COMPUTE VALUES DURING LOADING [FRONTEND]
-  TABLE_ITEM_BREAKDOWNS: {
-    item_no:        number,
-    item_name:      string,
-    qty:            number,
-    unit_cost:      number,
-    vat_amount:     number,
-    amount:         number,
-  }[],
-
-  // MODE_OF_PAYMENT: {
-  //   cash:           number,
-  //   check: {
-  //     amount:       number,
-  //     list: {
-  //       no:         number,
-  //       details:    string,
-  //       date:       string,
-  //       amount:     number,
-  //     }[],
-  //   },
-  //   total_amount:   number,
-  // },
-
-  // PLACE VALUES DURING LOADING [FRONTEND]
-  TOTAL_BREAKDOWN: {
-    vatable_sales:    number,
-    vat_exempt_sales: number,
-    zero_rated_sales: number,
-    vat_amount:       number,
-
-    total_sales:      number,
-    net_of_vat:       number,
-    wht_tax:          number,
-    total_amount_due: number,
-  },
-
-  // PLACE VALUES DURING PROCESSING [BACKEND]
-  SIGNATORY: {
-    user_id:        string,
-  },
-
-  // PLACE VALUES DURING PROCESSING [BACKEND]
-  FOOTER: {
-    certificate_no: string,
-    date_issued:    string,
-    series_range:   string,
-    timestamp:      string,
-  }
-}
-
 export interface InvoiceDetails {
   // KEY
   RECTYP: string; // RECEIPT TYPE         (2 chars)
@@ -336,6 +251,9 @@ export interface InvoiceDetails {
   RPDATE: number; // REPRINT DATE         (8 zoned digits)
   RPTIME: number; // REPRINT TIME         (6 zoned digits)
   REPRBY: string; // REPRINTED BY         (8 chars)
+
+  // OTHERS (QUERY THIS)
+  SERIES_RANGE: string;
 }
 
 export interface InvoiceItemBreakdown {
@@ -387,7 +305,7 @@ export interface InvoiceTotalBreakdown {
   AMTDUE: number; // TOTAL AMOUNT DUE     (13 zoned digits with 2 decimals)
 }
 
-export interface InvoiceRecordNew {
+export interface InvoiceRecord {
   PBL_KEY: string
   TCLTNO: number
   CLIENT_KEY_RAW?:  string
@@ -413,116 +331,4 @@ export interface InvoiceRecordNew {
 
   // Total / Overall Breakdown
   TOTAL_BREAKDOWN: InvoiceTotalBreakdown
-}
-
-const SAMPLE: InvoiceRecordNew = {
-
-  PBL_KEY:          'CL3 L 0000  ',
-  TCLTNO:           0,
-  COMPCD:           0,
-
-  BILLINGS:         [],
-
-  // COMPUTED
-  HEADER: {
-    COMPANY_NAME:   'selectedCompany.CONAME',
-    ADDRESS:        'selectedCompany.ADDRESS',
-    LOGO_URL:       'selectedCompany.CONAME',
-
-    INVOICE_NAME:   'SERVICE INVOICE',
-    INVOICE_NUMBER: 'VI011331A000001',
-    INVOICE_DATE:   '2021/12/01',
-  },
-
-  // CIRCLTPF
-  DETAILS: {
-    // KEY
-    RECTYP: 'VI',
-    ORNUM:  '01133A 008310',
-
-    PAYTYP: 'Y',
-    PIBIG:  '',
-    SLSTYP: 'V',
-    DATVAL: 20231114,
-
-    // COMPANY INFO
-    COMPCD: 2,
-    TELNO:  '8893-6060',
-    REGTIN: '000-527-103-00000',
-
-    // CLIENT INFO
-    CLTNME: 'John Doe Industries',
-    RADDR1: '123 Business Rd.',
-    RADDR2: 'Suite 100',
-    CLTTIN: '987654321012345',
-    CLTKEY: '12345678910',
-    PRJNAM: 'CITYNET CENTRAL',
-    UNIT:   'L 0000',
-
-    // FOOTER
-    DATSTP: 20231114,
-    TIMSTP: 143200,
-    AUTHSG: 'JD123456',
-
-    // TRACKING
-    STATUS: '',
-    RUNDAT: 20231114,
-    RUNTME: 152500,
-    RUNBY: 'USER1234',
-
-    RPDATE: 0,
-    RPTIME: 0,
-    REPRBY: '',
-  },
-  // CIRBRKPF
-  ITEM_BREAKDOWNS: [
-    {
-      // KEY
-      RECTYP: "01",
-      ORNUM: "0000123456789",
-
-      // TRACKING
-      ITEMNO: 1,
-      BILTYP: 4,
-      ITEM:   "RENTAL (September 1 - 30, 2001) VATable",
-      QTY:    1,
-
-      // VALUES
-      UNTCST: 1500.25,
-      VATAMT: 180.03,
-      VATSAL: 1200.10,
-      VATEXM: 0.00,
-      ZERSAL: 0.00,
-      NETVAT: 1020.07,
-      WTHTAX: 50.00,
-      GOVTAX: 25.00,
-      WTXRAT: 2.50,
-      AMTDUE: 1775.35,
-
-      // PERIOD
-      FRDATE: 20240101,
-      TODATE: 20240131,
-      DUEDAT: 20240215
-    }
-  ],
-  // CIRVATPF
-  TOTAL_BREAKDOWN: {
-    // KEY
-    RECTYP: "01",
-    ORNUM:  "0000123456789",
-
-    BILTYP: 0,
-
-    // VALUES
-    VATSAL: 1200.10,
-    VATEXM: 0.00,
-    ZERSAL: 0.00,
-    GOVTAX: 25.00,
-
-    TOTSAL: 1380.13,
-    NETVAT: 1020.07,
-    VATAMT: 180.03,
-    PRDTAX: 50.00,
-    AMTDUE: 1475.20
-  }
 }

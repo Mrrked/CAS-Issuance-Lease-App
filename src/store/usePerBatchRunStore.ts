@@ -98,28 +98,58 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             bill
           ],
 
-          TABLE_ITEM_BREAKDOWNS: [
-            ...mergedMap[key].TABLE_ITEM_BREAKDOWNS,
+          ITEM_BREAKDOWNS: [
+            ...mergedMap[key].ITEM_BREAKDOWNS,
             {
-              item_no:        mergedMap[key].TABLE_ITEM_BREAKDOWNS.length + 1,
-              item_name:      bill.BDESC,
-              qty:            1,
-              unit_cost:      bill.UNIT_COST,
-              vat_amount:     bill.VAT,
-              amount:         bill.TOTAL_AMOUNT,
+              // KEY
+              RECTYP:         "VI",
+              ORNUM:          "xxxxxxxxxxxxx",
+
+              // TRACKING
+              ITEMNO:         mergedMap[key].ITEM_BREAKDOWNS.length + 1,
+              BILTYP:         bill.OLD_BILL_TYPE,
+              ITEM:           bill.BDESC + " (September 1 - 30, 2001) VATable",
+              QTY:            1,
+
+              // VALUES
+              UNTCST:         bill.UNIT_COST,
+              VATAMT:         bill.VAT,
+              VATSAL:         bill.VAT_SALES,
+              VATEXM:         bill.VAT_EXEMPT,
+              ZERSAL:         bill.ZERO_RATE,
+              NETVAT:         bill.UNIT_COST,
+              WTHTAX:         bill.WITHHOLDING_TAX,
+              GOVTAX:         bill.GOVT_TAX,
+              WTXRAT:         bill.WHTAX_RATE,
+              AMTDUE:         bill.TOTAL_AMOUNT,
+
+              // PERIOD
+              FRDATE:         0,
+              TODATE:         0,
+              DUEDAT:         0
             }
           ],
-          TOTAL_BREAKDOWN: {
-            vatable_sales:    configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vatable_sales + bill.VAT_SALES),
-            vat_amount:       configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vat_amount + bill.VAT),
-            vat_exempt_sales: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.vat_exempt_sales + bill.VAT_EXEMPT),
-            zero_rated_sales: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.zero_rated_sales + bill.ZERO_RATE),
 
-            total_sales:      configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.total_sales + bill.AMOUNT),
-            net_of_vat:       configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.net_of_vat + bill.UNIT_COST),
-            wht_tax:          configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.wht_tax + bill.WITHHOLDING_TAX),
-            total_amount_due: configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.total_amount_due + bill.TOTAL_AMOUNT),
-          },
+          TOTAL_BREAKDOWN: {
+            ...mergedMap[key].TOTAL_BREAKDOWN,
+            // KEY
+            RECTYP: "VI",
+            ORNUM:  "xxxxxxxxxxxxx",
+
+            BILTYP: 0,
+
+            // VALUES
+            VATSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATSAL + bill.VAT_SALES),
+            VATEXM:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATEXM + bill.VAT_EXEMPT),
+            ZERSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.ZERSAL + bill.ZERO_RATE),
+            GOVTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.GOVTAX + bill.GOVT_TAX),
+
+            TOTSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.TOTSAL + bill.AMOUNT),
+            NETVAT:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.NETVAT + bill.UNIT_COST),
+            VATAMT:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATAMT + bill.VAT),
+            PRDTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
+            AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
+          }
         }
       } else {
         const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
@@ -133,59 +163,109 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
           BILLINGS:         [ bill ],
 
+          // COMPUTED
           HEADER: {
-            img_url:        selectedCompany?.IMG_URL,
-            company_name:   selectedCompany?.CONAME,
-            address:        selectedCompany?.ADDRESS,
-            tel_no:         selectedCompany?.TEL_NO,
-            tin:            selectedCompany?.TIN,
+            COMPANY_NAME:   selectedCompany?.CONAME,
+            ADDRESS:        selectedCompany?.ADDRESS,
+            LOGO_URL:       selectedCompany?.IMG_URL,
 
-            invoice_name:   'SERVICE INVOICE',
-            invoice_number: 'VI01133xxxxxxxx',
-            invoice_date:   'xxxx/xx/xx',
+            INVOICE_NAME:   'SERVICE INVOICE',
+            INVOICE_NUMBER: 'VIxxxxxxxxxxxxx',
+            INVOICE_DATE:   'xxxx/xx/xx',
           },
 
-          DESC: {
-            client_name:    bill.CLIENT_NAME,
-            address:        bill.CLIENT_ADDRESS,
-            tin:            bill.CLIENT_TIN,
-            client_key:     bill.CLIENT_KEY,
-            project:        selectedProject ? selectedProject.PTITLE : '-',
-            unit:           bill.CLIENT_UNIT,
-          },
+          // CIRCLTPF
+          DETAILS: {
+            // KEY
+            RECTYP:         'VI',
+            ORNUM:          'xxxxxxxxxxxxx',
 
-          TABLE_ITEM_BREAKDOWNS: [
+            PAYTYP:         'Y',
+            PIBIG:          '',
+            SLSTYP:         'V',
+            DATVAL:         20231114,
+
+            // COMPANY INFO
+            COMPCD:         bill.COMPCD,
+            TELNO:          selectedCompany?.TEL_NO,
+            REGTIN:         selectedCompany?.TIN,
+
+            // CLIENT INFO
+            CLTNME:         bill.CLIENT_NAME,
+            RADDR1:         bill.CLIENT_ADDRESS, //
+            RADDR2:         bill.CLIENT_ADDRESS, //
+            CLTTIN:         bill.CLIENT_TIN,
+            CLTKEY:         bill.CLIENT_KEY,
+            PRJNAM:         selectedProject ? selectedProject.PTITLE : '-',
+            UNIT:           bill.CLIENT_UNIT,
+
+            // FOOTER
+            DATSTP:         0,
+            TIMSTP:         0,
+            AUTHSG:         'xxxxxxxx',
+
+            // TRACKING
+            STATUS:         '',
+            RUNDAT:         0,
+            RUNTME:         0,
+            RUNBY:          'xxxxxxxx',
+
+            RPDATE:         0,
+            RPTIME:         0,
+            REPRBY:         '',
+
+            SERIES_RANGE:   '',
+          },
+          // CIRBRKPF
+          ITEM_BREAKDOWNS: [
             {
-              item_no:        1,
-              item_name:      bill.BDESC,
-              qty:            1,
-              unit_cost:      bill.UNIT_COST,
-              vat_amount:     bill.VAT,
-              amount:         bill.TOTAL_AMOUNT,
+              // KEY
+              RECTYP:         "VI",
+              ORNUM:          "xxxxxxxxxxxxx",
+
+              // TRACKING
+              ITEMNO:         1,
+              BILTYP:         bill.OLD_BILL_TYPE,
+              ITEM:           bill.BDESC + " (September 1 - 30, 2001) VATable",
+              QTY:            1,
+
+              // VALUES
+              UNTCST:         bill.UNIT_COST,
+              VATAMT:         bill.VAT,
+              VATSAL:         bill.VAT_SALES,
+              VATEXM:         bill.VAT_EXEMPT,
+              ZERSAL:         bill.ZERO_RATE,
+              NETVAT:         bill.UNIT_COST,
+              WTHTAX:         bill.WITHHOLDING_TAX,
+              GOVTAX:         bill.GOVT_TAX,
+              WTXRAT:         bill.WHTAX_RATE,
+              AMTDUE:         bill.TOTAL_AMOUNT,
+
+              // PERIOD
+              FRDATE:         0,
+              TODATE:         0,
+              DUEDAT:         0
             }
           ],
-
+          // CIRVATPF
           TOTAL_BREAKDOWN: {
-            vatable_sales:    bill.VAT_SALES,
-            vat_amount:       bill.VAT,
-            vat_exempt_sales: bill.VAT_EXEMPT,
-            zero_rated_sales: bill.ZERO_RATE,
+            // KEY
+            RECTYP: "VI",
+            ORNUM:  "xxxxxxxxxxxxx",
 
-            total_sales:      bill.AMOUNT,
-            net_of_vat:       bill.UNIT_COST,
-            wht_tax:          bill.WITHHOLDING_TAX,
-            total_amount_due: bill.TOTAL_AMOUNT,
-          },
+            BILTYP: 0,
 
-          SIGNATORY: {
-            user_id:        'xxxxxxxx'
-          },
+            // VALUES
+            VATSAL: bill.VAT_SALES,
+            VATEXM: bill.VAT_EXEMPT,
+            ZERSAL: bill.ZERO_RATE,
+            GOVTAX: bill.GOVT_TAX,
 
-          FOOTER: {
-            certificate_no: 'xxxxxxxxxxxx',
-            date_issued:    'xxxx/xx/xx',
-            series_range:   'VI01133xxxxxxxx - VI01133xxxxxxxx',
-            timestamp:      'xx/xx/xxxx xx:xx:xx'
+            TOTSAL: bill.AMOUNT,
+            NETVAT: bill.UNIT_COST,
+            VATAMT: bill.VAT,
+            PRDTAX: bill.WITHHOLDING_TAX,
+            AMTDUE: bill.TOTAL_AMOUNT,
           }
         }
       }
@@ -199,7 +279,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     return [
       { field: 'PBL_KEY',  header: 'Project/Block/Lot' },
       { field: 'TCLTNO',  header: 'Temp. Client #' },
-      { field: 'DESC.client_name',  header: 'Client Name' },
+      { field: 'DESC.CLTNME',  header: 'Client Name' },
       // { field: 'BILL_TYPE', header: 'Bill Type' },
       // { field: 'DATDUE', header: 'Due Date'},
       // { field: 'PERIOD', header: 'Billing Period' },
@@ -210,9 +290,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       // { field: 'VAT_EXEMPT', header: 'VAT Exempt' },
       // { field: 'VAT', header: 'VAT' },
       // { field: 'GOVT_TAX', header: 'Govt. Tax' },
-      { field: 'BREAKDOWN.total_sales', header: 'Total Sales' },
-      { field: 'BREAKDOWN.wht_tax', header: 'Withholding Tax' },
-      { field: 'BREAKDOWN.total_amount_due', header: 'Total Amount Due' },
+      { field: 'TOTAL_BREAKDOWN.TOTSAL', header: 'Total Sales' },
+      { field: 'TOTAL_BREAKDOWN.PRDTAX', header: 'Withholding Tax' },
+      { field: 'TOTAL_BREAKDOWN.AMTDUE', header: 'Total Amount Due' },
     ]
   })
 
@@ -406,23 +486,23 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
     var TABLE_ITEMS_COMPONENT = ``
 
-    CONTENT_VALUES.TABLE_ITEM_BREAKDOWNS.forEach((item) => {
+    CONTENT_VALUES.ITEM_BREAKDOWNS.forEach((item) => {
       TABLE_ITEMS_COMPONENT += `
         <div class="grid grid-cols-16">
           <div class="col-span-9 px-1 text-wrap">
-            ${ item.item_name || '-' }
+            ${ item.ITEM || '-' }
           </div>
           <div class="col-span-1 px-1 text-center text-wrap">
-            ${ item.qty || '0' }
+            ${ item.QTY || '0' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.unit_cost ? configStore.formatFloatNumber1(item.unit_cost) : '0.00' }
+            ${ item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.vat_amount ? configStore.formatFloatNumber1(item.vat_amount) : '0.00' }
+            ${ item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00' }
           </div>
           <div class="col-span-2 px-1 text-right text-wrap ">
-            ${ item.amount ? configStore.formatFloatNumber1(item.amount) : '0.00' }
+            ${ item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00' }
           </div>
         </div>
       `
@@ -439,21 +519,21 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           <!-- LEFT -->
           <div class="flex items-center h-full col-span-5">
             <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-              <img src="${ CONTENT_VALUES.HEADER.img_url }" alt="logo" class="w-20">
+              <img src="${ CONTENT_VALUES.HEADER.LOGO_URL }" alt="logo" class="w-20">
             </div>
             <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
               <div class="font-semibold text-16 tracking-tighter">
-                ${ CONTENT_VALUES.HEADER.company_name }
+                ${ CONTENT_VALUES.HEADER.COMPANY_NAME }
               </div>
               <div class="flex flex-col tracking-tighter text-10">
                 <div class="text-wrap">
-                  ${ CONTENT_VALUES.HEADER.address }
+                  ${ CONTENT_VALUES.HEADER.ADDRESS }
                 </div>
                 <div>
-                  TEL. NO. ${ CONTENT_VALUES.HEADER.tel_no }
+                  TEL. NO. ${ CONTENT_VALUES.DETAILS.TELNO }
                 </div>
                 <div>
-                  VAT REG TIN: ${ CONTENT_VALUES.HEADER.tin }
+                  VAT REG TIN: ${ CONTENT_VALUES.DETAILS.REGTIN }
                 </div>
               </div>
             </div>
@@ -461,14 +541,14 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           <!-- RIGHT -->
           <div class="flex flex-col items-end justify-center h-full col-span-3 -mt-2">
             <div class="font-semibold text-20 -mt-[12px]">
-              ${ CONTENT_VALUES.HEADER.invoice_name }
+              ${ CONTENT_VALUES.HEADER.INVOICE_NAME }
             </div>
             <div class="flex gap-3 font-semibold text-14">
               <div>
                 No.
               </div>
               <div>
-                ${ CONTENT_VALUES.HEADER.invoice_number }
+                ${ CONTENT_VALUES.HEADER.INVOICE_NUMBER }
               </div>
             </div>
             <div class="flex gap-3 font-semibold text-14">
@@ -476,7 +556,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 Date :
               </div>
               <div>
-                ${ CONTENT_VALUES.HEADER.invoice_date }
+                ${ CONTENT_VALUES.HEADER.INVOICE_DATE }
               </div>
             </div>
           </div>
@@ -493,7 +573,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.client_name }
+                ${ CONTENT_VALUES.DETAILS.CLTNME }
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -504,7 +584,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.address }
+                ${ CONTENT_VALUES.DETAILS.RADDR1 }${ CONTENT_VALUES.DETAILS.RADDR2 }
               </div>
             </div>
             <div class="flex items-end gap-3">
@@ -515,7 +595,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.tin }
+                ${ CONTENT_VALUES.DETAILS.CLTTIN }
               </div>
             </div>
           </div>
@@ -528,7 +608,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.client_key }
+                ${ CONTENT_VALUES.DETAILS.CLTKEY }
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -539,7 +619,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.project }
+                ${ CONTENT_VALUES.DETAILS.PRJNAM }
               </div>
             </div>
             <div class="flex items-start gap-3">
@@ -550,7 +630,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DESC.unit }
+                ${ CONTENT_VALUES.DETAILS.UNIT }
               </div>
             </div>
           </div>
@@ -598,7 +678,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       VATable Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vatable_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vatable_sales) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATSAL) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -606,7 +686,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       VAT Amount
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -614,7 +694,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       VAT Exempt Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_exempt_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_exempt_sales) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATEXM) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -622,7 +702,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Zero-Rated Sales
                     </div>
                     <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.zero_rated_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.zero_rated_sales) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.ZERSAL) : '0.00' }
                     </div>
                   </div>
                 </div>
@@ -635,7 +715,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Total Sales
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.total_sales ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.total_sales) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.TOTSAL) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -643,7 +723,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Less: VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -653,7 +733,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Amount: Net of VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.net_of_vat ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.net_of_vat) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.NETVAT) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -661,7 +741,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Add: VAT
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.vat_amount) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
                     </div>
                   </div>
                   <div class="grid grid-cols-2">
@@ -669,7 +749,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       Less: Withholding Tax
                     </div>
                     <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.wht_tax ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.wht_tax) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.PRDTAX) : '0.00' }
                     </div>
                   </div>
                   <div class="mt-2 border-t border-black"></div>
@@ -682,7 +762,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                       PHP
                     </div>
                     <div class="col-span-2 text-right font-bold">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.total_amount_due ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.total_amount_due) : '0.00' }
+                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.AMTDUE) : '0.00' }
                     </div>
                   </div>
                 </div>
@@ -705,7 +785,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         <div class="flex justify-end mt-[15px] -mb-[30px]">
           <div class="flex flex-col w-36 font-bold">
             <div class="text-center">
-              ${ CONTENT_VALUES.SIGNATORY.user_id }
+              ${ CONTENT_VALUES.DETAILS.AUTHSG }
             </div>
             <div class="mt-2 border-t border-black"></div>
             <div class="text-center -mt-2">
@@ -717,16 +797,16 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         <!-- FOOTER -->
         <div class="flex flex-col tracking-normal">
           <div>
-            Acknowledgement Certificate No. : ${ CONTENT_VALUES.FOOTER.certificate_no }
+            Acknowledgement Certificate No. : ${ CONTENT_VALUES.DETAILS.RECTYP }${ CONTENT_VALUES.DETAILS.ORNUM }
           </div>
           <div>
-            Date Issued : ${ CONTENT_VALUES.FOOTER.date_issued }
+            Date Issued : ${ CONTENT_VALUES.DETAILS.DATVAL }
           </div>
           <div>
-            Series Range : ${ CONTENT_VALUES.FOOTER.series_range }
+            Series Range : ${ CONTENT_VALUES.DETAILS.SERIES_RANGE }
           </div>
           <div>
-            Timestamp : ${ CONTENT_VALUES.FOOTER.timestamp }
+            Timestamp : ${ CONTENT_VALUES.DETAILS.DATSTP } ${ CONTENT_VALUES.DETAILS.TIMSTP }
           </div>
         </div>
       </div>

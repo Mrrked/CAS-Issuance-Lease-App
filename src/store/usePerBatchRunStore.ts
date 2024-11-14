@@ -2,21 +2,25 @@ import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/da
 import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
+import { AxiosResponse } from 'axios';
 import DraftInvoiceModal from '../components/Dialog/PerMonthYear/DraftInvoiceModal.vue';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
+import SummaryOfIssuanceModal from '../components/Dialog/PerMonthYear/SummaryOfIssuanceModal.vue';
 import { defineStore } from 'pinia';
 import html2pdf from 'html2pdf.js';
 import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
+import { useMainStore } from './useMainStore';
 
 export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const dialog = useDialog();
   const confirm = useConfirm();
 
+  const mainStore = useMainStore()
   const configStore = useConfigStore()
   const coreDataStore = useCoreDataStore()
 
@@ -348,37 +352,51 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       }
     })
 
+    const data = {
+      type: 'BATCH',
+      invoices: SELECTED_INVOICES,
+    }
 
-    // loadingDialogRef.close()
-    // const ShowDraftInvoices = dialog.open(DraftInvoiceModal, {
-    //   data: {
-    //     pdfBlob: MERGED_PDF_BLOB,
-    //     download: () => {
-    //       const url = URL.createObjectURL(MERGED_PDF_BLOB);
-    //       const a = document.createElement('a');
-    //       a.href = url;
-    //       a.download = 'DRAFT - ' + 'Service Invoice' + ' Multiple ' + SELECTED_INVOICES_1D.length + '.pdf';
-    //       a.click();
-    //       URL.revokeObjectURL(url);
-    //     },
-    //     submit: () => {
-    //     },
-    //     cancel: () => {
-    //       ShowDraftInvoices.close()
-    //     }
-    //   },
-    //   props: {
-    //     header: 'Preview Draft Invoices',
-    //     style: {
-    //       width: '75vw'
-    //     },
-    //     showHeader: true,
-    //     modal: true,
-    //   },
-    //   templates: {
-    //     footer: markRaw(Footer)
-    //   },
-    // })
+    const callback = (response: AxiosResponse) => {
+      console.log('RESPONSE', response.data);
+
+      // GENERATE PDF for Summary of Issuance then show it in a dialog
+
+      const PDF_BLOB = null
+
+      const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SummaryOfIssuanceModalFooter.vue'));
+      const ShowSummaryOfIssuedInvoices = dialog.open(SummaryOfIssuanceModal, {
+        data: {
+          pdfBlob: PDF_BLOB,
+          download: () => {
+            // const url = URL.createObjectURL(PDF_BLOB);
+            // const a = document.createElement('a');
+            // a.href = url;
+            // a.download = 'Summary of Issued Invoices.pdf';
+            // a.click();
+            // URL.revokeObjectURL(url);
+          },
+          submit: () => {
+          },
+          cancel: () => {
+            ShowSummaryOfIssuedInvoices.close()
+          }
+        },
+        props: {
+          header: 'Summary of Issued Invoices',
+          style: {
+            width: '75vw'
+          },
+          showHeader: true,
+          modal: true,
+        },
+        templates: {
+          footer: markRaw(Footer)
+        },
+      })
+    }
+
+    mainStore.handleExecuteIssueFinalInvoices(data, callback, () => loadingDialogRef.close())
   }
 
   const handleGeneratePage = (SELECTED_INVOICE_RECORD: InvoiceRecord) => {

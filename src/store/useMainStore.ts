@@ -60,6 +60,62 @@ export const useMainStore = defineStore('main', () => {
     return `${bill_desc} ( ${month} ${year} ) ${type}`
   }
 
+
+  const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
+    console.log('PROCESS BILLINGS', billings);
+
+    return billings.map((bill, index) => {
+      const BT_UNIQUE_STYPE = [1, 4, 2]
+
+      const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+        bill.SALTYP === 'VAT'  ? 'V' :
+        bill.SALTYP === 'NVAT' ? 'N' : ''
+
+      const VAT_RATE = bill.VAT_RATE ? bill.VAT_RATE / 100 : 0
+      const WHTAX_RATE = bill.WHTAX_RATE ? bill.WHTAX_RATE / 100 : 0
+
+      const GROSS = bill.BALAMT
+      const GROSS_VAT_RATE = 1 + VAT_RATE
+
+      let VAT_SALES = 0
+      let VAT_EXEMPT = 0
+      let ZERO_RATE = 0
+
+      const VAT = configStore.getRoundedTwoDecimals((GROSS / GROSS_VAT_RATE) * VAT_RATE)
+      const TEMP = configStore.getRoundedTwoDecimals(GROSS - VAT)
+      const WHTAX = configStore.getRoundedTwoDecimals(TEMP * WHTAX_RATE)
+
+      if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
+        ZERO_RATE = TEMP
+      } else {
+        VAT_SALES = TEMP
+      }
+
+      const TOTAL_AMOUNT = configStore.getRoundedTwoDecimals(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
+
+      return {
+        ...bill,
+        INDEX: index++,
+
+        UNIT_COST: TEMP,
+        AMOUNT: GROSS,
+
+        VAT_SALES: VAT_SALES,
+        VAT_EXEMPT: VAT_EXEMPT,
+        ZERO_RATE: ZERO_RATE,
+
+        // ADD
+        GOVT_TAX: 0,
+        VAT: VAT,
+
+        // LESS
+        WITHHOLDING_TAX: WHTAX,
+
+        TOTAL_AMOUNT: TOTAL_AMOUNT,
+      }
+    })
+  }
+
   const handleExecuteSearch = (tab: number ) => {
 
     switch (tab) {
@@ -188,6 +244,8 @@ export const useMainStore = defineStore('main', () => {
     getSplitClientAddress,
     getDeptCode,
     getItemName,
+
+    processBillings,
 
     handleExecuteSearch,
     handleExecuteReset,

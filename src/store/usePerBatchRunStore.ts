@@ -1,4 +1,3 @@
-import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
 import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
@@ -11,7 +10,6 @@ import { defineStore } from 'pinia';
 import html2pdf from 'html2pdf.js';
 import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
-import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
 
@@ -22,7 +20,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const mainStore = useMainStore()
   const configStore = useConfigStore()
-  const coreDataStore = useCoreDataStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()

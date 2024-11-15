@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
-import { Column, InvoiceKey, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';

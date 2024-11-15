@@ -1,4 +1,5 @@
-import { InvoiceRecord } from './types';
+import { InvoiceRecord, LeaseBill } from './types';
+
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -22,6 +23,36 @@ export const useMainStore = defineStore('main', () => {
   const perBillTypeRunStore = usePerBillTypeRunStore()
 
   // ACTIONS
+
+  const getDeptCode = (TCLTNO: number): number => {
+    if (TCLTNO <= 500) {
+      return 11
+    } else if (TCLTNO >= 501 && TCLTNO <= 700 ) {
+      return 55
+    } else if (TCLTNO >= 701 && TCLTNO <= 800 ) {
+      return 44
+    } else if (TCLTNO >= 801) {
+      return 33
+    } else {
+      return 0
+    }
+  }
+
+  const getItemName = (bill: LeaseBill) => {
+
+    let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
+
+    let dateObj = new Date(extractYear, extractMonth - 1, 1);
+
+    const [bill_desc, month, year, type] = [
+      bill.BDESC,
+      dateObj.toLocaleString('default', { month: 'long' }),
+      dateObj.getFullYear(),
+      'VATable'
+    ]
+
+    return `${bill_desc} ( ${month} ${year} ) ${type}`
+  }
 
   const handleExecuteSearch = (tab: number ) => {
 
@@ -148,6 +179,8 @@ export const useMainStore = defineStore('main', () => {
   }
 
   return {
+    getDeptCode,
+    getItemName,
 
     handleExecuteSearch,
     handleExecuteReset,

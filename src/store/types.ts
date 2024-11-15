@@ -182,6 +182,7 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   CLIENT_PROJECT_CODE: string
   CLIENT_UNIT: string
   COMPCD: number
+  BRANCH: number
 
   IS_ALREADY_VERIFIED: boolean
 
@@ -210,6 +211,21 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   WITHHOLDING_TAX: number
 
   TOTAL_AMOUNT: number
+}
+
+export interface InvoiceKey {
+  RECTYP:   'VI' | 'BI'
+
+  COMPLETE_OR_KEY: string
+  COMPCD:   number
+  BRANCH:   number
+  DEPTCD:   number
+  ORCOD:    string
+  ORNUM:    number
+
+  INVOICE_NAME:   string
+  INVOICE_NUMBER: string
+  INVOICE_DATE:   number
 }
 
 export interface InvoiceDetails {
@@ -308,8 +324,8 @@ export interface InvoiceTotalBreakdown {
 export interface InvoiceRecord {
   PBL_KEY: string
   TCLTNO: number
-  CLIENT_KEY_RAW?:  string
-  COMPCD:   number
+  CLIENT_KEY_RAW?: string
+
   BILLINGS: LeaseBill[]
 
   // COMPUTED
@@ -317,11 +333,9 @@ export interface InvoiceRecord {
     COMPANY_NAME:   string
     ADDRESS:        string
     LOGO_URL:       string
-
-    INVOICE_NAME:   string
-    INVOICE_NUMBER: string
-    INVOICE_DATE:   string
   },
+
+  INVOICE_KEY: InvoiceKey
 
   // Main Details (Invoice and Client)
   DETAILS: InvoiceDetails

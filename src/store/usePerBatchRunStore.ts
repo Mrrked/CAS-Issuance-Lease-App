@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
-import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { Column, InvoiceKey, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
@@ -90,9 +90,29 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     billings_data.value.forEach((bill) => {
       const key = bill.ID;
 
+      const BT_BillingInvoice = [5, 6, 7, 51, 61, 71]
+
+      const invoiceType: 'BI' | 'VI'  = BT_BillingInvoice.includes(bill.BILL_TYPE) ? 'BI' : 'VI'
+
+      const orKeyParts = {
+        COMPCD:         bill.COMPCD || 0,
+        BRANCH:         bill.BRANCH || 0,
+        DEPTCD:         bill.TCLTNO > 0 ? mainStore.getDeptCode(bill.TCLTNO % 1000) : 0,
+        ORCOD:          '',
+        ORNUM:          0,
+      }
+
+      const completeOrKey: string =
+        configStore.fillNumberWithZeroes(orKeyParts.COMPCD, 2) +
+        orKeyParts.BRANCH + configStore.fillNumberWithZeroes(orKeyParts.DEPTCD, 2) +
+        ( orKeyParts.ORCOD || 'xx' ) +
+        ( orKeyParts.ORNUM ? configStore.fillNumberWithZeroes(orKeyParts.ORNUM,6) : 'xxxxxx' )
+
+      // EXISTING INVOICE GROUP
       if (mergedMap[key]) {
         mergedMap[key] = {
           ...mergedMap[key],
+
           BILLINGS: [
             ...mergedMap[key].BILLINGS,
             bill
@@ -102,43 +122,38 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             ...mergedMap[key].ITEM_BREAKDOWNS,
             {
               // KEY
-              RECTYP:         "VI",
-              ORNUM:          "xxxxxxxxxxxxx",
+              RECTYP:         invoiceType,
+              ORNUM:          completeOrKey,
 
               // TRACKING
               ITEMNO:         mergedMap[key].ITEM_BREAKDOWNS.length + 1,
-              BILTYP:         bill.OLD_BILL_TYPE,
-              ITEM:           bill.BDESC + " (September 1 - 30, 2001) VATable",
+              BILTYP:         bill.OLD_BILL_TYPE || 0,
+              ITEM:           mainStore.getItemName(bill),
               QTY:            1,
 
-              // VALUES
-              UNTCST:         bill.UNIT_COST,
-              VATAMT:         bill.VAT,
-              VATSAL:         bill.VAT_SALES,
-              VATEXM:         bill.VAT_EXEMPT,
-              ZERSAL:         bill.ZERO_RATE,
-              NETVAT:         bill.UNIT_COST,
-              WTHTAX:         bill.WITHHOLDING_TAX,
-              GOVTAX:         bill.GOVT_TAX,
-              WTXRAT:         bill.WHTAX_RATE,
-              AMTDUE:         bill.TOTAL_AMOUNT,
+              UNTCST:         bill.UNIT_COST || 0,
+              VATAMT:         bill.VAT || 0,
+              VATSAL:         bill.VAT_SALES || 0,
+              VATEXM:         bill.VAT_EXEMPT || 0,
+              ZERSAL:         bill.ZERO_RATE || 0,
+              NETVAT:         bill.UNIT_COST || 0,
+              WTHTAX:         bill.WITHHOLDING_TAX || 0,
+              GOVTAX:         bill.GOVT_TAX || 0,
+              WTXRAT:         bill.WHTAX_RATE || 0,
+              AMTDUE:         bill.TOTAL_AMOUNT || 0,
 
               // PERIOD
-              FRDATE:         0,
-              TODATE:         0,
-              DUEDAT:         0
+              FRDATE:         bill.FRBILL || 0,
+              TODATE:         bill.TOBILL || 0,
+              DUEDAT:         bill.DATDUE || 0,
+
+              // VALUES
             }
           ],
 
           TOTAL_BREAKDOWN: {
             ...mergedMap[key].TOTAL_BREAKDOWN,
-            // KEY
-            RECTYP: "VI",
-            ORNUM:  "xxxxxxxxxxxxx",
 
-            BILTYP: 0,
-
-            // VALUES
             VATSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATSAL + bill.VAT_SALES),
             VATEXM:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATEXM + bill.VAT_EXEMPT),
             ZERSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.ZERSAL + bill.ZERO_RATE),
@@ -151,64 +166,71 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
           }
         }
-      } else {
+
+      }
+
+      // NEW INVOICE GROUP
+      else {
         const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
         const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS
 
         mergedMap[key] = {
-          PBL_KEY:          bill.PBL_KEY,
-          TCLTNO:           bill.TCLTNO,
-          CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW,
-          COMPCD:           bill.COMPCD,
+          PBL_KEY:          bill.PBL_KEY || '',
+          TCLTNO:           bill.TCLTNO || 0,
+          CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW || '',
 
           BILLINGS:         [ bill ],
 
-          // COMPUTED
           HEADER: {
-            COMPANY_NAME:   selectedCompany?.CONAME,
-            ADDRESS:        selectedCompany?.ADDRESS,
-            LOGO_URL:       selectedCompany?.IMG_URL,
+            COMPANY_NAME:   selectedCompany?.CONAME || '',
+            ADDRESS:        selectedCompany?.ADDRESS || '',
+            LOGO_URL:       selectedCompany?.IMG_URL || '',
+          },
 
-            INVOICE_NAME:   'SERVICE INVOICE',
-            INVOICE_NUMBER: 'VIxxxxxxxxxxxxx',
-            INVOICE_DATE:   'xxxx/xx/xx',
+          INVOICE_KEY:      {
+            RECTYP:         invoiceType,
+            COMPLETE_OR_KEY: completeOrKey,
+            ...orKeyParts,
+            INVOICE_NAME:   invoiceType === 'VI' ? 'SERVICE' : 'BILLING',
+            INVOICE_NUMBER: invoiceType + completeOrKey,
+            INVOICE_DATE:   0,
           },
 
           // CIRCLTPF
           DETAILS: {
             // KEY
-            RECTYP:         'VI',
-            ORNUM:          'xxxxxxxxxxxxx',
+            RECTYP:         invoiceType,
+            ORNUM:          completeOrKey,
 
             PAYTYP:         'Y',
             PIBIG:          '',
             SLSTYP:         'V',
-            DATVAL:         20231114,
+            DATVAL:         0,
 
             // COMPANY INFO
-            COMPCD:         bill.COMPCD,
-            TELNO:          selectedCompany?.TEL_NO,
-            REGTIN:         selectedCompany?.TIN,
+            COMPCD:         bill.COMPCD || 0,
+            TELNO:          selectedCompany?.TEL_NO || '',
+            REGTIN:         selectedCompany?.TIN || '',
 
             // CLIENT INFO
-            CLTNME:         bill.CLIENT_NAME,
-            RADDR1:         bill.CLIENT_ADDRESS, //
-            RADDR2:         bill.CLIENT_ADDRESS, //
-            CLTTIN:         bill.CLIENT_TIN,
-            CLTKEY:         bill.CLIENT_KEY,
+            CLTNME:         bill.CLIENT_NAME || '',
+            RADDR1:         bill.CLIENT_ADDRESS || '', //
+            RADDR2:         bill.CLIENT_ADDRESS || '', //
+            CLTTIN:         bill.CLIENT_TIN || '',
+            CLTKEY:         bill.CLIENT_KEY || '',
             PRJNAM:         selectedProject ? selectedProject.PTITLE : '-',
-            UNIT:           bill.CLIENT_UNIT,
+            UNIT:           bill.CLIENT_UNIT || '',
 
             // FOOTER
             DATSTP:         0,
             TIMSTP:         0,
-            AUTHSG:         'xxxxxxxx',
+            AUTHSG:         '',
 
             // TRACKING
             STATUS:         '',
             RUNDAT:         0,
             RUNTME:         0,
-            RUNBY:          'xxxxxxxx',
+            RUNBY:          '',
 
             RPDATE:         0,
             RPTIME:         0,
@@ -220,54 +242,55 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           ITEM_BREAKDOWNS: [
             {
               // KEY
-              RECTYP:         "VI",
-              ORNUM:          "xxxxxxxxxxxxx",
+              RECTYP:         invoiceType,
+              ORNUM:          completeOrKey,
 
               // TRACKING
               ITEMNO:         1,
-              BILTYP:         bill.OLD_BILL_TYPE,
-              ITEM:           bill.BDESC + " (September 1 - 30, 2001) VATable",
+              BILTYP:         bill.OLD_BILL_TYPE || 0,
+              ITEM:           mainStore.getItemName(bill),
               QTY:            1,
 
               // VALUES
-              UNTCST:         bill.UNIT_COST,
-              VATAMT:         bill.VAT,
-              VATSAL:         bill.VAT_SALES,
-              VATEXM:         bill.VAT_EXEMPT,
-              ZERSAL:         bill.ZERO_RATE,
-              NETVAT:         bill.UNIT_COST,
-              WTHTAX:         bill.WITHHOLDING_TAX,
-              GOVTAX:         bill.GOVT_TAX,
-              WTXRAT:         bill.WHTAX_RATE,
-              AMTDUE:         bill.TOTAL_AMOUNT,
+              UNTCST:         bill.UNIT_COST || 0,
+              VATAMT:         bill.VAT || 0,
+              VATSAL:         bill.VAT_SALES || 0,
+              VATEXM:         bill.VAT_EXEMPT || 0,
+              ZERSAL:         bill.ZERO_RATE || 0,
+              NETVAT:         bill.UNIT_COST || 0,
+              WTHTAX:         bill.WITHHOLDING_TAX || 0,
+              GOVTAX:         bill.GOVT_TAX || 0,
+              WTXRAT:         bill.WHTAX_RATE || 0,
+              AMTDUE:         bill.TOTAL_AMOUNT || 0,
 
               // PERIOD
-              FRDATE:         0,
-              TODATE:         0,
-              DUEDAT:         0
+              FRDATE:         bill.FRBILL || 0,
+              TODATE:         bill.TOBILL || 0,
+              DUEDAT:         bill.DATDUE || 0,
             }
           ],
           // CIRVATPF
           TOTAL_BREAKDOWN: {
             // KEY
-            RECTYP: "VI",
-            ORNUM:  "xxxxxxxxxxxxx",
+            RECTYP:         invoiceType,
+            ORNUM:          completeOrKey,
 
-            BILTYP: 0,
+            BILTYP:         0,
 
             // VALUES
-            VATSAL: bill.VAT_SALES,
-            VATEXM: bill.VAT_EXEMPT,
-            ZERSAL: bill.ZERO_RATE,
-            GOVTAX: bill.GOVT_TAX,
+            VATSAL:         bill.VAT_SALES || 0,
+            VATEXM:         bill.VAT_EXEMPT || 0,
+            ZERSAL:         bill.ZERO_RATE || 0,
+            GOVTAX:         bill.GOVT_TAX || 0,
 
-            TOTSAL: bill.AMOUNT,
-            NETVAT: bill.UNIT_COST,
-            VATAMT: bill.VAT,
-            PRDTAX: bill.WITHHOLDING_TAX,
-            AMTDUE: bill.TOTAL_AMOUNT,
+            TOTSAL:         bill.AMOUNT || 0,
+            NETVAT:         bill.UNIT_COST || 0,
+            VATAMT:         bill.VAT || 0,
+            PRDTAX:         bill.WITHHOLDING_TAX || 0,
+            AMTDUE:         bill.TOTAL_AMOUNT || 0,
           }
         }
+
       }
 
     })
@@ -295,7 +318,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       { field: 'TOTAL_BREAKDOWN.AMTDUE', header: 'Total Amount Due' },
     ]
   })
-
 
   const handleOpenMainDialogBox = () => {
     console.log('INVOICE RECORDS', invoice_records_data.value);
@@ -541,14 +563,19 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           <!-- RIGHT -->
           <div class="flex flex-col items-end justify-center h-full col-span-3 -mt-2">
             <div class="font-semibold text-20 -mt-[12px]">
-              ${ CONTENT_VALUES.HEADER.INVOICE_NAME }
+              <span class='text-18'>
+                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_NAME }
+              </span>
+              <span class='text-20'>
+                INVOICE
+              </span>
             </div>
             <div class="flex gap-3 font-semibold text-14">
               <div>
                 No.
               </div>
               <div>
-                ${ CONTENT_VALUES.HEADER.INVOICE_NUMBER }
+                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_NUMBER }
               </div>
             </div>
             <div class="flex gap-3 font-semibold text-14">
@@ -556,7 +583,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 Date :
               </div>
               <div>
-                ${ CONTENT_VALUES.HEADER.INVOICE_DATE }
+                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_DATE ? configStore.formatDate2(CONTENT_VALUES.INVOICE_KEY.INVOICE_DATE) :  'xxxx/xx/xx' }
               </div>
             </div>
           </div>
@@ -785,7 +812,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         <div class="flex justify-end mt-[15px] -mb-[30px]">
           <div class="flex flex-col w-36 font-bold">
             <div class="text-center">
-              ${ CONTENT_VALUES.DETAILS.AUTHSG }
+              ${ CONTENT_VALUES.DETAILS.AUTHSG || 'xxxxxxxx' }
             </div>
             <div class="mt-2 border-t border-black"></div>
             <div class="text-center -mt-2">
@@ -800,13 +827,13 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             Acknowledgement Certificate No. : ${ CONTENT_VALUES.DETAILS.RECTYP }${ CONTENT_VALUES.DETAILS.ORNUM }
           </div>
           <div>
-            Date Issued : ${ CONTENT_VALUES.DETAILS.DATVAL }
+            Date Issued : ${ CONTENT_VALUES.DETAILS.DATVAL ? configStore.formatDate2(CONTENT_VALUES.DETAILS.DATVAL) : 'xxxx/xx/xx' }
           </div>
           <div>
-            Series Range : ${ CONTENT_VALUES.DETAILS.SERIES_RANGE }
+            Series Range : ${ CONTENT_VALUES.DETAILS.SERIES_RANGE || 'xxxxxxxxxxxxxxx - xxxxxxxxxxxxxxx' }
           </div>
           <div>
-            Timestamp : ${ CONTENT_VALUES.DETAILS.DATSTP } ${ CONTENT_VALUES.DETAILS.TIMSTP }
+            Timestamp : ${ CONTENT_VALUES.DETAILS.DATSTP || 'xxxx/xx/xx'  } ${ CONTENT_VALUES.DETAILS.TIMSTP || 'xx:xx:xx' }
           </div>
         </div>
       </div>

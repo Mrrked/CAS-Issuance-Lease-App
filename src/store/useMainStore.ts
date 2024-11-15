@@ -24,6 +24,12 @@ export const useMainStore = defineStore('main', () => {
 
   // ACTIONS
 
+  const getSplitClientAddress = (CLIENT_ADDRESS: string) => {
+    const firstPart = CLIENT_ADDRESS.slice(0, 80);
+    const secondPart = CLIENT_ADDRESS.slice(80, 160);
+    return [firstPart, secondPart];
+  }
+
   const getDeptCode = (TCLTNO: number): number => {
     if (TCLTNO <= 500) {
       return 11
@@ -179,6 +185,7 @@ export const useMainStore = defineStore('main', () => {
   }
 
   return {
+    getSplitClientAddress,
     getDeptCode,
     getItemName,
 

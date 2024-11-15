@@ -92,6 +92,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
       const BT_BillingInvoice = [5, 6, 7, 51, 61, 71]
 
+      const invoiceDate: number = perBatchRunForm.value.invoiceDate ? configStore.formatDateToInteger(perBatchRunForm.value.invoiceDate) : 0
       const invoiceType: 'BI' | 'VI'  = BT_BillingInvoice.includes(bill.BILL_TYPE) ? 'BI' : 'VI'
 
       const orKeyParts = {
@@ -131,6 +132,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               ITEM:           mainStore.getItemName(bill),
               QTY:            1,
 
+              // VALUES
               UNTCST:         bill.UNIT_COST || 0,
               VATAMT:         bill.VAT || 0,
               VATSAL:         bill.VAT_SALES || 0,
@@ -140,14 +142,13 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               WTHTAX:         bill.WITHHOLDING_TAX || 0,
               GOVTAX:         bill.GOVT_TAX || 0,
               WTXRAT:         bill.WHTAX_RATE || 0,
-              AMTDUE:         bill.TOTAL_AMOUNT || 0,
+              AMTDUE:         bill.AMOUNT || 0,
 
               // PERIOD
               FRDATE:         bill.FRBILL || 0,
               TODATE:         bill.TOBILL || 0,
               DUEDAT:         bill.DATDUE || 0,
 
-              // VALUES
             }
           ],
 
@@ -174,6 +175,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
         const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS
 
+        const [CLIENT_ADDRESS_1, CLIENT_ADDRESS_2] = mainStore.getSplitClientAddress(bill.CLIENT_ADDRESS)
+
         mergedMap[key] = {
           PBL_KEY:          bill.PBL_KEY || '',
           TCLTNO:           bill.TCLTNO || 0,
@@ -188,12 +191,12 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           },
 
           INVOICE_KEY:      {
-            RECTYP:         invoiceType,
-            COMPLETE_OR_KEY: completeOrKey,
+            RECTYP:           invoiceType,
+            COMPLETE_OR_KEY:  completeOrKey,
             ...orKeyParts,
             INVOICE_NAME:   invoiceType === 'VI' ? 'SERVICE' : 'BILLING',
             INVOICE_NUMBER: invoiceType + completeOrKey,
-            INVOICE_DATE:   0,
+            INVOICE_DATE:   invoiceDate,
           },
 
           // CIRCLTPF
@@ -205,19 +208,19 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             PAYTYP:         'Y',
             PIBIG:          '',
             SLSTYP:         'V',
-            DATVAL:         0,
+            DATVAL:         invoiceDate,
 
             // COMPANY INFO
             COMPCD:         bill.COMPCD || 0,
             TELNO:          selectedCompany?.TEL_NO || '',
-            REGTIN:         selectedCompany?.TIN || '',
+            REGTIN:         selectedCompany?.TIN    || '',
 
             // CLIENT INFO
             CLTNME:         bill.CLIENT_NAME || '',
-            RADDR1:         bill.CLIENT_ADDRESS || '', //
-            RADDR2:         bill.CLIENT_ADDRESS || '', //
-            CLTTIN:         bill.CLIENT_TIN || '',
-            CLTKEY:         bill.CLIENT_KEY || '',
+            RADDR1:         CLIENT_ADDRESS_1 || '',
+            RADDR2:         CLIENT_ADDRESS_2 || '',
+            CLTTIN:         bill.CLIENT_TIN  || '',
+            CLTKEY:         bill.CLIENT_KEY  || '',
             PRJNAM:         selectedProject ? selectedProject.PTITLE : '-',
             UNIT:           bill.CLIENT_UNIT || '',
 
@@ -261,7 +264,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               WTHTAX:         bill.WITHHOLDING_TAX || 0,
               GOVTAX:         bill.GOVT_TAX || 0,
               WTXRAT:         bill.WHTAX_RATE || 0,
-              AMTDUE:         bill.TOTAL_AMOUNT || 0,
+              AMTDUE:         bill.AMOUNT || 0,
 
               // PERIOD
               FRDATE:         bill.FRBILL || 0,

@@ -3,7 +3,6 @@ import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
-import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
@@ -14,7 +13,6 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   const confirm = useConfirm();
 
   const mainStore = useMainStore()
-  const configStore = useConfigStore()
 
   const BILL_TYPE_OPTIONS = [
     { value: 'Rental and CUSA', name: 'Rental and CUSA' },

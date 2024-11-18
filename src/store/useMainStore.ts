@@ -65,8 +65,6 @@ export const useMainStore = defineStore('main', () => {
 
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
-    console.log('PROCESS BILLINGS', billings);
-
     return billings.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
 
@@ -449,6 +447,7 @@ export const useMainStore = defineStore('main', () => {
     callback: Function,
     closeLoading: Function
   ) => {
+    console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
     .then((response) => {
       callback(response)

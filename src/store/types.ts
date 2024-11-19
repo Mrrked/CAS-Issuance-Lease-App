@@ -184,6 +184,8 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   COMPCD: number
   BRANCH: number
 
+  INVOICE_KEY: InvoiceKey
+
   IS_ALREADY_VERIFIED: boolean
 
   IS_VATABLE: string
@@ -215,6 +217,10 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
 
 export interface InvoiceKey {
   RECTYP:   'VI' | 'BI'
+  TRNTYP:   'V' | 'B'
+
+  YY: string
+  MM: string
 
   COMPLETE_OR_KEY: string
   COMPCD:   number
@@ -225,7 +231,8 @@ export interface InvoiceKey {
 
   INVOICE_NAME:   string
   INVOICE_NUMBER: string
-  INVOICE_DATE:   number
+
+  SERIES_RANGE:   string
 }
 
 export interface InvoiceDetails {
@@ -250,8 +257,8 @@ export interface InvoiceDetails {
   RADDR2: string; // CLIENT ADDRESS #2    (80 chars)
   CLTTIN: string; // CLIENT TIN           (15 chars)
   CLTKEY: string; // CLIENT KEY           (5 chars)
-  PRJNAM: string; // PROJECT NAME         (3 chars)
-  UNIT: string;   // UNIT NUMBER          (4 chars)
+  PRJNAM: string; // PROJECT NAME         (50 chars)
+  PBLKEY: string; // PROJECT/BLOCK/LOT KEY(13 chars)
 
   // FOOTER
   AUTHSG: string; // AUTHORIZED SIGNATURE (8 chars)
@@ -267,9 +274,6 @@ export interface InvoiceDetails {
   RPDATE: number; // REPRINT DATE         (8 zoned digits)
   RPTIME: number; // REPRINT TIME         (6 zoned digits)
   REPRBY: string; // REPRINTED BY         (8 chars)
-
-  // OTHERS (QUERY THIS)
-  SERIES_RANGE: string;
 }
 
 export interface InvoiceItemBreakdown {

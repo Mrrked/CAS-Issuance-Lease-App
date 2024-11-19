@@ -66,7 +66,6 @@ export const useMainStore = defineStore('main', () => {
     return `${bill_desc} ( ${month} ${year} ) ${type}`
   }
 
-
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
@@ -126,24 +125,10 @@ export const useMainStore = defineStore('main', () => {
     billings.forEach((bill) => {
       const key = bill.ID;
 
-      const BT_BillingInvoice = [5, 6, 7, 51, 61, 71]
-
       const invoiceDate: number = invoice_date ? configStore.formatDateToInteger(invoice_date) : 0
-      const invoiceType: 'BI' | 'VI'  = BT_BillingInvoice.includes(bill.BILL_TYPE) ? 'BI' : 'VI'
+      const invoiceType: 'BI' | 'VI'  = bill.INVOICE_KEY.RECTYP
 
-      const orKeyParts = {
-        COMPCD:         bill.COMPCD || 0,
-        BRANCH:         bill.BRANCH || 0,
-        DEPTCD:         bill.TCLTNO > 0 ? getDeptCode(bill.TCLTNO % 1000) : 0,
-        ORCOD:          '',
-        ORNUM:          0,
-      }
-
-      const completeOrKey: string =
-        configStore.fillNumberWithZeroes(orKeyParts.COMPCD, 2) +
-        orKeyParts.BRANCH + configStore.fillNumberWithZeroes(orKeyParts.DEPTCD, 2) +
-        ( orKeyParts.ORCOD || 'xx' ) +
-        ( orKeyParts.ORNUM ? configStore.fillNumberWithZeroes(orKeyParts.ORNUM,6) : 'xxxxxx' )
+      const completeOrKey: string = bill.INVOICE_KEY.COMPLETE_OR_KEY
 
       // EXISTING INVOICE GROUP
       if (mergedMap[key]) {
@@ -225,14 +210,7 @@ export const useMainStore = defineStore('main', () => {
             LOGO_URL:       selectedCompany?.IMG_URL || '',
           },
 
-          INVOICE_KEY:      {
-            RECTYP:           invoiceType,
-            COMPLETE_OR_KEY:  completeOrKey,
-            ...orKeyParts,
-            INVOICE_NAME:   invoiceType === 'VI' ? 'SERVICE' : 'BILLING',
-            INVOICE_NUMBER: invoiceType + completeOrKey,
-            INVOICE_DATE:   invoiceDate,
-          },
+          INVOICE_KEY:      bill.INVOICE_KEY,
 
           // CIRCLTPF
           DETAILS: {
@@ -256,8 +234,8 @@ export const useMainStore = defineStore('main', () => {
             RADDR2:         CLIENT_ADDRESS_2 || '',
             CLTTIN:         bill.CLIENT_TIN  || '',
             CLTKEY:         bill.CLIENT_KEY  || '',
-            PRJNAM:         selectedProject ? selectedProject.PTITLE : '-',
-            UNIT:           bill.CLIENT_UNIT || '',
+            PRJNAM:         selectedProject?.PTITLE || '',
+            PBLKEY:         bill.PBL_KEY     || '',
 
             // FOOTER
             DATSTP:         0,
@@ -273,8 +251,6 @@ export const useMainStore = defineStore('main', () => {
             RPDATE:         0,
             RPTIME:         0,
             REPRBY:         '',
-
-            SERIES_RANGE:   '',
           },
           // CIRBRKPF
           ITEM_BREAKDOWNS: [
@@ -419,7 +395,7 @@ export const useMainStore = defineStore('main', () => {
                 Date :
               </div>
               <div>
-                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_DATE ? configStore.formatDate2(CONTENT_VALUES.INVOICE_KEY.INVOICE_DATE) :  'xxxx/xx/xx' }
+                ${ CONTENT_VALUES.DETAILS.DATVAL ? configStore.formatDate2(CONTENT_VALUES.DETAILS.DATVAL) :  'xxxx/xx/xx' }
               </div>
             </div>
           </div>
@@ -493,7 +469,7 @@ export const useMainStore = defineStore('main', () => {
                 :
               </div>
               <div>
-                ${ CONTENT_VALUES.DETAILS.UNIT }
+                ${ CONTENT_VALUES.DETAILS.PBLKEY.slice(3,) }
               </div>
             </div>
           </div>
@@ -666,7 +642,7 @@ export const useMainStore = defineStore('main', () => {
             Date Issued : ${ CONTENT_VALUES.DETAILS.DATVAL ? configStore.formatDate2(CONTENT_VALUES.DETAILS.DATVAL) : 'xxxx/xx/xx' }
           </div>
           <div>
-            Series Range : ${ CONTENT_VALUES.DETAILS.SERIES_RANGE || 'xxxxxxxxxxxxxxx - xxxxxxxxxxxxxxx' }
+            Series Range : ${ CONTENT_VALUES.INVOICE_KEY.SERIES_RANGE || 'xxxxxxxxxxxxxxx - xxxxxxxxxxxxxxx' }
           </div>
           <div>
             Timestamp : ${ CONTENT_VALUES.DETAILS.DATSTP || 'xxxx/xx/xx'  } ${ CONTENT_VALUES.DETAILS.TIMSTP || 'xx:xx:xx' }

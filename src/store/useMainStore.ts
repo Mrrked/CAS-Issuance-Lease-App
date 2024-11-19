@@ -21,8 +21,8 @@ export const useMainStore = defineStore('main', () => {
   // STATES
 
   const toast = useToast()
-  const dialog = useDialog();
-  const configStore = useConfigStore();
+  const dialog = useDialog()
+  const configStore = useConfigStore()
   const coreDataStore = useCoreDataStore()
 
   const perBatchRunStore = usePerBatchRunStore()
@@ -187,7 +187,6 @@ export const useMainStore = defineStore('main', () => {
             AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
           }
         }
-
       }
 
       // NEW INVOICE GROUP
@@ -304,7 +303,6 @@ export const useMainStore = defineStore('main', () => {
             AMTDUE:         bill.TOTAL_AMOUNT || 0,
           }
         }
-
       }
 
     })

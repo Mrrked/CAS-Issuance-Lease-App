@@ -219,15 +219,15 @@ export interface InvoiceKey {
   RECTYP:   'VI' | 'BI'
   TRNTYP:   'V' | 'B'
 
-  YY: string
-  MM: string
-
   COMPLETE_OR_KEY: string
   COMPCD:   number
   BRANCH:   number
   DEPTCD:   number
   ORCOD:    string
   ORNUM:    number
+
+  YY: string
+  MM: string
 
   INVOICE_NAME:   string
   INVOICE_NUMBER: string

@@ -123,7 +123,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
     const data = {
       type: 'BATCH',
-      invoices: [SELECTED_INVOICES[0]],
+      invoices: SELECTED_INVOICES,
     }
 
     const callback = (response: AxiosResponse) => {

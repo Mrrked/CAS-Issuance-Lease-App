@@ -181,6 +181,7 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   CLIENT_KEY_RAW: string
   CLIENT_PROJECT_CODE: string
   CLIENT_UNIT: string
+  CLIENT_PIBIG: string
   COMPCD: number
   BRANCH: number
 

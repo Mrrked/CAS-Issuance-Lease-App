@@ -1,11 +1,13 @@
-import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { Column, GROUPED_INVOICE_RECORD, INVOICE_PER_PROJECT, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
+import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
-import SummaryOfIssuanceModal from '../components/Dialog/PerMonthYear/SummaryOfIssuanceModal.vue';
 import { defineStore } from 'pinia';
+import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
@@ -104,6 +106,18 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     })
   }
 
+
+  const handleGeneratePDFBlob_SummaryOfIssuedInvoicesPage = (groupedInvoiceRecords: GROUPED_INVOICE_RECORD[]): Blob => {
+
+    var doc = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'letter'
+    })
+
+    return doc.output('blob')
+  }
+
   const handleExecuteIssueFinalInvoices = async () => {
 
     const SELECTED_INVOICES = invoice_records_data.value
@@ -126,24 +140,100 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       invoices: SELECTED_INVOICES,
     }
 
-    const callback = (response: AxiosResponse) => {
+    const callback = async (response: AxiosResponse) => {
       console.log('RESPONSE', response.data);
+
+      // GENERATE ARRAY OF ARRAY OF OBJECT THAT CONTAINS THE ARRAY OF INVOICE RECORDS
+
+      const issuedInvoiceRecords = response.data as InvoiceRecord[];
+
+      const groupedInvoiceRecords: GROUPED_INVOICE_RECORD[] =
+        (
+          Object.values(
+            issuedInvoiceRecords
+              .sort((a,b) => {
+                // COMPCD LOWEST TO HIGHEST
+                if (a.INVOICE_KEY.COMPCD !== b.INVOICE_KEY.COMPCD) {
+                  return a.INVOICE_KEY.COMPCD - b.INVOICE_KEY.COMPCD;
+                }
+
+                if (a.INVOICE_KEY.BRANCH !== b.INVOICE_KEY.BRANCH) {
+                  return a.INVOICE_KEY.BRANCH - b.INVOICE_KEY.BRANCH;
+                }
+
+                if (a.INVOICE_KEY.DEPTCD !== b.INVOICE_KEY.DEPTCD) {
+                  return a.INVOICE_KEY.DEPTCD - b.INVOICE_KEY.DEPTCD;
+                }
+
+                return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
+              })
+              .reduce((acc: any , record: InvoiceRecord) => {
+                const key = record.INVOICE_KEY.INVOICE_NUMBER.substring(0, 7)
+
+                if (!acc[key]) {
+                  console.log()
+                  console.log('NEW PAGE FOR', key, '\n');
+                  acc[key] = {
+                    COMPCD: record.INVOICE_KEY.COMPCD,
+                    BRANCH: record.INVOICE_KEY.BRANCH,
+                    DEPTCD: record.INVOICE_KEY.DEPTCD,
+
+                    INVOICE_RECORDS: [],
+                    INVOICE_RECORDS_PER_PROJECT: []
+                  };
+                }
+
+                console.log(key + '-' + record.INVOICE_KEY.PROJCD);
+                acc[key].INVOICE_RECORDS.push(record);
+
+                return acc;
+              }, {})
+          ) as GROUPED_INVOICE_RECORD[]
+        )
+        .map((grouped_record) => {
+          const invoiceRecordPerProject: INVOICE_PER_PROJECT[] =
+            Object.values(
+              grouped_record.INVOICE_RECORDS
+                .reduce((acc: any , record: InvoiceRecord) => {
+                  if (!acc[record.INVOICE_KEY.PROJCD]) {
+                    acc[record.INVOICE_KEY.PROJCD] = {
+                      PROJCD: record.INVOICE_KEY.PROJCD,
+                      PROJECT_NAME: record.DETAILS.PRJNAM,
+                      INVOICE_RECORDS: []
+                    };
+                  }
+
+                  acc[record.INVOICE_KEY.PROJCD].INVOICE_RECORDS.push(record);
+
+                  return acc;
+                }, {})
+            )
+
+          console.log('PER PROJECT', grouped_record.COMPCD, grouped_record.BRANCH, grouped_record.DEPTCD, invoiceRecordPerProject);
+
+          return {
+            ...grouped_record,
+            INVOICE_RECORDS_PER_PROJECT: invoiceRecordPerProject
+          }
+        })
+
+      console.log('GROUPED', groupedInvoiceRecords);
 
       // GENERATE PDF for Summary of Issuance then show it in a dialog
 
-      const PDF_BLOB = null
+      const PDF_BLOB = handleGeneratePDFBlob_SummaryOfIssuedInvoicesPage(groupedInvoiceRecords)
 
       const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SummaryOfIssuanceModalFooter.vue'));
-      const ShowSummaryOfIssuedInvoices = dialog.open(SummaryOfIssuanceModal, {
+      const ShowSummaryOfIssuedInvoices = dialog.open(PreviewPDFModal, {
         data: {
           pdfBlob: PDF_BLOB,
           download: () => {
-            // const url = URL.createObjectURL(PDF_BLOB);
-            // const a = document.createElement('a');
-            // a.href = url;
-            // a.download = 'Summary of Issued Invoices.pdf';
-            // a.click();
-            // URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(PDF_BLOB);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Summary of Issued Invoices.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
           },
           submit: () => {
           },

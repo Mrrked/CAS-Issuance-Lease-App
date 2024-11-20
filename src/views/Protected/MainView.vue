@@ -71,7 +71,6 @@
                   filter
                   optionLabel="name"
                   placeholder="Select..."
-                  autofocus
                 ></Select>
               </InputGroup>
               <InputGroup>
@@ -86,7 +85,6 @@
                   filter
                   optionLabel="name"
                   placeholder="Select..."
-                  autofocus
                 ></Select>
               </InputGroup>
 

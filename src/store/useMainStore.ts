@@ -2,8 +2,8 @@ import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/da
 import { InvoiceRecord, LeaseBill } from './types';
 import { defineAsyncComponent, markRaw } from 'vue';
 
-import DraftInvoiceModal from '../components/Dialog/General/DraftInvoiceModal.vue';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
+import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import html2pdf from 'html2pdf.js';
@@ -218,8 +218,8 @@ export const useMainStore = defineStore('main', () => {
             ORNUM:          completeOrKey,
 
             PAYTYP:         'Y',
-            PIBIG:          '',
-            SLSTYP:         'V',
+            PIBIG:          bill.CLIENT_PIBIG,
+            SLSTYP:         '',
             DATVAL:         invoiceDate,
 
             // COMPANY INFO
@@ -685,7 +685,7 @@ export const useMainStore = defineStore('main', () => {
 
     loadingDialogRef.close()
 
-    const ShowDraftInvoice = dialog.open(DraftInvoiceModal, {
+    const ShowDraftInvoice = dialog.open(PreviewPDFModal, {
       data: {
         pdfBlob: PDF_BLOB,
         download: () => {

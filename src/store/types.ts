@@ -220,6 +220,8 @@ export interface InvoiceKey {
   RECTYP:   'VI' | 'BI'
   TRNTYP:   'V' | 'B'
 
+  PROJCD:   string
+
   COMPLETE_OR_KEY: string
   COMPCD:   number
   BRANCH:   number
@@ -350,4 +352,20 @@ export interface InvoiceRecord {
 
   // Total / Overall Breakdown
   TOTAL_BREAKDOWN: InvoiceTotalBreakdown
+}
+
+
+export interface INVOICE_PER_PROJECT {
+  PROJCD: string
+  PROJECT_NAME: string
+  INVOICE_RECORDS: InvoiceRecord[]
+}
+
+export interface GROUPED_INVOICE_RECORD {
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+
+  INVOICE_RECORDS: InvoiceRecord[]
+  INVOICE_RECORDS_PER_PROJECT: INVOICE_PER_PROJECT[]
 }

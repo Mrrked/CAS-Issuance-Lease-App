@@ -5,6 +5,7 @@
   interface DialogRef  {
     data: {
       pdfBlob: Blob
+      exportToXLSX: Function
       download: Function
       submit: Function
       cancel: Function
@@ -17,7 +18,8 @@
 
 
 <template>
-  <div>
-    <Button v-if="dialogRef" type="button" label="Download Copy" @click="dialogRef.data.download()"></Button>
+  <div class="flex justify-between w-full">
+    <Button v-if="dialogRef" type="button" label="Export to XLSX" @click="dialogRef.data.exportToXLSX()"></Button>
+    <Button v-if="dialogRef" type="button" label="Save Copy as PDF" @click="dialogRef.data.download()"></Button>
   </div>
 </template>

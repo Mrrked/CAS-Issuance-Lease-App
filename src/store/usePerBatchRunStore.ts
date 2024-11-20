@@ -141,10 +141,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     const callback = async (response: AxiosResponse) => {
       console.log('RESPONSE', response.data);
 
-      // GENERATE ARRAY OF ARRAY OF OBJECT THAT CONTAINS THE ARRAY OF INVOICE RECORDS
-
       const issuedInvoiceRecords = response.data as InvoiceRecord[];
 
+      // 1 GENERATE ARRAY OF ARRAY OF OBJECT THAT CONTAINS THE ARRAY OF INVOICE RECORDS
       const groupedInvoiceRecords: GROUPED_INVOICE_RECORD[] =
         (
           Object.values(
@@ -217,14 +216,16 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
       console.log('GROUPED', groupedInvoiceRecords);
 
-      // GENERATE PDF for Summary of Issuance then show it in a dialog
-
+      // 2 GENERATE PDF for Summary of Issuance
       const PDF_BLOB = handleGeneratePDFBlob_SummaryOfIssuedInvoicesPage(groupedInvoiceRecords)
 
+      // 3 Show it in a Dialog
       const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SummaryOfIssuanceModalFooter.vue'));
       const ShowSummaryOfIssuedInvoices = dialog.open(PreviewPDFModal, {
         data: {
           pdfBlob: PDF_BLOB,
+          exportToXLSX: () => {
+          },
           download: () => {
             const url = URL.createObjectURL(PDF_BLOB);
             const a = document.createElement('a');

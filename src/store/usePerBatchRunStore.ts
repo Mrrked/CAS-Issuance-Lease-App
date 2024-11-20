@@ -6,7 +6,6 @@ import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
-import html2pdf from 'html2pdf.js';
 import jsPDF from 'jspdf';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
@@ -105,7 +104,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       }
     })
   }
-
 
   const handleGeneratePDFBlob_SummaryOfIssuedInvoicesPage = (groupedInvoiceRecords: GROUPED_INVOICE_RECORD[]): Blob => {
 

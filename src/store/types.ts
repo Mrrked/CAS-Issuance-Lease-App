@@ -206,6 +206,8 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   VAT_EXEMPT: number
   ZERO_RATE: number
 
+  TOTAL_SALE: number
+
   // ADD
   GOVT_TAX: number
   VAT: number
@@ -352,8 +354,14 @@ export interface InvoiceRecord {
 
   // Total / Overall Breakdown
   TOTAL_BREAKDOWN: InvoiceTotalBreakdown
-}
 
+  // CASH OR FILES
+  CORFPF: CORFPF
+  CORTPF: CORTPF
+  CORF3PF: CORF3PF
+  CORF4PF: CORF4PF
+
+}
 
 export interface INVOICE_PER_PROJECT {
   PROJCD: string
@@ -368,4 +376,137 @@ export interface GROUPED_INVOICE_RECORD {
 
   INVOICE_RECORDS: InvoiceRecord[]
   INVOICE_RECORDS_PER_PROJECT: INVOICE_PER_PROJECT[]
+}
+
+
+
+interface CORFPF {
+  COMPCD: number; // COMPANY CODE (ZONED 2, 0)
+  BRANCH: number; // BRANCH CODE (ZONED 1, 0)
+  DEPTCD: number; // DEPARTMENT CODE (ZONED 2, 0)
+  ORCOD: string; // O.R. CODE (CHAR 2)
+  ORNUM: number; // O.R. NUMBER (ZONED 6, 0)
+  DATOR: number; // O.R. DATE (ZONED 8, 0)
+  CASHCD: string; // USER ID CODE (CHAR 10)
+  COLSTF: string; // COLLECTION STAFF (CHAR 4)
+  ORAMT: number; // OR AMOUNT (PACKED 11, 2)
+  NOACCT: number; // NO. OF ACCOUNTS (ZONED 3, 0)
+  PAYTYP: string; // PAYMENT TYPE (CHAR 1)
+  INTRST: number; // INTEREST (PACKED 11, 2)
+  PNALTY: number; // PENALTY (PACKED 9, 2)
+  OTHERS: number; // OTHER AMOUNT (PACKED 11, 2)
+  OVRPAY: number; // OVER PAYMENT (PACKED 9, 2)
+  UNDPAY: number; // UNDER PAYMENT (PACKED 9, 2)
+  PROJCD: string; // PROJECT CODE (CHAR 3)
+  PCSCOD: string; // PCS CODE (CHAR 1)
+  PHASE: string; // PHASE (CHAR 1)
+  BLOCK: string; // BLOCK (CHAR 2)
+  LOT: string; // LOT/UNIT (CHAR 4)
+  UNITCD: string; // UNIT CODE (CHAR 2)
+  PAYCOD: string; // PAYEE CODE (CHAR 4)
+  PAYEE: string; // NAME OF PAYEE (CHAR 35)
+  PN: number; // PROMISSORY NOTE # (ZONED 5, 0)
+  DATVAL: number; // VALUE DATE (ZONED 8, 0)
+  DATPRT: number; // PRINTING DATE (ZONED 8, 0)
+  BANKCD: string; // BANK CODE (CHAR 5)
+  BNKACT: string; // BANK ACCT. NO. (CHAR 1)
+  NOCHK: number; // NO. OF CHECKS (ZONED 2, 0)
+  PRNO: number; // PR NO. (ZONED 6, 0)
+  CSHAMT: number; // CASH AMOUNT (PACKED 11, 2)
+  TCHKAM: number; // TOTAL CHECK AMOUNT (PACKED 11, 2)
+  LEAFNO: number; // LEAFLET NUMBER (ZONED 6, 0)
+  NORMRK: number; // NO. OF REMARKS (ZONED 2, 0)
+  DATCAN: number; // DATE CANCELLED (ZONED 8, 0)
+  RETCOD: string; // RETURN CHECK CODE (CHAR 1)
+  UPDCOD: string; // UPDATE CODE (CHAR 1)
+  NOMOS: number; // NO. OF MONTHS (ZONED 3, 0)
+  TRANSN: number; // TRANSACTION NO. (ZONED 4, 0)
+  DELOR: string; // DELOR (CHAR 1)
+}
+
+
+interface CORTPF {
+  COMPCD: number;  // COMPANY CODE
+  BRANCH: number;  // BRANCH CODE
+  DEPTCD: number;  // DEPARTMENT CODE
+  ORCOD: string;   // O. R. CODE
+  ORNUM: number;   // O. R. NUMBER
+  DATVAL: number;  // VALUE DATE
+  PROJCD: string;  // PROJECT CODE
+  PCSCOD: string;  // PCS CODE
+  PHASE: string;   // PHASE
+  BLOCK: string;   // BLOCK
+  LOT: string;     // LOT/UNIT
+  UNITCD: string;  // UNIT CODE
+  PAYTYP: string;  // PAYMENT TYPE
+  CLTNUM: number;  // CLIENT NUMBER
+  PDSCOD: string;  // PARK, DRY, STORE CODE
+  PDSNUM: number;  // PARK, DRY, STORE NUMBER
+  TCLTNO: number;  // TEMPORARY CLIENT NUMBER
+  DATINS: number;  // INSTALLMENT DATE
+  BALRUN: number;  // RUNNING BALANCE
+  PAYNO: number;   // PAYMENT NUMBER
+  NOMOS: number;   // NO. OF MONTHS
+}
+
+
+interface CORF3PF {
+  COMPCD: number;    // COMPANY CODE
+  BRANCH: number;    // BRANCH CODE
+  DEPTCD: number;    // DEPARTMENT CODE
+  ORCOD: string;     // O. R. CODE
+  ORNUM: number;     // O. R. NUMBER
+  DATVAL: number;    // VALUE DATE
+  PROJCD: string;    // PROJECT CODE
+  PCSCOD: string;    // PCS CODE
+  PHASE: string;     // PHASE
+  BLOCK: string;     // BLOCK
+  LOT: string;       // LOT/UNIT
+  UNITCD: string;    // UNIT CODE
+  PAYTYP: string;    // PAYMENT TYPE
+  ORAMT: number;     // OR AMOUNT
+  VATAMT: number;    // VAT AMOUNT
+  RATIO: number;     // RATIO OF ZV/NET SP
+  ZONVAL: number;    // ZONAL VALUE USED
+  NETSP: number;     // NET SELLING PRICE USED
+  PRPTAX: number;    // PREPAID TAX OF LEASE CLIENTS
+  VATCOD: string;    // VAT/NON VAT CODE
+  VATDES: string;    // VAT DESCRIPTION
+  DATENT: number;    // DATE ENTERED
+  TIMENT: number;    // TIME ENTERED
+  USRENT: string;    // USER NAME
+}
+
+interface CORF4PF {
+  COMPCD: number; // COMPANY CODE
+  BRANCH: number; // BRANCH CODE
+  DEPTCD: number; // DEPARTMENT CODE
+  ORCOD: string;  // O. R. CODE
+  ORNUM: number;  // O. R. NUMBER
+  DATVAL: number; // VALUE DATE
+  PROJCD: string; // PROJECT CODE
+  PCSCOD: string; // PCS CODE
+  PHASE: string;  // PHASE
+  BLOCK: string;  // BLOCK
+  LOT: string;    // LOT/UNIT
+  UNITCD: string; // UNIT CODE
+  PAYTYP: string; // PAYMENT TYPE
+  BTYPE: number;  // BILL TYPE
+  MBTYPE: number; // MOTHER BILL TYPE
+  LESDES: string; // LEASE DESCRIPTION
+  ORAMT: number;  // OR AMOUNT
+  VATSAL: number; // VATABLE SALES
+  VATXMP: number; // VAT-EXEMPT SALES
+  VATZRO: number; // ZERO RATED SALES
+  TOTSAL: number; // TOTAL SALES
+  VATAMT: number; // VAT AMOUNT
+  WITTAX: number; // WITHHOLDING TAX
+  GRSAMT: number; // GROSS AMOUNT
+  ENTDES: string; // ACK.REC-ENTRY DESCRIPTION
+  ENTAMT: number; // ACK.REC.-ENTRY AMOUNT
+  LESRF: number;  // LESS: RES. FEE
+  ORTYPE: string; // OR TYPE
+  DATENT: number; // DATE ENTERED
+  TIMENT: number; // TIME ENTERED
+  USRENT: string; // USER NAME
 }

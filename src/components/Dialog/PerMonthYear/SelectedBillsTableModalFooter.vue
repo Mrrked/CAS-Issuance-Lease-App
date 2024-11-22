@@ -7,6 +7,7 @@
       table_data: any[],
       table_column: any[],
       view: Function
+      view1: Function
       submit: Function
       cancel: Function
     },
@@ -18,7 +19,8 @@
 
 
 <template>
-  <div class="flex items-end justify-between w-full">
+  <div class="flex items-center justify-between w-full">
+    <Button type="button" label="PREVIEW DRAFTS" autofocus @click="dialogRef?.data.view1()"></Button>
     <div class="">
       Found
       <span class="font-bold">{{ dialogRef?.data.table_data.length }}</span>

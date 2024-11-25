@@ -19,12 +19,12 @@
 
 
 <template>
-  <div class="flex items-center justify-between w-full">
+  <div class="flex items-end justify-between w-full">
     <Button type="button" label="PREVIEW DRAFTS" autofocus @click="dialogRef?.data.view1()"></Button>
     <div class="">
       Found
       <span class="font-bold">{{ dialogRef?.data.table_data.length }}</span>
-      records for issuance
+      records
     </div>
     <div class="flex gap-2">
       <Button type="button" label="Close" severity="secondary" @click="dialogRef?.data.cancel()"></Button>

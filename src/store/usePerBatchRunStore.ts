@@ -95,8 +95,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         },
         submit: () => {
           confirm.require({
-            message: `The ${invoice_records_data.value.length} invoices will be final once issued.\n Are you sure you want to continue in generating the invoices?`,
-            header: 'Confirm Issuance of Invoice (FINAL) ?',
+            message: `This action will issue invoice for each of the ${invoice_records_data.value.length}. Are you sure you want to continue in the issuance of invoices?`,
+            header: '(FINAL) Confirm Issuance of Invoice?',
             icon: 'pi pi-exclamation-triangle',
             rejectProps: {
               label: 'Cancel',
@@ -174,18 +174,21 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
       const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
+      const download = () => {
+        const url = URL.createObjectURL(PDF_BLOB);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Issued Invoices ${data.year}/${data.month}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+      download()
+
       const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
       const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
         data: {
           pdfBlob: PDF_BLOB,
-          download: () => {
-            const url = URL.createObjectURL(PDF_BLOB);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Issued Invoices ${data.year}/${data.month}.pdf`;
-            a.click();
-            URL.revokeObjectURL(url);
-          },
+          download: download,
           submit: () => {
           },
           cancel: () => {

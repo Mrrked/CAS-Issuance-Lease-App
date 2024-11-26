@@ -986,7 +986,7 @@ export const useMainStore = defineStore('main', () => {
           const url = URL.createObjectURL(PDF_BLOB);
           const a = document.createElement('a');
           a.href = url;
-          a.download = '(DRAFT) Service Invoice.pdf';
+          a.download = '(DRAFT) Invoice.pdf';
           a.click();
           URL.revokeObjectURL(url);
         },

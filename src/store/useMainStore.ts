@@ -579,7 +579,6 @@ export const useMainStore = defineStore('main', () => {
         doc.setFont("helvetica", "bold")
         doc.text("SOLD TO ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
         doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
-        console.log('LINE HEIGHT', doc.getLineHeight());
 
         doc.setFontSize(SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
@@ -685,7 +684,6 @@ export const useMainStore = defineStore('main', () => {
         }
 
         if (cursorLineHeight > HIGHEST_CURSOR_LINE_HEIGHT) {
-          console.log('3 ',cursorLineHeight);
           HIGHEST_CURSOR_LINE_HEIGHT = cursorLineHeight
         }
 

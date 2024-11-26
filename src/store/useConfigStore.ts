@@ -36,6 +36,7 @@ export const useConfigStore = defineStore('config', () => {
     return value < 10 ? '0' + value : value;
   };
 
+  // 12 hr
   const formatTime1 = (number: number) => {
     // Convert the integer to a zero-padded string (if necessary)
     const timeStr = number.toString().padStart(6, '0');
@@ -57,6 +58,21 @@ export const useConfigStore = defineStore('config', () => {
 
     // Return formatted time string
     return `${hours}:${minutes}:${seconds} ${period}`;
+  }
+  // 24 hr
+  const formatTime2 = (number: number) => {
+    // Extract hours, minutes, and seconds from the number
+    let hours = Math.floor(number / 10000);
+    let minutes = Math.floor((number % 10000) / 100);
+    let seconds = number % 100;
+
+    // Format with leading zeros if needed
+    let formattedHours = hours.toString().padStart(2, '0');
+    let formattedMinutes = minutes.toString().padStart(2, '0');
+    let formattedSeconds = seconds.toString().padStart(2, '0');
+
+    // Combine into time string
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   }
 
   // Month Day, Year
@@ -227,6 +243,7 @@ export const useConfigStore = defineStore('config', () => {
     currentTime,
 
     formatTime1,
+    formatTime2,
     formatDate1,
     formatDate2,
     formatDateToInteger,

@@ -6,6 +6,7 @@ import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
+import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
@@ -18,6 +19,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const confirm = useConfirm();
 
   const mainStore = useMainStore()
+  const configStore = useConfigStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()
@@ -174,7 +176,27 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       },
     })
 
-    const SELECTED_INVOICES = invoice_records_data.value
+    const SELECTED_INVOICES = [
+      ...invoice_records_data.value.map((INVOICE) => {
+        const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
+        const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+
+        return {
+          ...INVOICE,
+          DETAILS: {
+            ...INVOICE.DETAILS,
+
+            DATSTP: stampDate,
+            TIMSTP: stampTime,
+            AUTHSG: configStore.authenticatedUser.username || '',
+
+            RUNDAT: stampDate,
+            RUNTME: stampTime,
+            RUNBY:  configStore.authenticatedUser.username || '',
+          }
+        }
+      })
+    ]
 
     const data = {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),

@@ -18,6 +18,6 @@
 
 <template>
   <div>
-    <Button v-if="dialogRef" type="button" label="Save Draft as PDF" @click="dialogRef.data.download()"></Button>
+    <Button v-if="dialogRef" type="button" icon="pi pi-download" label="Download Copy" @click="dialogRef.data.download()"></Button>
   </div>
 </template>

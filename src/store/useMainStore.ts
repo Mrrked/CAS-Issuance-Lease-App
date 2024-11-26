@@ -1011,8 +1011,13 @@ export const useMainStore = defineStore('main', () => {
     })
   }
 
-  const handleGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], callback: Function) => {
+  const handleGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const data = {
+      year: invoiceDate.getFullYear(),
+      month: invoiceDate.getMonth() + 1,
+    }
 
     const PDF_BLOB = handleGenerateInvoicePDFBlob([
       ...SELECTED_INVOICE_RECORDS.map((INVOICE) => {
@@ -1036,7 +1041,7 @@ export const useMainStore = defineStore('main', () => {
           const url = URL.createObjectURL(PDF_BLOB);
           const a = document.createElement('a');
           a.href = url;
-          a.download = '(DRAFTS) Service Invoice.pdf';
+          a.download = `(DRAFTS) Invoice ${data.year}-${data.month}.pdf`;
           a.click();
           URL.revokeObjectURL(url);
         },

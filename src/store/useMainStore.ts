@@ -744,7 +744,6 @@ export const useMainStore = defineStore('main', () => {
         doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
         doc.line(THIRD_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, THIRD_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
         doc.line(FOURTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FOURTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
-        // doc.line(FIFTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FIFTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
         incrementHeight(LARGE_LINE_HEIGHT + TABLE_PADDING)
 
         // TABLE ROWS
@@ -943,7 +942,6 @@ export const useMainStore = defineStore('main', () => {
 
       INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
 
-        // INITIAL
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica");
         doc.setLineWidth(0.01);

@@ -185,6 +185,9 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
   COMPCD: number
   BRANCH: number
 
+  ACNUM: string
+  ACDAT: string
+
   INVOICE_KEY: InvoiceKey
 
   IS_ALREADY_VERIFIED: boolean
@@ -342,11 +345,16 @@ export interface InvoiceRecord {
     COMPANY_NAME:   string
     ADDRESS:        string
     LOGO_URL:       string
-    LOGO_SIZE_INCH:   {
+    LOGO_SIZE_INCH: {
       WIDTH:        number
       HEIGHT:       number
     }
   },
+
+  FOOTER: {
+    ACNUM: string
+    ACDAT: string
+  }
 
   INVOICE_KEY: InvoiceKey
 

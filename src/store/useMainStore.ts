@@ -1,4 +1,4 @@
-import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/PerMonthYear/data';
+import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { InvoiceRecord, LeaseBill } from './types';
 import { defineAsyncComponent, markRaw } from 'vue';
 

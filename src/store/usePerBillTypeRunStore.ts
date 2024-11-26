@@ -1,7 +1,7 @@
 import { Column, InvoiceRecord, LeaseBill, PerBillTypeRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
-import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
+import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
@@ -61,7 +61,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   const handleOpenMainDialogBox = () => {
     console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
-    const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SelectedBillsTableModalFooter.vue'));
+    const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
     const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
       data: {
         table_data : invoice_records_data.value,

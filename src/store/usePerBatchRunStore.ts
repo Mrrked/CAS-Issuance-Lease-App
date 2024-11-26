@@ -4,7 +4,7 @@ import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 import { AxiosResponse } from 'axios';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
-import SelectedBillsTableModal from '../components/Dialog/PerMonthYear/SelectedBillsTableModal.vue';
+import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
@@ -56,8 +56,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const handleOpenMainDialogBox = () => {
     console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
-    const Footer = defineAsyncComponent(() => import('../components/Dialog/PerMonthYear/SelectedBillsTableModalFooter.vue'));
-    const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
+    const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
+    const PerBatchRunDialog = dialog.open(SelectedBillsTableModal, {
       data: {
         table_data : invoice_records_data.value,
         table_column: invoice_records_column.value,
@@ -108,14 +108,14 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             },
             accept: () => {
               handleExecuteIssueFinalInvoices()
-              PerMonthYearDialog.close()
+              PerBatchRunDialog.close()
             },
             reject: () => {
             }
           });
         },
         cancel: () => {
-          PerMonthYearDialog.close()
+          PerBatchRunDialog.close()
         }
       },
       props: {

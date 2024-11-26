@@ -31,6 +31,22 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const invoice_records_data = computed((): InvoiceRecord[] => {
     return mainStore.processInvoiceRecords(billings_data.value, perBatchRunForm.value.invoiceDate)
+    .sort((a,b) => {
+      // COMPCD LOWEST TO HIGHEST
+      if (a.INVOICE_KEY.COMPCD !== b.INVOICE_KEY.COMPCD) {
+        return a.INVOICE_KEY.COMPCD - b.INVOICE_KEY.COMPCD;
+      }
+
+      if (a.INVOICE_KEY.BRANCH !== b.INVOICE_KEY.BRANCH) {
+        return a.INVOICE_KEY.BRANCH - b.INVOICE_KEY.BRANCH;
+      }
+
+      if (a.INVOICE_KEY.DEPTCD !== b.INVOICE_KEY.DEPTCD) {
+        return a.INVOICE_KEY.DEPTCD - b.INVOICE_KEY.DEPTCD;
+      }
+
+      return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
+    })
   })
 
   const invoice_records_column = computed((): Column[] => {
@@ -91,7 +107,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             },
           })
 
-          mainStore.handleGenerateDraftInvoices(invoice_records_data.value, () => loadingDialogRef.close())
+          mainStore.handleGenerateDraftInvoices(invoice_records_data.value, perBatchRunForm.value.invoiceDate, () => loadingDialogRef.close())
         },
         submit: () => {
           confirm.require({
@@ -178,7 +194,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         const url = URL.createObjectURL(PDF_BLOB);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Issued Invoices ${data.year}/${data.month}.pdf`;
+        a.download = `Issued Invoices ${data.year}-${data.month}.pdf`;
         a.click();
         URL.revokeObjectURL(url);
       }

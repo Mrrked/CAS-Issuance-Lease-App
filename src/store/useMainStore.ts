@@ -476,7 +476,7 @@ export const useMainStore = defineStore('main', () => {
 
         // 1ST COLUMN
         if (INVOICE_RECORD.HEADER.LOGO_URL) {
-          doc.addImage(INVOICE_RECORD.HEADER.LOGO_URL, "PNG", startLineX, cursorLineHeight - NORMAL_LINE_HEIGHT, LOGO_WIDTH, LOGO_HEIGHT);
+          doc.addImage(INVOICE_RECORD.HEADER.LOGO_URL, "PNG", startLineX, cursorLineHeight - NORMAL_LINE_HEIGHT, LOGO_WIDTH, LOGO_HEIGHT, undefined, "FAST");
         }
 
         // doc.line(startLineX + LOGO_WIDTH , cursorLineHeight - NORMAL_LINE_HEIGHT, startLineX + LOGO_WIDTH, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )

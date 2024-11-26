@@ -6,7 +6,7 @@ import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
-import html2pdf from 'html2pdf.js';
+import jsPDF from 'jspdf';
 import { useConfigStore } from './useConfigStore';
 import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
@@ -194,7 +194,7 @@ export const useMainStore = defineStore('main', () => {
       // NEW INVOICE GROUP
       else {
         const selectedProject = coreDataStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
-        const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS
+        const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS || COMPANIES[0]
 
         const [CLIENT_ADDRESS_1, CLIENT_ADDRESS_2] = getSplitClientAddress(bill.CLIENT_ADDRESS)
 
@@ -227,7 +227,7 @@ export const useMainStore = defineStore('main', () => {
             // COMPANY INFO
             COMPCD:         bill.COMPCD || 0,
             TELNO:          selectedCompany?.TEL_NO || '',
-            REGTIN:         selectedCompany?.TIN    || '',
+            REGTIN:         selectedCompany?.TIN || '',
 
             // CLIENT INFO
             CLTNME:         bill.CLIENT_NAME || '',
@@ -438,381 +438,550 @@ export const useMainStore = defineStore('main', () => {
     return [...Object.values(mergedMap)] as InvoiceRecord[]
   }
 
+  const handleGenerateInvoicePDFBlob = (INVOICE_RECORDS: InvoiceRecord[]):Blob => {
+    console.log('GENERATE PDF BLOB FOR INVOICES', INVOICE_RECORDS)
 
-  const handleGeneratePage = (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
-    console.log('GEN. DRAFT FOR SELECTED INVOICE', SELECTED_INVOICE_RECORD)
+    const generateDoc = (INVOICE_RECORDS: InvoiceRecord[]): jsPDF => {
 
-    const CONTENT_VALUES: InvoiceRecord = SELECTED_INVOICE_RECORD
+      const VERY_SMALL_LINE_HEIGHT = 0.14
+      const SMALL_LINE_HEIGHT = 0.15
+      const NORMAL_LINE_HEIGHT = SMALL_LINE_HEIGHT + 0.05
+      const LARGE_LINE_HEIGHT = SMALL_LINE_HEIGHT + 0.05
 
-    var TABLE_ITEMS_COMPONENT = ``
+      const INVOICE_TEXT_FONT_SIZE = 18
+      const TITLE_TEXT_FONT_SIZE = 12
+      const NORMAL_TEXT_FONT_SIZE = 10
+      const SMALL_TEXT_FONT_SIZE = 8
+      const VERY_SMALL_TEXT_FONT_SIZE = 6
 
-    CONTENT_VALUES.ITEM_BREAKDOWNS.forEach((item) => {
-      TABLE_ITEMS_COMPONENT += `
-        <div class="grid grid-cols-16">
-          <div class="col-span-9 px-1 text-wrap">
-            ${ item.ITEM || '-' }
-          </div>
-          <div class="col-span-1 px-1 text-center text-wrap">
-            ${ item.QTY || '0' }
-          </div>
-          <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00' }
-          </div>
-          <div class="col-span-2 px-1 text-right text-wrap">
-            ${ item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00' }
-          </div>
-          <div class="col-span-2 px-1 text-right text-wrap ">
-            ${ item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00' }
-          </div>
-        </div>
-      `
-    })
+      const HEADER_HEIGHT = 0.9
+      const FOOTER_HEIGHT = ( VERY_SMALL_LINE_HEIGHT * 3 ) + ( NORMAL_LINE_HEIGHT * 2 )
 
-    const PAGE = `
-      <div class="
-          min-w-[816px] h-[1056px] min-h-[1056px] max-w-[1056px] p-[72px] gap-[12px] text-12 font-helvetica
-          flex flex-col text-black bg-white
-        "
-      >
-        <!-- HEADER -->
-        <div class="grid grid-cols-8 -mt-4 min-h-24 max-h-24">
-          <!-- LEFT -->
-          <div class="flex items-center h-full col-span-5">
-            <div class="flex items-center justify-center h-full resize-none shrink-0 w-fit">
-              <img src="${ CONTENT_VALUES.HEADER.LOGO_URL }" alt="logo" class="w-20">
-            </div>
-            <div class="flex flex-col items-start justify-center flex-1 h-full gap-1 pl-4 -mt-4 resize-none shrink-0">
-              <div class="font-semibold text-16 tracking-tighter">
-                ${ CONTENT_VALUES.HEADER.COMPANY_NAME }
-              </div>
-              <div class="flex flex-col tracking-tighter text-10">
-                <div class="text-wrap">
-                  ${ CONTENT_VALUES.HEADER.ADDRESS }
-                </div>
-                <div>
-                  TEL. NO. ${ CONTENT_VALUES.DETAILS.TELNO }
-                </div>
-                <div>
-                  VAT REG TIN: ${ CONTENT_VALUES.DETAILS.REGTIN }
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- RIGHT -->
-          <div class="flex flex-col items-end justify-center h-full col-span-3 -mt-2">
-            <div class="font-semibold text-20 -mt-[12px]">
-              <span class='text-18'>
-                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_NAME }
-              </span>
-              <span class='text-20'>
-                INVOICE
-              </span>
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                No.
-              </div>
-              <div>
-                ${ CONTENT_VALUES.INVOICE_KEY.INVOICE_NUMBER }
-              </div>
-            </div>
-            <div class="flex gap-3 font-semibold text-14">
-              <div>
-                Date :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.DATVAL ? configStore.formatDate2(CONTENT_VALUES.DETAILS.DATVAL) :  'xxxx/xx/xx' }
-              </div>
-            </div>
-          </div>
-        </div>
+      const incrementHeight = (num: number = NORMAL_LINE_HEIGHT) => {cursorLineHeight += num}
 
-        <!-- DESCRIPTION -->
-        <div class="grid grid-cols-7 gap-10 mt-1">
-          <div class="flex flex-col col-span-4 shrink-0">
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                SOLD TO
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.CLTNME }
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                ADDRESS
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.RADDR1 }${ CONTENT_VALUES.DETAILS.RADDR2 }
-              </div>
-            </div>
-            <div class="flex items-end gap-3">
-              <div class="w-24 font-semibold">
-                TIN
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.CLTTIN }
-              </div>
-            </div>
-          </div>
-          <div class="flex flex-col col-span-3 shrink-0">
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                CLIENT KEY
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.CLTKEY }
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                PROJECT
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.PRJNAM }
-              </div>
-            </div>
-            <div class="flex items-start gap-3">
-              <div class="w-24 font-semibold shrink-0">
-                UNIT
-              </div>
-              <div>
-                :
-              </div>
-              <div>
-                ${ CONTENT_VALUES.DETAILS.PBLKEY.slice(3,) }
-              </div>
-            </div>
-          </div>
-        </div>
+      const handleCreateNewPage = () => {
+        doc.addPage(pageFormat, pageOrientation)
 
-        <!-- TABLE -->
-        <div class="flex flex-col h-full mt-2">
-          <!-- THEAD -->
-          <div class="grid grid-cols-16 font-bold border border-black" style="line-height: 11px;">
-            <div class="col-span-9 px-1 pb-3 border-r border-black -pt-4 text-wrap">
-              Item / Description
-            </div>
-            <div class="col-span-1 px-1 pb-3 text-center border-r border-black -pt-4 text-wrap">
-              Qty
-            </div>
-            <div class="col-span-2 px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              Unit Cost
-            </div>
-            <div class="col-span-2 px-1 pb-3 text-right border-r border-black -pt-4 text-wrap">
-              VAT Amount
-            </div>
-            <div class="col-span-2 px-1 pb-3 text-right -pt-4 text-wrap">
-              Amount
-            </div>
-          </div>
-          <!-- TBODY -->
-          <div class="flex flex-col justify-between flex-1 border-b border-black border-x">
-            <!-- ROWS -->
-            <div class="flex flex-col">
-              ${ TABLE_ITEMS_COMPONENT }
-            </div>
+        cursorLineHeight = marginTop + NORMAL_LINE_HEIGHT
+      }
 
-            <!-- BOTTOM -->
-            <div class="flex flex-col gap-1">
+      const handleAddInvoiceHeader = (INVOICE_RECORD: InvoiceRecord) => {
+        const BOTTOM_MARGIN_HEIGHT = NORMAL_LINE_HEIGHT
 
-              <!-- 1 -->
-              <div class="grid items-end grid-cols-2 gap-8 px-2 pb-3 tracking-normal">
+        const LOGO_WIDTH  = 0.8
+        const LOGO_HEIGHT = HEADER_HEIGHT
 
-                <!-- COL 1 -->
-                <div class="flex flex-col">
+        const HEADER_START_HEIGHT = cursorLineHeight
 
-                  <!-- BREAKDOWN -->
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      VATable Sales
-                    </div>
-                    <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATSAL) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      VAT Amount
-                    </div>
-                    <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      VAT Exempt Sales
-                    </div>
-                    <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATEXM) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      Zero-Rated Sales
-                    </div>
-                    <div class="font-bold text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.ZERSAL) : '0.00' }
-                    </div>
-                  </div>
-                </div>
+        // 1ST COLUMN
+        if (INVOICE_RECORD.HEADER.LOGO_URL) {
+          doc.addImage(INVOICE_RECORD.HEADER.LOGO_URL, "PNG", startLineX, cursorLineHeight - NORMAL_LINE_HEIGHT, LOGO_WIDTH, LOGO_HEIGHT);
+        }
 
-                <!-- COL 2 -->
-                <div class="flex flex-col">
+        // doc.line(startLineX + LOGO_WIDTH , cursorLineHeight - NORMAL_LINE_HEIGHT, startLineX + LOGO_WIDTH, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )
 
-                  <div class="grid grid-cols-2 mt-5">
-                    <div class="text-left">
-                      Total Sales
-                    </div>
-                    <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.TOTSAL) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      Less: VAT
-                    </div>
-                    <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="mt-2 border-t border-black"></div>
+        // 2ND COLUMN
+        const SECOND_COL_START_X = startLineX + LOGO_WIDTH + 0.2
+        const SECOND_COL_WIDTH_X = 4.25
+        const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
 
-                  <div class="grid grid-cols-2 -mt-2">
-                    <div class="text-left">
-                      Amount: Net of VAT
-                    </div>
-                    <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.NETVAT) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      Add: VAT
-                    </div>
-                    <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.VATAMT) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="grid grid-cols-2">
-                    <div class="text-left">
-                      Less: Withholding Tax
-                    </div>
-                    <div class="text-right">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.PRDTAX) : '0.00' }
-                    </div>
-                  </div>
-                  <div class="mt-2 border-t border-black"></div>
+        // doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )
 
-                  <div class="grid grid-cols-5 -mt-2">
-                    <div class="col-span-2 text-left">
-                      Total Amount Due
-                    </div>
-                    <div class="text-right">
-                      PHP
-                    </div>
-                    <div class="col-span-2 text-right font-bold">
-                      ${ CONTENT_VALUES.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(CONTENT_VALUES.TOTAL_BREAKDOWN.AMTDUE) : '0.00' }
-                    </div>
-                  </div>
-                </div>
-              </div>
+        doc.setFontSize(TITLE_TEXT_FONT_SIZE + 1)
+        doc.setFont("helvetica", "bold");
+        doc.text(INVOICE_RECORD.HEADER.COMPANY_NAME, SECOND_COL_START_X, cursorLineHeight - 0.05, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
-              <!-- MODE OF PAYMENT -->
-              <!-- <div class="flex flex-col pb-3 tracking-normal">
-                <div class="border-y border-black w-full px-2 pb-3 font-bold">
-                  MODE OF PAYMENT
-                </div>
-                <div class="h-32">
+        const companyNameWidth = doc.getTextWidth(INVOICE_RECORD.HEADER.COMPANY_NAME || '-')
 
-                </div>
-              </div> -->
-            </div>
+        if (companyNameWidth > SECOND_COL_WIDTH_X) {
+          const times = companyNameWidth / SECOND_COL_WIDTH_X
+          incrementHeight(SMALL_LINE_HEIGHT + (0.10 * Math.ceil(times)))
+        } else {
+          incrementHeight(SMALL_LINE_HEIGHT)
+        }
 
-          </div>
-        </div>
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal");
+        doc.text(INVOICE_RECORD.HEADER.ADDRESS, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
-        <div class="flex justify-end mt-[15px] -mb-[30px]">
-          <div class="flex flex-col w-36 font-bold">
-            <div class="text-center">
-              ${ CONTENT_VALUES.DETAILS.AUTHSG || 'xxxxxxxx' }
-            </div>
-            <div class="mt-2 border-t border-black"></div>
-            <div class="text-center -mt-2">
-              Authorized Signature
-            </div>
-          </div>
-        </div>
+        const companyAddressWidth = doc.getTextWidth(INVOICE_RECORD.HEADER.ADDRESS || '-')
 
-        <!-- FOOTER -->
-        <div class="flex flex-col tracking-normal">
-          <div>
-            Acknowledgement Certificate No. : ${ CONTENT_VALUES.DETAILS.RECTYP }${ CONTENT_VALUES.DETAILS.ORNUM }
-          </div>
-          <div>
-            Date Issued : ${ CONTENT_VALUES.DETAILS.DATVAL ? configStore.formatDate2(CONTENT_VALUES.DETAILS.DATVAL) : 'xxxx/xx/xx' }
-          </div>
-          <div>
-            Series Range : ${ CONTENT_VALUES.INVOICE_KEY.SERIES_RANGE || 'xxxxxxxxxxxxxxx - xxxxxxxxxxxxxxx' }
-          </div>
-          <div>
-            Timestamp : ${ CONTENT_VALUES.DETAILS.DATSTP || 'xxxx/xx/xx'  } ${ CONTENT_VALUES.DETAILS.TIMSTP || 'xx:xx:xx' }
-          </div>
-        </div>
-      </div>
-    `
+        if (companyAddressWidth > SECOND_COL_WIDTH_X) {
+          const times = companyAddressWidth / SECOND_COL_WIDTH_X
+          incrementHeight(SMALL_LINE_HEIGHT + (0.08 * Math.ceil(times)))
+        } else {
+          incrementHeight(SMALL_LINE_HEIGHT)
+        }
 
-    return PAGE
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal");
+        doc.text('TEL. NO. ' + INVOICE_RECORD.DETAILS.TELNO, SECOND_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight(SMALL_LINE_HEIGHT)
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal");
+        doc.text('VAT REG TIN: ' + INVOICE_RECORD.DETAILS.REGTIN, SECOND_COL_START_X, cursorLineHeight, { align: 'left' })
+
+        // 3RD COLUMN
+        cursorLineHeight = HEADER_START_HEIGHT - 0.05
+
+        doc.setFontSize(INVOICE_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold");
+        doc.text("INVOICE", endLineX, cursorLineHeight, { align: 'right' })
+        const invoiceTextWidth = doc.getTextWidth('INVOICE')
+        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
+        doc.setFont("helvetica", "bold");
+        doc.text(INVOICE_RECORD.INVOICE_KEY.INVOICE_NAME, endLineX - invoiceTextWidth - 0.1, cursorLineHeight - 0.01, { align: 'right' })
+        incrementHeight(LARGE_LINE_HEIGHT + 0.075)
+
+        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
+        doc.setFont("helvetica", "bold");
+        doc.text("No.   " + INVOICE_RECORD.INVOICE_KEY.INVOICE_NUMBER, endLineX, cursorLineHeight, { align: 'right' })
+        incrementHeight(LARGE_LINE_HEIGHT + 0.05)
+
+        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
+        doc.setFont("helvetica", "bold");
+        doc.text("Date :   " + (INVOICE_RECORD.DETAILS.DATVAL ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), endLineX, cursorLineHeight, { align: 'right' })
+
+        cursorLineHeight = HEADER_START_HEIGHT
+        incrementHeight(HEADER_HEIGHT)
+
+        // BOTTOM MARGIN
+        incrementHeight(BOTTOM_MARGIN_HEIGHT)
+
+      }
+
+      const handleAddInvoiceClientDescription = (INVOICE_RECORD: InvoiceRecord): number => {
+
+        var HIGHEST_CURSOR_LINE_HEIGHT = 0
+        var TEXT_WIDTH = 0
+        const initialCursorLineHeight = cursorLineHeight
+
+        const LABEL_WIDTH = 0.8
+
+        const FIRST_COL_START_X  = startLineX
+        const FIRST_COL_END_X    = FIRST_COL_START_X + LABEL_WIDTH
+
+        const SECOND_COL_START_X = FIRST_COL_END_X + 0.2
+        const SECOND_COL_WIDTH_X = 3.6
+        const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
+
+        const THIRD_COL_START_X  = SECOND_COL_END_X + 0.2
+        const THIRD_COL_END_X    = THIRD_COL_START_X + LABEL_WIDTH
+
+        const FOURTH_COL_START_X = THIRD_COL_END_X + 0.2
+        const FOURTH_COL_WIDTH_X = endLineX - FOURTH_COL_START_X
+        const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
+
+        // 1ST COLUMN
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("SOLD TO ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
+        console.log('LINE HEIGHT', doc.getLineHeight());
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(INVOICE_RECORD.DETAILS.CLTNME, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTNME || '-')
+        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("ADDRESS ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
+
+        const CLIENT_ADDRESS = INVOICE_RECORD.DETAILS.RADDR1 + INVOICE_RECORD.DETAILS.RADDR2
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(CLIENT_ADDRESS, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(CLIENT_ADDRESS || '-')
+        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("TIN ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(INVOICE_RECORD.DETAILS.CLTTIN, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTTIN || '-')
+        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+        if (cursorLineHeight > HIGHEST_CURSOR_LINE_HEIGHT) {
+          HIGHEST_CURSOR_LINE_HEIGHT = cursorLineHeight
+        }
+
+
+        // 2ND COLUMN
+
+        cursorLineHeight = initialCursorLineHeight
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("CLIENT KEY ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(INVOICE_RECORD.DETAILS.CLTKEY, FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTKEY || '-')
+        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("PROJECT ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(INVOICE_RECORD.DETAILS.PRJNAM, FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PRJNAM || '-')
+        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("UNIT ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,), FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,) || '-')
+        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
+          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
+        } else {
+          incrementHeight()
+        }
+
+        if (cursorLineHeight > HIGHEST_CURSOR_LINE_HEIGHT) {
+          console.log('3 ',cursorLineHeight);
+          HIGHEST_CURSOR_LINE_HEIGHT = cursorLineHeight
+        }
+
+        cursorLineHeight = HIGHEST_CURSOR_LINE_HEIGHT
+
+        return HIGHEST_CURSOR_LINE_HEIGHT
+      }
+
+      const handleAddInvoiceBreakdownTable = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number) => {
+
+        const TABLE_START_Y = cursorLineHeight;
+        const TABLE_END_Y = cursorLineHeight + HEIGHT_VACANT_FOR_BODY;
+
+        const COLUMN_HEIGHT = 0.3
+
+        const TABLE_PADDING = 0.075
+
+
+        const FIRST_COL_START_X  = startLineX + TABLE_PADDING
+        const FIRST_COL_WIDTH_X  = 3.25
+        const FIRST_COL_END_X    = FIRST_COL_START_X + FIRST_COL_WIDTH_X + TABLE_PADDING
+
+        const SECOND_COL_WIDTH_X = 0.5
+        const SECOND_COL_START_X = FIRST_COL_END_X + (SECOND_COL_WIDTH_X / 2)
+        const SECOND_COL_END_X   = FIRST_COL_END_X + SECOND_COL_WIDTH_X
+
+        const remainingWidth = endLineX - SECOND_COL_END_X
+
+        const THIRD_COL_START_X  = SECOND_COL_END_X
+        const THIRD_COL_WIDTH_X  = remainingWidth / 3
+        const THIRD_COL_END_X    = THIRD_COL_START_X + THIRD_COL_WIDTH_X
+
+        const FOURTH_COL_START_X = THIRD_COL_END_X
+        const FOURTH_COL_WIDTH_X = remainingWidth / 3
+        const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
+
+        const FIFTH_COL_START_X  = FOURTH_COL_END_X
+        const FIFTH_COL_WIDTH_X  = endLineX - FIFTH_COL_START_X
+        const FIFTH_COL_END_X    = FIFTH_COL_START_X + FIFTH_COL_WIDTH_X
+
+        doc.rect(startLineX, TABLE_START_Y, contentWidth, HEIGHT_VACANT_FOR_BODY );
+
+        // TABLE COLUMN HEADER
+        incrementHeight()
+        doc.line(startLineX, TABLE_START_Y + COLUMN_HEIGHT, endLineX, TABLE_START_Y + COLUMN_HEIGHT );
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold");
+
+        doc.text("Item / Description", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text("Qty", SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
+        doc.text("Unit Cost", THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text("VAT Amount", FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text("Amount", FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+
+        doc.line(FIRST_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FIRST_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        doc.line(THIRD_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, THIRD_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        doc.line(FOURTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FOURTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        // doc.line(FIFTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FIFTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        incrementHeight(LARGE_LINE_HEIGHT + TABLE_PADDING)
+
+        // TABLE ROWS
+        var TEXT_WIDTH = 0
+
+        // MAX WITH FOOTER = 18 - 21
+        // MAX WITHOUT FOOTER = 25 - 28
+
+        INVOICE_RECORD.ITEM_BREAKDOWNS.forEach((item) => {
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text(`${item.QTY || 0}`, SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
+          doc.text(item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00', THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00', FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00', FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.ITEM || '-', FIRST_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FIRST_COL_WIDTH_X })
+          TEXT_WIDTH = doc.getTextWidth(item.ITEM || '-')
+          if (TEXT_WIDTH > FIRST_COL_WIDTH_X) {
+            const times = TEXT_WIDTH / FIRST_COL_WIDTH_X
+            incrementHeight(NORMAL_LINE_HEIGHT + (NORMAL_LINE_HEIGHT * times) - TABLE_PADDING)
+          } else {
+            incrementHeight()
+          }
+        })
+
+
+        // TOTAL BREAKDOWN
+
+        const GAP = 0.25
+        const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
+
+        const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * 5) + TABLE_PADDING
+        const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
+
+        const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
+        const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
+        const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
+
+        const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
+        const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
+        const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
+
+
+        const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
+        const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
+        const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
+
+        const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
+        const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
+        const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
+
+
+        // FIRST COLUMN
+        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal");
+
+        incrementHeight()
+        incrementHeight()
+        doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+
+        // SECOND COLUMN
+        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold");
+
+        incrementHeight()
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+
+        // THIRD COLUMN
+        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal");
+
+        doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        incrementHeight()
+        doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+        doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
+        incrementHeight()
+
+        // FOURTH COLUMN
+        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold");
+
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+        incrementHeight()
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        incrementHeight()
+
+      }
+
+      const handleAddInvoiceFooter = (INVOICE_RECORD: InvoiceRecord) => {
+
+        cursorLineHeight = pageSizeY - marginTop - FOOTER_HEIGHT
+
+        const PADDING_X = 0.2
+        const SIGNATURE_WIDTH = 1.8
+
+        const SIGNATURE_START_X = endLineX - SIGNATURE_WIDTH - PADDING_X
+        const SIGNATURE_END_X = endLineX - PADDING_X
+        const SIGNATURE_CENTER_X = SIGNATURE_END_X - ( SIGNATURE_WIDTH / 2)
+
+        doc.setFontSize(TITLE_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text(INVOICE_RECORD.DETAILS.AUTHSG || 'xxxxxxxx', SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
+        incrementHeight(NORMAL_LINE_HEIGHT)
+
+        doc.line(SIGNATURE_START_X, cursorLineHeight - SMALL_LINE_HEIGHT, SIGNATURE_END_X, cursorLineHeight - SMALL_LINE_HEIGHT)
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text("Authorized Signature", SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
+        incrementHeight(NORMAL_LINE_HEIGHT)
+
+        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text("Acknowledgement Certificate No. : xxxxxxxxxxxxxxx", startLineX, cursorLineHeight, { align: 'left' })
+        incrementHeight(VERY_SMALL_LINE_HEIGHT)
+
+        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text("Date Issued : " + (INVOICE_RECORD.DETAILS.DATVAL ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), startLineX, cursorLineHeight, { align: 'left' })
+        incrementHeight(VERY_SMALL_LINE_HEIGHT)
+
+        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text("Series Range : " + INVOICE_RECORD.INVOICE_KEY.SERIES_RANGE, startLineX, cursorLineHeight, { align: 'left' })
+        incrementHeight(VERY_SMALL_LINE_HEIGHT)
+
+        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text("Timestamp : " + (INVOICE_RECORD.DETAILS.DATSTP ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.TIMSTP ? configStore.formatTime2(INVOICE_RECORD.DETAILS.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
+      }
+
+      const pageFormat = 'letter'
+      const pageOrientation = 'portrait'
+
+      const doc = new jsPDF({
+        orientation:  pageOrientation,
+        unit:         "in",
+        format:       pageFormat,         // Letter size (8.5 x 11 inches)
+      });
+
+
+      const pageSizeX = 8.5
+      const pageSizeY = 11
+
+      const marginLeft = 0.5;
+      const marginTop = 0.75;
+      const contentWidth = pageSizeX - (marginLeft * 2);    // Width of writable content area
+      const contentHeight = pageSizeY - (marginTop * 2);    // Height of writable content area
+
+      var cursorLineHeight = marginTop + NORMAL_LINE_HEIGHT
+
+      const startLineX = marginLeft
+      const endLineX = pageSizeX - marginLeft
+
+
+      INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
+
+        // INITIAL
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica");
+        doc.setLineWidth(0.01);
+
+        handleAddInvoiceHeader(INVOICE_RECORD)
+
+        const CLIENT_DESC_HEIGHT = handleAddInvoiceClientDescription(INVOICE_RECORD)
+
+        handleAddInvoiceBreakdownTable(INVOICE_RECORD, pageSizeY - ( CLIENT_DESC_HEIGHT + NORMAL_LINE_HEIGHT + 0.3 + NORMAL_LINE_HEIGHT + FOOTER_HEIGHT + marginTop ))
+
+        handleAddInvoiceFooter(INVOICE_RECORD)
+
+        if (index + 1 < INVOICE_RECORDS.length) {
+          handleCreateNewPage()
+        }
+      })
+
+      return doc
+    }
+
+    return generateDoc(INVOICE_RECORDS).output('blob')
   }
 
-  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
+  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const PDF_BLOB = handleGenerateInvoicePDFBlob([{
+      ...SELECTED_INVOICE_RECORD,
+      DETAILS: {
+        ...SELECTED_INVOICE_RECORD.DETAILS,
+        DATVAL: 0
+      }
+    }])
+
+    callback()
 
     const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
-    const loadingDialogRef = dialog.open(LoadingModal, {
-      data: {
-        label: 'Generating Draft...'
-      },
-      props: {
-        style: {
-          paddingTop: '1.5rem',
-        },
-        showHeader: false,
-        modal: true
-      },
-    })
-
-    const PAGE = handleGeneratePage(SELECTED_INVOICE_RECORD)
-
-    const CONFIGURATION = {
-      margin: 0,
-      filename: 'DRAFT - ' + 'Service Invoice' + ' Single',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-    const PDF_BLOB = await html2pdf()
-      .set(CONFIGURATION)
-      .from(PAGE)
-      .output('blob')
-
-    loadingDialogRef.close()
-
     const ShowDraftInvoice = dialog.open(PreviewPDFModal, {
       data: {
         pdfBlob: PDF_BLOB,
@@ -820,7 +989,7 @@ export const useMainStore = defineStore('main', () => {
           const url = URL.createObjectURL(PDF_BLOB);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'DRAFT - ' + 'Service Invoice' + ' Single.pdf';
+          a.download = '(DRAFT) Service Invoice.pdf';
           a.click();
           URL.revokeObjectURL(url);
         },
@@ -844,6 +1013,54 @@ export const useMainStore = defineStore('main', () => {
     })
   }
 
+  const handleGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], callback: Function) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const PDF_BLOB = handleGenerateInvoicePDFBlob([
+      ...SELECTED_INVOICE_RECORDS.map((INVOICE) => {
+        return {
+          ...INVOICE,
+          DETAILS: {
+            ...INVOICE.DETAILS,
+            DATVAL: 0
+          }
+        }
+      })
+    ])
+
+    callback()
+
+    const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
+    const ShowDraftInvoices = dialog.open(PreviewPDFModal, {
+      data: {
+        pdfBlob: PDF_BLOB,
+        download: () => {
+          const url = URL.createObjectURL(PDF_BLOB);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = '(DRAFT) Service Invoice ' + perBatchRunStore.perBatchRunForm.invoiceDate.toLocaleDateString() + '.pdf';
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        submit: () => {
+        },
+        cancel: () => {
+          ShowDraftInvoices.close()
+        }
+      },
+      props: {
+        header: 'Preview Draft Invoices',
+        style: {
+          width: '75vw'
+        },
+        showHeader: true,
+        modal: true,
+      },
+      templates: {
+        footer: markRaw(Footer)
+      },
+    })
+  }
 
   const handleExecuteSearch = (tab: number ) => {
 
@@ -960,10 +1177,10 @@ export const useMainStore = defineStore('main', () => {
     closeLoading: Function
   ) => {
     console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
-
     axios.post('issuance_lease/invoice/', data)
-    .then((response) => {
-      callback(response)
+
+    .then(async (response) => {
+      await callback(response)
     })
     .catch(configStore.handleError)
     .finally(() => {
@@ -979,7 +1196,9 @@ export const useMainStore = defineStore('main', () => {
     processBillings,
     processInvoiceRecords,
 
+    handleGenerateInvoicePDFBlob,
     handleGenerateDraftInvoice,
+    handleGenerateDraftInvoices,
 
     handleExecuteSearch,
     handleExecuteReset,

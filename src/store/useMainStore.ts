@@ -206,9 +206,10 @@ export const useMainStore = defineStore('main', () => {
           BILLINGS:         [ bill ],
 
           HEADER: {
-            COMPANY_NAME:   selectedCompany?.CONAME || '',
-            ADDRESS:        selectedCompany?.ADDRESS || '',
-            LOGO_URL:       selectedCompany?.IMG_URL || '',
+            COMPANY_NAME:   selectedCompany.CONAME,
+            ADDRESS:        selectedCompany.ADDRESS,
+            LOGO_URL:       selectedCompany.IMG_URL,
+            LOGO_SIZE_INCH: selectedCompany.IMG_SIZE_INCH
           },
 
           INVOICE_KEY:      bill.INVOICE_KEY,
@@ -226,8 +227,8 @@ export const useMainStore = defineStore('main', () => {
 
             // COMPANY INFO
             COMPCD:         bill.COMPCD || 0,
-            TELNO:          selectedCompany?.TEL_NO || '',
-            REGTIN:         selectedCompany?.TIN || '',
+            TELNO:          selectedCompany.TEL_NO,
+            REGTIN:         selectedCompany.TIN,
 
             // CLIENT INFO
             CLTNME:         bill.CLIENT_NAME || '',
@@ -468,8 +469,8 @@ export const useMainStore = defineStore('main', () => {
       const handleAddInvoiceHeader = (INVOICE_RECORD: InvoiceRecord) => {
         const BOTTOM_MARGIN_HEIGHT = NORMAL_LINE_HEIGHT
 
-        const LOGO_WIDTH  = 0.8
-        const LOGO_HEIGHT = HEADER_HEIGHT
+        const LOGO_WIDTH  = INVOICE_RECORD.HEADER.LOGO_SIZE_INCH.WIDTH
+        const LOGO_HEIGHT = INVOICE_RECORD.HEADER.LOGO_SIZE_INCH.HEIGHT
 
         const HEADER_START_HEIGHT = cursorLineHeight
 

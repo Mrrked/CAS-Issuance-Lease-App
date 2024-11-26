@@ -342,6 +342,10 @@ export interface InvoiceRecord {
     COMPANY_NAME:   string
     ADDRESS:        string
     LOGO_URL:       string
+    LOGO_SIZE_INCH:   {
+      WIDTH:        number
+      HEIGHT:       number
+    }
   },
 
   INVOICE_KEY: InvoiceKey

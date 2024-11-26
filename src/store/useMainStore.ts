@@ -1038,7 +1038,7 @@ export const useMainStore = defineStore('main', () => {
           const url = URL.createObjectURL(PDF_BLOB);
           const a = document.createElement('a');
           a.href = url;
-          a.download = '(DRAFT) Service Invoice ' + perBatchRunStore.perBatchRunForm.invoiceDate.toLocaleDateString() + '.pdf';
+          a.download = '(DRAFTS) Service Invoice.pdf';
           a.click();
           URL.revokeObjectURL(url);
         },
@@ -1104,7 +1104,7 @@ export const useMainStore = defineStore('main', () => {
         // }
         break;
 
-      // Per Year / Month (BATCH)
+      // Per Batch
       case 2:
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
           const loadingDialogRef = dialog.open(LoadingModal, {
@@ -1158,7 +1158,7 @@ export const useMainStore = defineStore('main', () => {
         }
         break;
 
-      // Per Year / Month (BATCH)
+      // Per Batch
       case 2:
         perBatchRunStore.perBatchRunForm.invoiceDate = new Date()
         break;
@@ -1178,7 +1178,6 @@ export const useMainStore = defineStore('main', () => {
   ) => {
     console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
-
     .then(async (response) => {
       await callback(response)
     })

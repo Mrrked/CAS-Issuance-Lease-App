@@ -51,6 +51,11 @@ export const useMainStore = defineStore('main', () => {
   }
 
   const getItemName = (bill: LeaseBill) => {
+    const BT_UNIQUE_STYPE = [1, 4, 2]
+
+    const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+      bill.SALTYP === 'VAT'  ? 'V' :
+      bill.SALTYP === 'NVAT' ? 'N' : ''
 
     let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
 
@@ -60,7 +65,11 @@ export const useMainStore = defineStore('main', () => {
       bill.BDESC,
       dateObj.toLocaleString('default', { month: 'long' }),
       dateObj.getFullYear(),
-      'VATable'
+      BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
+        'Zero-Rated' :
+      BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
+        'VAT Exempt' :
+        'VATable'
     ]
 
     return `${bill_desc} ( ${month} ${year} ) ${type}`
@@ -90,6 +99,8 @@ export const useMainStore = defineStore('main', () => {
 
       if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
         ZERO_RATE = TEMP
+      } else if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N') {
+        VAT_EXEMPT = TEMP
       } else {
         VAT_SALES = TEMP
       }
@@ -213,6 +224,11 @@ export const useMainStore = defineStore('main', () => {
           },
 
           INVOICE_KEY:      bill.INVOICE_KEY,
+
+          FOOTER: {
+            ACNUM:          bill.ACNUM,
+            ACDAT:          bill.ACDAT,
+          },
 
           // CIRCLTPF
           DETAILS: {
@@ -898,12 +914,12 @@ export const useMainStore = defineStore('main', () => {
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text("Acknowledgement Certificate No. : xxxxxxxxxxxxxxx", startLineX, cursorLineHeight, { align: 'left' })
+        doc.text(INVOICE_RECORD.FOOTER.ACNUM || "Acknowledgement Certificate No. : xxxxxxxxxxxxxxx", startLineX, cursorLineHeight, { align: 'left' })
         incrementHeight(VERY_SMALL_LINE_HEIGHT)
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text("Date Issued : " + (INVOICE_RECORD.DETAILS.DATVAL ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), startLineX, cursorLineHeight, { align: 'left' })
+        doc.text(INVOICE_RECORD.FOOTER.ACDAT || "Date Issued : xxxx/xx/xx", startLineX, cursorLineHeight, { align: 'left' })
         incrementHeight(VERY_SMALL_LINE_HEIGHT)
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
@@ -941,6 +957,7 @@ export const useMainStore = defineStore('main', () => {
 
 
       INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
+        console.log(INVOICE_RECORD.BILLINGS.map(bill => bill.SALTYP));
 
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica");
@@ -968,11 +985,21 @@ export const useMainStore = defineStore('main', () => {
   const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
+    const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+
     const PDF_BLOB = handleGenerateInvoicePDFBlob([{
       ...SELECTED_INVOICE_RECORD,
       DETAILS: {
         ...SELECTED_INVOICE_RECORD.DETAILS,
-        DATVAL: 0
+
+        DATSTP: stampDate,
+        TIMSTP: stampTime,
+        AUTHSG: configStore.authenticatedUser.username || '',
+
+        RUNDAT: stampDate,
+        RUNTME: stampTime,
+        RUNBY:  configStore.authenticatedUser.username || '',
       }
     }])
 
@@ -1020,11 +1047,21 @@ export const useMainStore = defineStore('main', () => {
 
     const PDF_BLOB = handleGenerateInvoicePDFBlob([
       ...SELECTED_INVOICE_RECORDS.map((INVOICE) => {
+        const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
+        const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+
         return {
           ...INVOICE,
           DETAILS: {
             ...INVOICE.DETAILS,
-            DATVAL: 0
+
+            DATSTP: stampDate,
+            TIMSTP: stampTime,
+            AUTHSG: configStore.authenticatedUser.username || '',
+
+            RUNDAT: stampDate,
+            RUNTME: stampTime,
+            RUNBY:  configStore.authenticatedUser.username || '',
           }
         }
       })

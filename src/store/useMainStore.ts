@@ -75,6 +75,14 @@ export const useMainStore = defineStore('main', () => {
     return `${bill_desc} ( ${month} ${year} ) ${type}`
   }
 
+  const getVATDESC = (bill: LeaseBill) => {
+    if (bill.CLIENT_PIBIG === 'V')
+      return 'VATABLE INSTALLMENT SALE'
+    if (bill.CLIENT_PIBIG === 'I')
+      return 'VAT-EXEMPTED INSTALLMENT SALE'
+    return ''
+  }
+
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
@@ -111,8 +119,8 @@ export const useMainStore = defineStore('main', () => {
         ...bill,
         INDEX: index++,
 
-        UNIT_COST: TEMP,
-        AMOUNT: GROSS,
+        UNIT_COST: TEMP,  //SALE
+        AMOUNT: GROSS,    //SALE + VAT
 
         VAT_SALES: VAT_SALES,
         VAT_EXEMPT: VAT_EXEMPT,
@@ -127,7 +135,7 @@ export const useMainStore = defineStore('main', () => {
         // LESS
         WITHHOLDING_TAX: WHTAX,
 
-        TOTAL_AMOUNT: TOTAL_AMOUNT,
+        TOTAL_AMOUNT: TOTAL_AMOUNT, //SALE + VAT - WTHTAX
       }
     })
   }
@@ -198,6 +206,11 @@ export const useMainStore = defineStore('main', () => {
             VATAMT:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATAMT + bill.VAT),
             PRDTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
             AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
+          },
+
+          CORFPF: {
+            ...mergedMap[key].CORFPF,
+            NORMRK: mergedMap[key].CORFPF.NORMRK + 1,
           }
         }
       }
@@ -256,15 +269,15 @@ export const useMainStore = defineStore('main', () => {
             PBLKEY:         bill.PBL_KEY     || '',
 
             // FOOTER
-            DATSTP:         0,
-            TIMSTP:         0,
-            AUTHSG:         '',
+            DATSTP:         0,  //UPDATE ON FINAL
+            TIMSTP:         0,  //UPDATE ON FINAL
+            AUTHSG:         configStore.authenticatedUser.username || '',
 
             // TRACKING
             STATUS:         '',
-            RUNDAT:         0,
-            RUNTME:         0,
-            RUNBY:          '',
+            RUNDAT:         0,  //UPDATE ON FINAL
+            RUNTME:         0,  //UPDATE ON FINAL
+            RUNBY:          configStore.authenticatedUser.username || '',
 
             RPDATE:         0,
             RPTIME:         0,
@@ -310,16 +323,16 @@ export const useMainStore = defineStore('main', () => {
             BILTYP:         0,
 
             // VALUES
-            VATSAL:         bill.VAT_SALES || 0,
-            VATEXM:         bill.VAT_EXEMPT || 0,
-            ZERSAL:         bill.ZERO_RATE || 0,
-            GOVTAX:         bill.GOVT_TAX || 0,
+            VATSAL:         bill.VAT_SALES || 0,        //INCREMENT THIS PER ITEM
+            VATEXM:         bill.VAT_EXEMPT || 0,       //INCREMENT THIS PER ITEM
+            ZERSAL:         bill.ZERO_RATE || 0,        //INCREMENT THIS PER ITEM
+            GOVTAX:         bill.GOVT_TAX || 0,         //INCREMENT THIS PER ITEM
 
-            TOTSAL:         bill.AMOUNT || 0,
-            NETVAT:         bill.UNIT_COST || 0,
-            VATAMT:         bill.VAT || 0,
-            PRDTAX:         bill.WITHHOLDING_TAX || 0,
-            AMTDUE:         bill.TOTAL_AMOUNT || 0,
+            TOTSAL:         bill.AMOUNT || 0,           //INCREMENT THIS PER ITEM
+            NETVAT:         bill.UNIT_COST || 0,        //INCREMENT THIS PER ITEM
+            VATAMT:         bill.VAT || 0,              //INCREMENT THIS PER ITEM
+            PRDTAX:         bill.WITHHOLDING_TAX || 0,  //INCREMENT THIS PER ITEM
+            AMTDUE:         bill.TOTAL_AMOUNT || 0,     //INCREMENT THIS PER ITEM
           },
           // CASH OR FILES
           CORFPF: {
@@ -328,40 +341,40 @@ export const useMainStore = defineStore('main', () => {
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
-            // DATOR:          invoiceDate,
-            // CASHCD:         '',
-            // COLSTF:         '',
-            ORAMT:          bill.TOTAL_AMOUNT, //ADD
-            // NOACCT:         0,
+            DATOR:          0,  //UPDATE ON FINAL
+            CASHCD:         configStore.authenticatedUser.username || '',
+            COLSTF:         '',
+            ORAMT:          bill.TOTAL_AMOUNT,  //UPDATE ON FINAL
+            NOACCT:         0,  //UPDATE ON FINAL no of months
             PAYTYP:         bill.PAYTYP,
-            // INTRST:         0,
-            // PNALTY:         0,
-            // OTHERS:         0,
-            // OVRPAY:         0,
-            // UNDPAY:         0,
+            INTRST:         0,
+            PNALTY:         0,
+            OTHERS:         0,
+            OVRPAY:         0,
+            UNDPAY:         0,
             PROJCD:         bill.PROJCD,
             PCSCOD:         bill.PCSCOD,
             PHASE:          bill.PHASE,
             BLOCK:          bill.BLOCK,
             LOT:            bill.LOT,
             UNITCD:         bill.UNITCD,
-            // PAYCOD:         '',
+            PAYCOD:         '',
             PAYEE:          bill.CLIENT_NAME.substring(0,40),
-            // PN:             0,
-            // DATVAL:         0,
-            // DATPRT:         0,
-            // BANKCD:         '',
-            // BNKACT:         '',
-            // NOCHK:          0,
-            // PRNO:           0,
-            // CSHAMT:         0,
-            // TCHKAM:         0,
-            // LEAFNO:         0,
-            // NORMRK:         0,
+            PN:             0,
+            DATVAL:         invoiceDate,
+            DATPRT:         0,  //UPDATE ON FINAL
+            BANKCD:         '',
+            BNKACT:         '',
+            NOCHK:          0,
+            PRNO:           0,
+            CSHAMT:         0,
+            TCHKAM:         0,
+            LEAFNO:         0,
+            NORMRK:         1,  //INCREMENT THIS PER ITEM # of item/description then insert each to file remarks
             DATCAN:         0,
             RETCOD:         '',
-            // UPDCOD:         '',
-            // NOMOS:          0,
+            UPDCOD:         '',
+            NOMOS:          0,  //UPDATE ON FINAL no of months
             TRANSN:         0,
             DELOR:          ''
           },
@@ -371,7 +384,7 @@ export const useMainStore = defineStore('main', () => {
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
-            // DATVAL:         invoiceDate,
+            DATVAL:         invoiceDate,
             PROJCD:         bill.PROJCD,
             PCSCOD:         bill.PCSCOD,
             PHASE:          bill.PHASE,
@@ -383,10 +396,10 @@ export const useMainStore = defineStore('main', () => {
             PDSCOD:         bill.PDSCOD,
             PDSNUM:         bill.PDSNUM,
             TCLTNO:         bill.TCLTNO,
-            // DATINS:         0,
-            // BALRUN:         0,
-            // PAYNO:          0,
-            // NOMOS:          0
+            DATINS:         bill.DATDUE,
+            BALRUN:         0,
+            PAYNO:          0,
+            NOMOS:          0   //UPDATE ON FINAL no of months
           },
           CORF3PF: {
             COMPCD:         bill.INVOICE_KEY.COMPCD,
@@ -394,7 +407,7 @@ export const useMainStore = defineStore('main', () => {
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
-            // DATVAL:         invoiceDate,
+            DATVAL:         invoiceDate,
             PROJCD:         bill.PROJCD,
             PCSCOD:         bill.PCSCOD,
             PHASE:          bill.PHASE,
@@ -402,17 +415,17 @@ export const useMainStore = defineStore('main', () => {
             LOT:            bill.LOT,
             UNITCD:         bill.UNITCD,
             PAYTYP:         bill.PAYTYP,
-            ORAMT:          bill.TOTAL_AMOUNT,
-            VATAMT:         bill.VAT,
-            // RATIO:          0,
-            // ZONVAL:         0,
-            // NETSP:          0,
-            // PRPTAX:         0,
-            // VATCOD:         '',
-            // VATDES:         '',
-            DATENT:         0, //UPDATE ON FINALIZE
-            TIMENT:         0, //UPDATE ON FINALIZE
-            USRENT:         '' //UPDATE ON FINALIZE
+            ORAMT:          bill.TOTAL_AMOUNT,  //UPDATE ON FINALIZE
+            VATAMT:         bill.VAT,           //UPDATE ON FINALIZE
+            RATIO:          0,
+            ZONVAL:         0,
+            NETSP:          0,
+            PRPTAX:         bill.WITHHOLDING_TAX, //UPDATE ON FINALIZE
+            VATCOD:         bill.CLIENT_PIBIG,
+            VATDES:         getVATDESC(bill),
+            DATENT:         0,    //UPDATE ON FINALIZE
+            TIMENT:         0,    //UPDATE ON FINALIZE
+            USRENT:         configStore.authenticatedUser.username || '',
           },
           CORF4PF: {
             COMPCD:         bill.INVOICE_KEY.COMPCD,
@@ -420,7 +433,7 @@ export const useMainStore = defineStore('main', () => {
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
-            // DATVAL:         invoiceDate,
+            DATVAL:         invoiceDate,
             PROJCD:         bill.PROJCD,
             PCSCOD:         bill.PCSCOD,
             PHASE:          bill.PHASE,
@@ -428,24 +441,24 @@ export const useMainStore = defineStore('main', () => {
             LOT:            bill.LOT,
             UNITCD:         bill.UNITCD,
             PAYTYP:         bill.PAYTYP,
-            // BTYPE:          bill.OLD_BILL_TYPE,
-            // MBTYPE:         bill.BILL_TYPE,
-            // LESDES:         '',
-            ORAMT:          bill.TOTAL_AMOUNT,
-            VATSAL:         bill.VAT_SALES,
-            VATXMP:         bill.VAT_EXEMPT,
-            VATZRO:         bill.ZERO_RATE,
-            TOTSAL:         bill.TOTAL_SALE,
-            VATAMT:         bill.VAT,
-            WITTAX:         bill.WITHHOLDING_TAX,
-            GRSAMT:         bill.AMOUNT,
-            // ENTDES:         '',
-            // ENTAMT:         0,
-            // LESRF:          0,
-            // ORTYPE:         '',
-            DATENT:         0, //UPDATE ON FINALIZE
-            TIMENT:         0, //UPDATE ON FINALIZE
-            USRENT:         '' //UPDATE ON FINALIZE
+            BTYPE:          0,
+            MBTYPE:         0,
+            LESDES:         '',
+            ORAMT:          bill.TOTAL_AMOUNT,    //UPDATE ON FINAL
+            VATSAL:         bill.VAT_SALES,       //UPDATE ON FINAL
+            VATXMP:         bill.VAT_EXEMPT,      //UPDATE ON FINAL
+            VATZRO:         bill.ZERO_RATE,       //UPDATE ON FINAL
+            TOTSAL:         bill.TOTAL_SALE,      //UPDATE ON FINAL
+            VATAMT:         bill.VAT,             //UPDATE ON FINAL
+            WITTAX:         bill.WITHHOLDING_TAX, //UPDATE ON FINAL
+            GRSAMT:         bill.AMOUNT,          //UPDATE ON FINAL
+            ENTDES:         '',
+            ENTAMT:         0,
+            LESRF:          0,
+            ORTYPE:         bill.INVOICE_KEY.TRNTYP,
+            DATENT:         0,  //UPDATE ON FINAL
+            TIMENT:         0,  //UPDATE ON FINAL
+            USRENT:         configStore.authenticatedUser.username || '',
           },
         }
       }
@@ -957,7 +970,6 @@ export const useMainStore = defineStore('main', () => {
 
 
       INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
-        console.log(INVOICE_RECORD.BILLINGS.map(bill => bill.SALTYP));
 
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica");
@@ -985,8 +997,9 @@ export const useMainStore = defineStore('main', () => {
   const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
-    const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+    const currentDate = new Date()
+    const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
+    const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
     const PDF_BLOB = handleGenerateInvoicePDFBlob([{
       ...SELECTED_INVOICE_RECORD,
@@ -995,11 +1008,9 @@ export const useMainStore = defineStore('main', () => {
 
         DATSTP: stampDate,
         TIMSTP: stampTime,
-        AUTHSG: configStore.authenticatedUser.username || '',
 
         RUNDAT: stampDate,
         RUNTME: stampTime,
-        RUNBY:  configStore.authenticatedUser.username || '',
       }
     }])
 
@@ -1047,8 +1058,10 @@ export const useMainStore = defineStore('main', () => {
 
     const PDF_BLOB = handleGenerateInvoicePDFBlob([
       ...SELECTED_INVOICE_RECORDS.map((INVOICE) => {
-        const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
-        const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+
+        const currentDate = new Date()
+        const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
+        const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
         return {
           ...INVOICE,
@@ -1057,11 +1070,9 @@ export const useMainStore = defineStore('main', () => {
 
             DATSTP: stampDate,
             TIMSTP: stampTime,
-            AUTHSG: configStore.authenticatedUser.username || '',
 
             RUNDAT: stampDate,
             RUNTME: stampTime,
-            RUNBY:  configStore.authenticatedUser.username || '',
           }
         }
       })

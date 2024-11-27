@@ -113,7 +113,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         },
         submit: () => {
           confirm.require({
-            message: `This action will issue invoice for each of the ${invoice_records_data.value.length}. Are you sure you want to continue in the issuance of invoices?`,
+            message: `This action will issue invoice for each of the ${invoice_records_data.value.length} records. Are you sure you want to continue in the issuance of invoices?`,
             header: '(FINAL) Confirm Issuance of Invoice?',
             icon: 'pi pi-exclamation-triangle',
             rejectProps: {
@@ -178,8 +178,12 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
     const SELECTED_INVOICES = [
       ...invoice_records_data.value.map((INVOICE) => {
-        const stampDate = parseInt(new Date().toISOString().slice(0, 10).replace(/-/g, ''))
-        const stampTime = parseInt(new Date().toTimeString().slice(0, 8).replace(/:/g, ''))
+
+        const currentDate = new Date()
+        const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
+        const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+
+        const NO_OF_MONTHS = 0 // compute this
 
         return {
           ...INVOICE,
@@ -188,11 +192,44 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             DATSTP: stampDate,
             TIMSTP: stampTime,
-            AUTHSG: configStore.authenticatedUser.username || '',
 
             RUNDAT: stampDate,
             RUNTME: stampTime,
-            RUNBY:  configStore.authenticatedUser.username || '',
+          },
+          CORFPF: {
+            ...INVOICE.CORFPF,
+            DATOR: stampDate,
+            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
+            NOACCT: NO_OF_MONTHS,
+            DATPRT: stampDate,
+            NOMOS: NO_OF_MONTHS,
+          },
+          CORTPF: {
+            ...INVOICE.CORTPF,
+            NOMOS: NO_OF_MONTHS,
+          },
+          CORF3PF: {
+            ...INVOICE.CORF3PF,
+            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
+            VATAMT: INVOICE.TOTAL_BREAKDOWN.VATAMT,
+            PRPTAX: INVOICE.TOTAL_BREAKDOWN.PRDTAX,
+
+            DATENT: stampDate,
+            TIMENT: stampTime,
+          },
+          CORF4PF: {
+            ...INVOICE.CORF4PF,
+            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
+            VATSAL: INVOICE.TOTAL_BREAKDOWN.VATSAL,
+            VATXMP: INVOICE.TOTAL_BREAKDOWN.VATEXM,
+            VATZRO: INVOICE.TOTAL_BREAKDOWN.ZERSAL,
+            TOTSAL: INVOICE.TOTAL_BREAKDOWN.NETVAT,
+            VATAMT: INVOICE.TOTAL_BREAKDOWN.VATAMT,
+            WITTAX: INVOICE.TOTAL_BREAKDOWN.PRDTAX,
+            GRSAMT: INVOICE.TOTAL_BREAKDOWN.TOTSAL,
+
+            DATENT: stampDate,
+            TIMENT: stampTime,
           }
         }
       })

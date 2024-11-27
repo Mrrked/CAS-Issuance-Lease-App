@@ -148,11 +148,13 @@ export const useMainStore = defineStore('main', () => {
   const processInvoiceRecords = (billings: LeaseBill[], invoice_date: Date): InvoiceRecord[] => {
     const mergedMap: { [key: string]: InvoiceRecord } = {};
 
+
     billings.forEach((bill) => {
+
       const key = bill.ID;
 
       const invoiceDate: number = invoice_date ? configStore.formatDateToInteger(invoice_date) : 0
-      const invoiceType: 'BI' | 'VI'  = bill.INVOICE_KEY.RECTYP
+      const invoiceType: 'BI' | 'VI' = bill.INVOICE_KEY.RECTYP
 
       const completeOrKey: string = bill.INVOICE_KEY.COMPLETE_OR_KEY
 
@@ -359,8 +361,8 @@ export const useMainStore = defineStore('main', () => {
             LOT:            bill.LOT,
             UNITCD:         bill.UNITCD,
             PAYCOD:         '',
-            PAYEE:          bill.CLIENT_NAME.substring(0,40),
-            PN:             0,
+            PAYEE:          bill.CLIENT_NAME.substring(0,35),
+            'PN#':          0,
             DATVAL:         invoiceDate,
             DATPRT:         0,  //UPDATE ON FINAL
             BANKCD:         '',
@@ -1117,8 +1119,17 @@ export const useMainStore = defineStore('main', () => {
           axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
             console.log('FETCHED OPEN BILLINGS', response.data);
-            perBatchRunStore.billings = response.data;
-            perBatchRunStore.handleOpenMainDialogBox()
+            if (response.data.length) {
+              perBatchRunStore.billings = response.data;
+              perBatchRunStore.handleOpenMainDialogBox()
+            } else {
+              toast.add({
+                summary: 'No available record found!',
+                detail: 'There is available lease open bill for the specified month!',
+                severity: 'warn',
+                life: 3000,
+              })
+            }
           })
           .catch(configStore.handleError)
           .finally(() => {

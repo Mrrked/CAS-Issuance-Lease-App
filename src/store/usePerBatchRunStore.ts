@@ -1,4 +1,4 @@
-import { Column, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { Column, FAILED_INVOICE_RECORDS, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
@@ -196,6 +196,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           },
           CORFPF: {
             ...INVOICE.CORFPF,
+
             DATOR: stampDate,
             ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
             NOACCT: NO_OF_MONTHS,
@@ -204,6 +205,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           },
           CORTPF: {
             ...INVOICE.CORTPF,
+
             NOMOS: NO_OF_MONTHS,
           },
         }
@@ -220,7 +222,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     const callback = async (response?: AxiosResponse) => {
       // console.log('RESPONSE', response.data);
 
-      const issuedInvoiceRecords = response?.data as InvoiceRecord[];
+      const issuedInvoiceRecords = response?.data.success as InvoiceRecord[];
+      const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS;
+      console.log('FAILED ISSUED INVOICE RECORDS', failedInvoiceRecords);
 
       const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
 

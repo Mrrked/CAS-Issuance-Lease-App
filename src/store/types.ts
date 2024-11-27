@@ -389,7 +389,6 @@ export interface GROUPED_INVOICE_RECORD {
 }
 
 
-
 interface CORFPF {
   COMPCD: number; // COMPANY CODE (ZONED 2, 0)
   BRANCH: number; // BRANCH CODE (ZONED 1, 0)
@@ -415,7 +414,7 @@ interface CORFPF {
   UNITCD: string; // UNIT CODE (CHAR 2)
   PAYCOD: string; // PAYEE CODE (CHAR 4)
   PAYEE: string; // NAME OF PAYEE (CHAR 35)
-  PN: number; // PROMISSORY NOTE # (ZONED 5, 0)
+  'PN#': number; // PROMISSORY NOTE # (ZONED 5, 0)
   DATVAL: number; // VALUE DATE (ZONED 8, 0)
   DATPRT: number; // PRINTING DATE (ZONED 8, 0)
   BANKCD: string; // BANK CODE (CHAR 5)
@@ -519,4 +518,16 @@ interface CORF4PF {
   DATENT: number; // DATE ENTERED
   TIMENT: number; // TIME ENTERED
   USRENT: string; // USER NAME
+}
+
+interface FAILED_INVOICE_RECORD {
+  error: string
+  invoice_record: InvoiceRecord
+}
+
+export interface FAILED_INVOICE_RECORDS {
+  type: string
+  user: string
+  timestamp: string
+  records: FAILED_INVOICE_RECORD[]
 }

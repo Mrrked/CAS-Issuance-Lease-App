@@ -75,12 +75,17 @@ export const useMainStore = defineStore('main', () => {
     return `${bill_desc} ( ${month} ${year} ) ${type}`
   }
 
-  const getVATDESC = (bill: LeaseBill) => {
-    if (bill.CLIENT_PIBIG === 'V')
-      return 'VATABLE INSTALLMENT SALE'
-    if (bill.CLIENT_PIBIG === 'I')
-      return 'VAT-EXEMPTED INSTALLMENT SALE'
-    return ''
+  const getNOMOS = (invoiceRecord: InvoiceRecord, billTypes: number[]) => {
+    const billings = invoiceRecord.BILLINGS
+    var max = 0
+    billTypes.forEach(billType => {
+      const count = billings.filter((bill) => bill.BILL_TYPE === billType)?.length || 0
+      if (count > max) {
+        max = count
+      }
+    });
+
+    return max
   }
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
@@ -207,11 +212,6 @@ export const useMainStore = defineStore('main', () => {
             PRDTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
             AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
           },
-
-          CORFPF: {
-            ...mergedMap[key].CORFPF,
-            NORMRK: mergedMap[key].CORFPF.NORMRK + 1,
-          }
         }
       }
 
@@ -370,7 +370,7 @@ export const useMainStore = defineStore('main', () => {
             CSHAMT:         0,
             TCHKAM:         0,
             LEAFNO:         0,
-            NORMRK:         1,  //INCREMENT THIS PER ITEM # of item/description then insert each to file remarks
+            NORMRK:         0,
             DATCAN:         0,
             RETCOD:         '',
             UPDCOD:         '',
@@ -400,66 +400,7 @@ export const useMainStore = defineStore('main', () => {
             BALRUN:         0,
             PAYNO:          0,
             NOMOS:          0   //UPDATE ON FINAL no of months
-          },
-          CORF3PF: {
-            COMPCD:         bill.INVOICE_KEY.COMPCD,
-            BRANCH:         bill.INVOICE_KEY.BRANCH,
-            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
-            ORCOD:          bill.INVOICE_KEY.ORCOD,
-            ORNUM:          bill.INVOICE_KEY.ORNUM,
-            DATVAL:         invoiceDate,
-            PROJCD:         bill.PROJCD,
-            PCSCOD:         bill.PCSCOD,
-            PHASE:          bill.PHASE,
-            BLOCK:          bill.BLOCK,
-            LOT:            bill.LOT,
-            UNITCD:         bill.UNITCD,
-            PAYTYP:         bill.PAYTYP,
-            ORAMT:          bill.TOTAL_AMOUNT,  //UPDATE ON FINALIZE
-            VATAMT:         bill.VAT,           //UPDATE ON FINALIZE
-            RATIO:          0,
-            ZONVAL:         0,
-            NETSP:          0,
-            PRPTAX:         bill.WITHHOLDING_TAX, //UPDATE ON FINALIZE
-            VATCOD:         bill.CLIENT_PIBIG,
-            VATDES:         getVATDESC(bill),
-            DATENT:         0,    //UPDATE ON FINALIZE
-            TIMENT:         0,    //UPDATE ON FINALIZE
-            USRENT:         configStore.authenticatedUser.username || '',
-          },
-          CORF4PF: {
-            COMPCD:         bill.INVOICE_KEY.COMPCD,
-            BRANCH:         bill.INVOICE_KEY.BRANCH,
-            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
-            ORCOD:          bill.INVOICE_KEY.ORCOD,
-            ORNUM:          bill.INVOICE_KEY.ORNUM,
-            DATVAL:         invoiceDate,
-            PROJCD:         bill.PROJCD,
-            PCSCOD:         bill.PCSCOD,
-            PHASE:          bill.PHASE,
-            BLOCK:          bill.BLOCK,
-            LOT:            bill.LOT,
-            UNITCD:         bill.UNITCD,
-            PAYTYP:         bill.PAYTYP,
-            BTYPE:          0,
-            MBTYPE:         0,
-            LESDES:         '',
-            ORAMT:          bill.TOTAL_AMOUNT,    //UPDATE ON FINAL
-            VATSAL:         bill.VAT_SALES,       //UPDATE ON FINAL
-            VATXMP:         bill.VAT_EXEMPT,      //UPDATE ON FINAL
-            VATZRO:         bill.ZERO_RATE,       //UPDATE ON FINAL
-            TOTSAL:         bill.TOTAL_SALE,      //UPDATE ON FINAL
-            VATAMT:         bill.VAT,             //UPDATE ON FINAL
-            WITTAX:         bill.WITHHOLDING_TAX, //UPDATE ON FINAL
-            GRSAMT:         bill.AMOUNT,          //UPDATE ON FINAL
-            ENTDES:         '',
-            ENTAMT:         0,
-            LESRF:          0,
-            ORTYPE:         bill.INVOICE_KEY.TRNTYP,
-            DATENT:         0,  //UPDATE ON FINAL
-            TIMENT:         0,  //UPDATE ON FINAL
-            USRENT:         configStore.authenticatedUser.username || '',
-          },
+          }
         }
       }
 
@@ -1241,6 +1182,7 @@ export const useMainStore = defineStore('main', () => {
     getSplitClientAddress,
     getDeptCode,
     getItemName,
+    getNOMOS,
 
     processBillings,
     processInvoiceRecords,

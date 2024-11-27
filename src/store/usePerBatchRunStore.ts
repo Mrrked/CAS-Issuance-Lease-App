@@ -6,7 +6,6 @@ import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
-import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
@@ -19,7 +18,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const confirm = useConfirm();
 
   const mainStore = useMainStore()
-  const configStore = useConfigStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()
@@ -183,7 +181,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
         const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
-        const NO_OF_MONTHS = 0 // compute this
+        const NO_OF_MONTHS = mainStore.getNOMOS(INVOICE, [1, 11])
 
         return {
           ...INVOICE,
@@ -208,29 +206,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             ...INVOICE.CORTPF,
             NOMOS: NO_OF_MONTHS,
           },
-          CORF3PF: {
-            ...INVOICE.CORF3PF,
-            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
-            VATAMT: INVOICE.TOTAL_BREAKDOWN.VATAMT,
-            PRPTAX: INVOICE.TOTAL_BREAKDOWN.PRDTAX,
-
-            DATENT: stampDate,
-            TIMENT: stampTime,
-          },
-          CORF4PF: {
-            ...INVOICE.CORF4PF,
-            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
-            VATSAL: INVOICE.TOTAL_BREAKDOWN.VATSAL,
-            VATXMP: INVOICE.TOTAL_BREAKDOWN.VATEXM,
-            VATZRO: INVOICE.TOTAL_BREAKDOWN.ZERSAL,
-            TOTSAL: INVOICE.TOTAL_BREAKDOWN.NETVAT,
-            VATAMT: INVOICE.TOTAL_BREAKDOWN.VATAMT,
-            WITTAX: INVOICE.TOTAL_BREAKDOWN.PRDTAX,
-            GRSAMT: INVOICE.TOTAL_BREAKDOWN.TOTSAL,
-
-            DATENT: stampDate,
-            TIMENT: stampTime,
-          }
         }
       })
     ]

@@ -371,9 +371,6 @@ export interface InvoiceRecord {
   // CASH OR FILES
   CORFPF: CORFPF
   CORTPF: CORTPF
-  CORF3PF: CORF3PF
-  CORF4PF: CORF4PF
-
 }
 
 export interface INVOICE_PER_PROJECT {

@@ -48,7 +48,7 @@ export const useCoreDataStore = defineStore('coreData', () => {
       axios.get('issuance_lease/core/project_codes/')
         .then((response) => {
           // console.log('RESPONSE', response);
-          project_codes.value = response.data as ProjectRecord[];
+          project_codes.value = response.data.data as ProjectRecord[];
         }),
       axios.get('issuance_lease/core/company_codes/')
         .then((response) => {

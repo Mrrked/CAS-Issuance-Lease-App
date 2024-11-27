@@ -199,6 +199,7 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
 
   YYYYMM: string
   BILL_TYPE: number
+  MBTYPE: number
   OLD_BILL_TYPE: number
   OLD_BILL_TYPE_DESC: string
 

@@ -452,68 +452,6 @@ interface CORTPF {
   NOMOS: number;   // NO. OF MONTHS
 }
 
-
-interface CORF3PF {
-  COMPCD: number;    // COMPANY CODE
-  BRANCH: number;    // BRANCH CODE
-  DEPTCD: number;    // DEPARTMENT CODE
-  ORCOD: string;     // O. R. CODE
-  ORNUM: number;     // O. R. NUMBER
-  DATVAL: number;    // VALUE DATE
-  PROJCD: string;    // PROJECT CODE
-  PCSCOD: string;    // PCS CODE
-  PHASE: string;     // PHASE
-  BLOCK: string;     // BLOCK
-  LOT: string;       // LOT/UNIT
-  UNITCD: string;    // UNIT CODE
-  PAYTYP: string;    // PAYMENT TYPE
-  ORAMT: number;     // OR AMOUNT
-  VATAMT: number;    // VAT AMOUNT
-  RATIO: number;     // RATIO OF ZV/NET SP
-  ZONVAL: number;    // ZONAL VALUE USED
-  NETSP: number;     // NET SELLING PRICE USED
-  PRPTAX: number;    // PREPAID TAX OF LEASE CLIENTS
-  VATCOD: string;    // VAT/NON VAT CODE
-  VATDES: string;    // VAT DESCRIPTION
-  DATENT: number;    // DATE ENTERED
-  TIMENT: number;    // TIME ENTERED
-  USRENT: string;    // USER NAME
-}
-
-interface CORF4PF {
-  COMPCD: number; // COMPANY CODE
-  BRANCH: number; // BRANCH CODE
-  DEPTCD: number; // DEPARTMENT CODE
-  ORCOD: string;  // O. R. CODE
-  ORNUM: number;  // O. R. NUMBER
-  DATVAL: number; // VALUE DATE
-  PROJCD: string; // PROJECT CODE
-  PCSCOD: string; // PCS CODE
-  PHASE: string;  // PHASE
-  BLOCK: string;  // BLOCK
-  LOT: string;    // LOT/UNIT
-  UNITCD: string; // UNIT CODE
-  PAYTYP: string; // PAYMENT TYPE
-  BTYPE: number;  // BILL TYPE
-  MBTYPE: number; // MOTHER BILL TYPE
-  LESDES: string; // LEASE DESCRIPTION
-  ORAMT: number;  // OR AMOUNT
-  VATSAL: number; // VATABLE SALES
-  VATXMP: number; // VAT-EXEMPT SALES
-  VATZRO: number; // ZERO RATED SALES
-  TOTSAL: number; // TOTAL SALES
-  VATAMT: number; // VAT AMOUNT
-  WITTAX: number; // WITHHOLDING TAX
-  GRSAMT: number; // GROSS AMOUNT
-  ENTDES: string; // ACK.REC-ENTRY DESCRIPTION
-  ENTAMT: number; // ACK.REC.-ENTRY AMOUNT
-  LESRF: number;  // LESS: RES. FEE
-  ORTYPE: string; // OR TYPE
-  DATENT: number; // DATE ENTERED
-  TIMENT: number; // TIME ENTERED
-  USRENT: string; // USER NAME
-}
-
 interface FAILED_INVOICE_RECORD {
   error: string
   invoice_record: InvoiceRecord

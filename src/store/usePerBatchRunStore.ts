@@ -1,4 +1,4 @@
-import { Column, FAILED_INVOICE_RECORDS, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { Column, FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
@@ -6,6 +6,7 @@ import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
+import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
@@ -18,6 +19,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const confirm = useConfirm();
 
   const mainStore = useMainStore()
+  const configStore = useConfigStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()
@@ -222,27 +224,95 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     const callback = async (response?: AxiosResponse) => {
       // console.log('RESPONSE', response.data);
 
-      const issuedInvoiceRecords = response?.data.success as InvoiceRecord[];
-      const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS;
+      const issuedInvoiceRecords = response?.data.success as InvoiceRecord[] || [];
+      const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS || [];
+
+      const groupedInvoiceRecords: INVOICE_PER_COMPANY_AND_PROJECT[] =
+      (
+        Object.values(
+          issuedInvoiceRecords
+            .sort((a,b) => {
+              // COMPCD LOWEST TO HIGHEST
+              if (a.INVOICE_KEY.COMPCD !== b.INVOICE_KEY.COMPCD) {
+                return a.INVOICE_KEY.COMPCD - b.INVOICE_KEY.COMPCD;
+              }
+              return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
+            })
+            .reduce((acc: any , record: InvoiceRecord) => {
+              const key = configStore.fillNumberWithZeroes(record.INVOICE_KEY.COMPCD, 2) + '_' + record.INVOICE_KEY.PROJCD
+              if (!acc[key]) {
+                // console.log('NEW PAGE FOR', key, '\n');
+                acc[key] = {
+                  COMPCD: record.INVOICE_KEY.COMPCD,
+                  PROJCD: record.INVOICE_KEY.PROJCD,
+                  COMPANY_NAME: record.HEADER.COMPANY_NAME,
+                  PROJECT_NAME: record.DETAILS.PRJNAM,
+
+                  INVOICE_RECORDS: [],
+                };
+              }
+              // console.log(key);
+              acc[key].INVOICE_RECORDS.push(record);
+              return acc;
+            }, {})
+        ) as INVOICE_PER_COMPANY_AND_PROJECT[]
+      )
+
+      console.log('GROUPED FOR SUMMARY', groupedInvoiceRecords);
+
       console.log('FAILED ISSUED INVOICE RECORDS', failedInvoiceRecords);
 
       const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
-      const download = () => {
-        const url = URL.createObjectURL(PDF_BLOB);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Issued Invoices ${data.year}-${data.month}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-      download()
+      configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
       const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
       const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
         data: {
           pdfBlob: PDF_BLOB,
-          download: download,
+          failedInvoiceRecords: failedInvoiceRecords,
+          download: () => {
+            configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+          },
+          downloadErrorLogs: () => {
+            const JSON_BLOB = new Blob(
+              [JSON.stringify(failedInvoiceRecords, null, 2)],
+              { type: 'application/json' }
+            );
+            const url = URL.createObjectURL(JSON_BLOB);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `errors_invoice_issuance_${failedInvoiceRecords.timestamp}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          },
+          viewSummary: () => {
+            const PDF_BLOB = mainStore.handleGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords);
+
+            const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
+            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal, {
+              data: {
+                pdfBlob: PDF_BLOB,
+                download: configStore.handleDownloadFile(PDF_BLOB, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`),
+                submit: () => {
+                },
+                cancel: () => {
+                  ShowSummaryIssuedInvoices.close()
+                }
+              },
+              props: {
+                header: '(Per Batch) Summary of Issued Invoices',
+                style: {
+                  width: '75vw'
+                },
+                showHeader: true,
+                modal: true,
+              },
+              templates: {
+                footer: markRaw(Footer1)
+              },
+            })
+          },
           submit: () => {
           },
           cancel: () => {

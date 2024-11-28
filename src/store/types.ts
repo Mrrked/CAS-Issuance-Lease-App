@@ -373,19 +373,13 @@ export interface InvoiceRecord {
   CORTPF: CORTPF
 }
 
-export interface INVOICE_PER_PROJECT {
+export interface INVOICE_PER_COMPANY_AND_PROJECT {
+  COMPCD: number
+  COMPANY_NAME: string
   PROJCD: string
   PROJECT_NAME: string
-  INVOICE_RECORDS: InvoiceRecord[]
-}
-
-export interface GROUPED_INVOICE_RECORD {
-  COMPCD: number
-  BRANCH: number
-  DEPTCD: number
 
   INVOICE_RECORDS: InvoiceRecord[]
-  INVOICE_RECORDS_PER_PROJECT: INVOICE_PER_PROJECT[]
 }
 
 

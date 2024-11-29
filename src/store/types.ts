@@ -375,9 +375,26 @@ export interface InvoiceRecord {
 
 export interface INVOICE_PER_COMPANY_AND_PROJECT {
   COMPCD: number
-  COMPANY_NAME: string
   PROJCD: string
-  PROJECT_NAME: string
+
+  HEADER: {
+    COMPANY_NAME:   string
+    PROJECT_NAME:   string
+    ADDRESS:        string
+    LOGO_URL:       string
+    LOGO_SIZE_INCH: {
+      WIDTH:        number
+      HEIGHT:       number
+    },
+    INVOICE_DATE:   number
+  },
+
+  FOOTER: {
+    ACNUM:          string
+    ACDAT:          string
+    TIMSTP:         number
+    DATSTP:         number
+  },
 
   INVOICE_RECORDS: InvoiceRecord[]
 }

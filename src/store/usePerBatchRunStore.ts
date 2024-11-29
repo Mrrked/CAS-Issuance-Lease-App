@@ -4,6 +4,7 @@ import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 import { AxiosResponse } from 'axios';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
+import PreviewPDFModal1 from '../components/Dialog/General/PreviewPDFModal1.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
 import { useConfigStore } from './useConfigStore';
@@ -22,7 +23,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const configStore = useConfigStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date()
+    invoiceDate: new Date('2025/01/10')
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -243,10 +244,24 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               if (!acc[key]) {
                 // console.log('NEW PAGE FOR', key, '\n');
                 acc[key] = {
-                  COMPCD: record.INVOICE_KEY.COMPCD,
-                  PROJCD: record.INVOICE_KEY.PROJCD,
-                  COMPANY_NAME: record.HEADER.COMPANY_NAME,
-                  PROJECT_NAME: record.DETAILS.PRJNAM,
+                  COMPCD:           record.INVOICE_KEY.COMPCD,
+                  PROJCD:           record.INVOICE_KEY.PROJCD,
+
+                  HEADER: {
+                    COMPANY_NAME:   record.HEADER.COMPANY_NAME,
+                    PROJECT_NAME:   record.DETAILS.PRJNAM,
+                    ADDRESS:        record.HEADER.ADDRESS,
+                    LOGO_URL:       record.HEADER.LOGO_URL,
+                    LOGO_SIZE_INCH: record.HEADER.LOGO_SIZE_INCH,
+                    INVOICE_DATE:   record.DETAILS.DATVAL
+                  },
+
+                  FOOTER: {
+                    ACNUM:          record.FOOTER.ACDAT,
+                    ACDAT:          record.FOOTER.ACNUM,
+                    TIMSTP:         record.DETAILS.TIMSTP,
+                    DATSTP:         record.DETAILS.DATSTP
+                  },
 
                   INVOICE_RECORDS: [],
                 };
@@ -286,14 +301,30 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             a.click();
             URL.revokeObjectURL(url);
           },
-          viewSummary: () => {
-            const PDF_BLOB = mainStore.handleGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords);
-
-            const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
-            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal, {
+          viewSummary: async () => {
+            const loadingDialogRef = dialog.open(LoadingModal, {
               data: {
-                pdfBlob: PDF_BLOB,
-                download: configStore.handleDownloadFile(PDF_BLOB, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`),
+                label: `Generating Summary of Invoices Report...`
+              },
+              props: {
+                style: {
+                  paddingTop: '1.5rem',
+                },
+                showHeader: false,
+                modal: true
+              },
+            })
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const PDF_BLOB1 = await mainStore.handleGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords) ;
+
+            const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/SummaryFinalInvoiceModalFooter.vue'));
+            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal1, {
+              data: {
+                pdfBlob: PDF_BLOB1,
+                download: () => {
+                  configStore.handleDownloadFile(PDF_BLOB1, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`)
+                },
                 submit: () => {
                 },
                 cancel: () => {
@@ -312,6 +343,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 footer: markRaw(Footer1)
               },
             })
+
+            loadingDialogRef.close()
           },
           submit: () => {
           },

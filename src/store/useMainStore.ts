@@ -937,10 +937,10 @@ export const useMainStore = defineStore('main', () => {
     return generateDoc(INVOICE_RECORDS).output('blob')
   }
 
-  const handleGenerateSummaryInvoicesPDFBlob = (groupedInvoice: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
-    console.log('GENERATE PDF BLOB FOR INVOICES', groupedInvoice)
+  const handleGenerateSummaryInvoicesPDFBlob = async (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
+    console.log('GENERATE PDF BLOB FOR SUMMARY OF INVOICES', groupedInvoices)
 
-    const generateDoc = (groupedInvoice: INVOICE_PER_COMPANY_AND_PROJECT[]): jsPDF => {
+    const generateDoc = (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]): jsPDF => {
 
       const VERY_SMALL_LINE_HEIGHT = 0.14
       const SMALL_LINE_HEIGHT = 0.15
@@ -950,11 +950,11 @@ export const useMainStore = defineStore('main', () => {
       const INVOICE_TEXT_FONT_SIZE = 18
       const TITLE_TEXT_FONT_SIZE = 12
       const NORMAL_TEXT_FONT_SIZE = 10
-      const SMALL_TEXT_FONT_SIZE = 8
+      const SMALL_TEXT_FONT_SIZE = 7.5
       const VERY_SMALL_TEXT_FONT_SIZE = 6
 
       const HEADER_HEIGHT = 0.9
-      const FOOTER_HEIGHT = ( VERY_SMALL_LINE_HEIGHT * 3 ) + ( NORMAL_LINE_HEIGHT * 2 )
+      const FOOTER_HEIGHT = ( VERY_SMALL_LINE_HEIGHT * 2 )
 
       const incrementHeight = (num: number = NORMAL_LINE_HEIGHT) => {cursorLineHeight += num}
 
@@ -964,234 +964,65 @@ export const useMainStore = defineStore('main', () => {
         cursorLineHeight = marginTop + NORMAL_LINE_HEIGHT
       }
 
-      const handleAddInvoiceHeader = (INVOICE_RECORD: InvoiceRecord) => {
-        const BOTTOM_MARGIN_HEIGHT = NORMAL_LINE_HEIGHT
-
-        const LOGO_WIDTH  = INVOICE_RECORD.HEADER.LOGO_SIZE_INCH.WIDTH
-        const LOGO_HEIGHT = INVOICE_RECORD.HEADER.LOGO_SIZE_INCH.HEIGHT
+      const handleAddSummaryInvoicesHeader = (GROUPED_INVOICE: INVOICE_PER_COMPANY_AND_PROJECT) => {
+        const LOGO_WIDTH  = GROUPED_INVOICE.HEADER.LOGO_SIZE_INCH.WIDTH
+        const LOGO_HEIGHT = GROUPED_INVOICE.HEADER.LOGO_SIZE_INCH.HEIGHT
 
         const HEADER_START_HEIGHT = cursorLineHeight
 
         // 1ST COLUMN
-        if (INVOICE_RECORD.HEADER.LOGO_URL) {
-          doc.addImage(INVOICE_RECORD.HEADER.LOGO_URL, "PNG", startLineX, cursorLineHeight - NORMAL_LINE_HEIGHT, LOGO_WIDTH, LOGO_HEIGHT, undefined, "FAST");
+        if (GROUPED_INVOICE.HEADER.LOGO_URL) {
+          doc.addImage(GROUPED_INVOICE.HEADER.LOGO_URL, "PNG", startLineX, cursorLineHeight - NORMAL_LINE_HEIGHT, LOGO_WIDTH, LOGO_HEIGHT, undefined, "FAST");
         }
 
         // doc.line(startLineX + LOGO_WIDTH , cursorLineHeight - NORMAL_LINE_HEIGHT, startLineX + LOGO_WIDTH, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )
 
         // 2ND COLUMN
         const SECOND_COL_START_X = startLineX + LOGO_WIDTH + 0.2
-        const SECOND_COL_WIDTH_X = 4.25
+        const SECOND_COL_WIDTH_X = endLineX - SECOND_COL_START_X
         const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
-
-        // doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )
 
         doc.setFontSize(TITLE_TEXT_FONT_SIZE + 1)
         doc.setFont("helvetica", "bold");
-        doc.text(INVOICE_RECORD.HEADER.COMPANY_NAME, SECOND_COL_START_X, cursorLineHeight - 0.05, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        doc.text(GROUPED_INVOICE.HEADER.COMPANY_NAME, SECOND_COL_START_X, cursorLineHeight - 0.05, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
-        const companyNameWidth = doc.getTextWidth(INVOICE_RECORD.HEADER.COMPANY_NAME || '-')
+        const companyNameWidth = doc.getTextWidth(GROUPED_INVOICE.HEADER.COMPANY_NAME || '-')
 
         if (companyNameWidth > SECOND_COL_WIDTH_X) {
           const times = companyNameWidth / SECOND_COL_WIDTH_X
-          incrementHeight(SMALL_LINE_HEIGHT + (0.10 * Math.ceil(times)))
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.10 * Math.ceil(times)))
         } else {
-          incrementHeight(SMALL_LINE_HEIGHT)
+          incrementHeight(NORMAL_LINE_HEIGHT)
         }
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-        doc.text(INVOICE_RECORD.HEADER.ADDRESS, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold");
+        doc.text('PROJECT:  ' + GROUPED_INVOICE.HEADER.PROJECT_NAME, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
-        const companyAddressWidth = doc.getTextWidth(INVOICE_RECORD.HEADER.ADDRESS || '-')
+        const projectNameWidth = doc.getTextWidth(GROUPED_INVOICE.HEADER.PROJECT_NAME || '-')
 
-        if (companyAddressWidth > SECOND_COL_WIDTH_X) {
-          const times = companyAddressWidth / SECOND_COL_WIDTH_X
-          incrementHeight(SMALL_LINE_HEIGHT + (0.08 * Math.ceil(times)))
+        if (projectNameWidth > SECOND_COL_WIDTH_X) {
+          const times = projectNameWidth / SECOND_COL_WIDTH_X
+          console.log(Math.ceil(times), projectNameWidth, SECOND_COL_WIDTH_X );
+          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
         } else {
-          incrementHeight(SMALL_LINE_HEIGHT)
+          incrementHeight(NORMAL_LINE_HEIGHT)
         }
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal");
-        doc.text('TEL. NO. ' + INVOICE_RECORD.DETAILS.TELNO, SECOND_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight(SMALL_LINE_HEIGHT)
+        doc.text('List of Billing/Service Invoice finalized for the day', SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        incrementHeight(NORMAL_LINE_HEIGHT)
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal");
-        doc.text('VAT REG TIN: ' + INVOICE_RECORD.DETAILS.REGTIN, SECOND_COL_START_X, cursorLineHeight, { align: 'left' })
-
-        // 3RD COLUMN
-        cursorLineHeight = HEADER_START_HEIGHT - 0.05
-
-        doc.setFontSize(INVOICE_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-        doc.text("INVOICE", endLineX, cursorLineHeight, { align: 'right' })
-        const invoiceTextWidth = doc.getTextWidth('INVOICE')
-        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
-        doc.setFont("helvetica", "bold");
-        doc.text(INVOICE_RECORD.INVOICE_KEY.INVOICE_NAME, endLineX - invoiceTextWidth - 0.1, cursorLineHeight - 0.01, { align: 'right' })
-        incrementHeight(LARGE_LINE_HEIGHT + 0.075)
-
-        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
-        doc.setFont("helvetica", "bold");
-        doc.text("No.   " + INVOICE_RECORD.INVOICE_KEY.INVOICE_NUMBER, endLineX, cursorLineHeight, { align: 'right' })
-        incrementHeight(LARGE_LINE_HEIGHT + 0.05)
-
-        doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
-        doc.setFont("helvetica", "bold");
-        doc.text("Date :   " + (INVOICE_RECORD.DETAILS.DATVAL ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), endLineX, cursorLineHeight, { align: 'right' })
+        doc.text('Invoice Date : ' + (GROUPED_INVOICE.HEADER.INVOICE_DATE ? configStore.formatDate2(GROUPED_INVOICE.HEADER.INVOICE_DATE) :  'xxxx/xx/xx'), SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
         cursorLineHeight = HEADER_START_HEIGHT
         incrementHeight(HEADER_HEIGHT)
-
-        // BOTTOM MARGIN
-        incrementHeight(BOTTOM_MARGIN_HEIGHT)
-
       }
 
-      const handleAddInvoiceClientDescription = (INVOICE_RECORD: InvoiceRecord): number => {
-
-        var HIGHEST_CURSOR_LINE_HEIGHT = 0
-        var TEXT_WIDTH = 0
-        const initialCursorLineHeight = cursorLineHeight
-
-        const LABEL_WIDTH = 0.8
-
-        const FIRST_COL_START_X  = startLineX
-        const FIRST_COL_END_X    = FIRST_COL_START_X + LABEL_WIDTH
-
-        const SECOND_COL_START_X = FIRST_COL_END_X + 0.2
-        const SECOND_COL_WIDTH_X = 3.6
-        const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
-
-        const THIRD_COL_START_X  = SECOND_COL_END_X + 0.2
-        const THIRD_COL_END_X    = THIRD_COL_START_X + LABEL_WIDTH
-
-        const FOURTH_COL_START_X = THIRD_COL_END_X + 0.2
-        const FOURTH_COL_WIDTH_X = endLineX - FOURTH_COL_START_X
-        const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
-
-        // 1ST COLUMN
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("SOLD TO ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.CLTNME, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTNME || '-')
-        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("ADDRESS ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        const CLIENT_ADDRESS = INVOICE_RECORD.DETAILS.RADDR1 + INVOICE_RECORD.DETAILS.RADDR2
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(CLIENT_ADDRESS, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(CLIENT_ADDRESS || '-')
-        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("TIN ", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", FIRST_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.CLTTIN, SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTTIN || '-')
-        if (TEXT_WIDTH > SECOND_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / SECOND_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-        if (cursorLineHeight > HIGHEST_CURSOR_LINE_HEIGHT) {
-          HIGHEST_CURSOR_LINE_HEIGHT = cursorLineHeight
-        }
-
-
-        // 2ND COLUMN
-
-        cursorLineHeight = initialCursorLineHeight
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("CLIENT KEY ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.CLTKEY, FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTKEY || '-')
-        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("PROJECT ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.PRJNAM, FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PRJNAM || '-')
-        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("UNIT ", THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text(":", THIRD_COL_END_X, cursorLineHeight, { align: 'left' })
-
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,), FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,) || '-')
-        if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
-          const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
-          incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
-        } else {
-          incrementHeight()
-        }
-
-        if (cursorLineHeight > HIGHEST_CURSOR_LINE_HEIGHT) {
-          HIGHEST_CURSOR_LINE_HEIGHT = cursorLineHeight
-        }
-
-        cursorLineHeight = HIGHEST_CURSOR_LINE_HEIGHT
-
-        return HIGHEST_CURSOR_LINE_HEIGHT
-      }
-
-      const handleAddInvoiceBreakdownTable = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number) => {
+      const handleAddSummaryInvoicesTable = (GROUPED_INVOICE: INVOICE_PER_COMPANY_AND_PROJECT, INVOICE_RECORDS: InvoiceRecord[], HEIGHT_VACANT_FOR_BODY: number) => {
 
         const TABLE_START_Y = cursorLineHeight;
         const TABLE_END_Y = cursorLineHeight + HEIGHT_VACANT_FOR_BODY;
@@ -1200,28 +1031,49 @@ export const useMainStore = defineStore('main', () => {
 
         const TABLE_PADDING = 0.075
 
+        interface ColumnPosition {
+          colStartX: number,
+          colWidthX: number,
+          colEndX: number
+        }
+
+        const columns: ColumnPosition[] = [];
+        let previousColEndX = startLineX;
+
+        const sizes = [0.85, 0.65, 0.6, 2, 2, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.6]
+
+        for (let i = 0; i < 13; i++) {
+          var colStartX = 0;
+          var colWidthX = 0;
+          var colEndX = 0;
+
+          if (i < 12) {
+            colStartX = previousColEndX + TABLE_PADDING;
+            colWidthX = sizes[i];
+            colEndX   = colStartX + colWidthX + TABLE_PADDING;
+          } else {
+            colStartX = previousColEndX + TABLE_PADDING;
+            colWidthX = endLineX - colStartX - TABLE_PADDING;
+            colEndX   = colStartX + colWidthX;
+          }
+
+          columns.push({
+            colStartX,
+            colWidthX,
+            colEndX
+          });
+
+          previousColEndX = colEndX;
+        }
 
         const FIRST_COL_START_X  = startLineX + TABLE_PADDING
-        const FIRST_COL_WIDTH_X  = 3.25
+        const FIRST_COL_WIDTH_X  = 1
         const FIRST_COL_END_X    = FIRST_COL_START_X + FIRST_COL_WIDTH_X + TABLE_PADDING
 
-        const SECOND_COL_WIDTH_X = 0.5
-        const SECOND_COL_START_X = FIRST_COL_END_X + (SECOND_COL_WIDTH_X / 2)
-        const SECOND_COL_END_X   = FIRST_COL_END_X + SECOND_COL_WIDTH_X
+        const SECOND_COL_START_X = FIRST_COL_END_X + TABLE_PADDING
+        const SECOND_COL_WIDTH_X = 1
+        const SECOND_COL_END_X   = FIRST_COL_END_X + SECOND_COL_WIDTH_X + TABLE_PADDING
 
-        const remainingWidth = endLineX - SECOND_COL_END_X
-
-        const THIRD_COL_START_X  = SECOND_COL_END_X
-        const THIRD_COL_WIDTH_X  = remainingWidth / 3
-        const THIRD_COL_END_X    = THIRD_COL_START_X + THIRD_COL_WIDTH_X
-
-        const FOURTH_COL_START_X = THIRD_COL_END_X
-        const FOURTH_COL_WIDTH_X = remainingWidth / 3
-        const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
-
-        const FIFTH_COL_START_X  = FOURTH_COL_END_X
-        const FIFTH_COL_WIDTH_X  = endLineX - FIFTH_COL_START_X
-        const FIFTH_COL_END_X    = FIFTH_COL_START_X + FIFTH_COL_WIDTH_X
 
         doc.rect(startLineX, TABLE_START_Y, contentWidth, HEIGHT_VACANT_FOR_BODY );
 
@@ -1229,206 +1081,174 @@ export const useMainStore = defineStore('main', () => {
         incrementHeight()
         doc.line(startLineX, TABLE_START_Y + COLUMN_HEIGHT, endLineX, TABLE_START_Y + COLUMN_HEIGHT );
 
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "bold");
 
-        doc.text("Item / Description", FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text("Qty", SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
-        doc.text("Unit Cost", THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.text("VAT Amount", FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.text("Amount", FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text("Invoice Number", columns[0].colStartX, cursorLineHeight, { align: 'left' })
+        doc.text("PBL Key", columns[1].colStartX, cursorLineHeight, { align: 'left' })
+        doc.text("Client Key", columns[2].colStartX, cursorLineHeight, { align: 'left' })
+        doc.text("Client Name", columns[3].colStartX, cursorLineHeight, { align: 'left' })
+        doc.text("Item / Description", columns[4].colStartX, cursorLineHeight, { align: 'left' })
+        doc.text("Vatable Sales", columns[5].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Vat Exempt", columns[6].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Zero Rated", columns[7].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Govt. Taxes", columns[8].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Total Sales", columns[9].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("VAT", columns[10].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Wth. Tax", columns[11].colEndX, cursorLineHeight, { align: 'right' })
+        doc.text("Invoice Amount", columns[12].colEndX, cursorLineHeight, { align: 'right' })
 
-        doc.line(FIRST_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FIRST_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
-        doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
-        doc.line(THIRD_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, THIRD_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
-        doc.line(FOURTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FOURTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        // doc.line(FIRST_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FIRST_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        // doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        // doc.line(THIRD_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, THIRD_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
+        // doc.line(FOURTH_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, FOURTH_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + COLUMN_HEIGHT )
         incrementHeight(LARGE_LINE_HEIGHT + TABLE_PADDING)
 
         // TABLE ROWS
-        var TEXT_WIDTH = 0
+        // var TEXT_WIDTH = 0
 
         // MAX WITH FOOTER = 18 - 21
         // MAX WITHOUT FOOTER = 25 - 28
 
-        INVOICE_RECORD.ITEM_BREAKDOWNS.forEach((item) => {
-          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-          doc.setFont("helvetica", "normal");
-          doc.text(`${item.QTY || 0}`, SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
-          doc.text(item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00', THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          doc.text(item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00', FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          doc.text(item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00', FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          doc.text(item.ITEM || '-', FIRST_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FIRST_COL_WIDTH_X })
-          TEXT_WIDTH = doc.getTextWidth(item.ITEM || '-')
-          if (TEXT_WIDTH > FIRST_COL_WIDTH_X) {
-            const times = TEXT_WIDTH / FIRST_COL_WIDTH_X
-            incrementHeight(NORMAL_LINE_HEIGHT + (NORMAL_LINE_HEIGHT * times) - TABLE_PADDING)
-          } else {
-            incrementHeight()
+        for (let index = 0; index < INVOICE_RECORDS.length; index++) {
+
+          const INVOICE_RECORD = INVOICE_RECORDS[index];
+
+          if (cursorLineHeight + TABLE_PADDING > TABLE_END_Y ) {
+
+            doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+            doc.setFont("helvetica");
+            doc.setLineWidth(0.01);
+
+            handleCreateNewPage()
+
+            handleAddSummaryInvoicesHeader(GROUPED_INVOICE)
+
+            handleAddSummaryInvoicesFooter(GROUPED_INVOICE)
+
+            handleAddSummaryInvoicesTable(GROUPED_INVOICE, INVOICE_RECORDS.slice(index), contentHeight - ( HEADER_HEIGHT + ( NORMAL_LINE_HEIGHT * 3 ) + FOOTER_HEIGHT ))
+
+            break;
           }
-        })
+
+          const startY = cursorLineHeight;
+          var highestEndY = 0;
+
+          doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text(INVOICE_RECORD.INVOICE_KEY.INVOICE_NUMBER, columns[0].colStartX, cursorLineHeight, { align: 'left' })
+          doc.text(INVOICE_RECORD.DETAILS.PBLKEY, columns[1].colStartX, cursorLineHeight, { align: 'left' })
+          doc.text(INVOICE_RECORD.DETAILS.CLTKEY, columns[2].colStartX, cursorLineHeight, { align: 'left' })
+          doc.text(INVOICE_RECORD.DETAILS.CLTNME, columns[3].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[3].colWidthX })
+
+          const clientNameWidth = doc.getTextWidth(INVOICE_RECORD.DETAILS.CLTNME || '-')
+
+          if (clientNameWidth > columns[3].colWidthX) {
+            const times = clientNameWidth / columns[3].colWidthX
+            incrementHeight(NORMAL_LINE_HEIGHT + (0.10 * Math.ceil(times)))
+          } else {
+            incrementHeight(NORMAL_LINE_HEIGHT)
+          }
+
+          if ( cursorLineHeight > highestEndY ) {
+            highestEndY = cursorLineHeight
+          }
+
+          cursorLineHeight = startY;
+
+          for (let index = 0; index < INVOICE_RECORD.ITEM_BREAKDOWNS.length; index++) {
+            const ITEM_BREAKDOWN = INVOICE_RECORD.ITEM_BREAKDOWNS[index];
+
+            doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+            doc.setFont("helvetica", "normal");
+            doc.text(ITEM_BREAKDOWN.ITEM || '', columns[4].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[4].colWidthX })
+            doc.text(ITEM_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.WTHTAX ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.WTHTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
+
+            const IS_LAST = (index + 1) === INVOICE_RECORD.ITEM_BREAKDOWNS.length ;
+
+            const itemDescWidth = doc.getTextWidth(ITEM_BREAKDOWN.ITEM || '-')
+            if (itemDescWidth > columns[4].colWidthX) {
+              const times = itemDescWidth / columns[4].colWidthX
+              incrementHeight(INVOICE_RECORD.ITEM_BREAKDOWNS.length === 1 ? LARGE_LINE_HEIGHT * 1.5  : NORMAL_LINE_HEIGHT + (0.045 * Math.ceil(times)))
+            } else {
+              incrementHeight(IS_LAST ? NORMAL_LINE_HEIGHT : VERY_SMALL_LINE_HEIGHT )
+            }
+          }
+
+          if (INVOICE_RECORD.ITEM_BREAKDOWNS.length > 1) {
+            doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+            doc.setFont("helvetica", "bold");
+            doc.text('TOTAL :', columns[4].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
+            doc.line(columns[5].colStartX, cursorLineHeight - VERY_SMALL_LINE_HEIGHT, columns[12].colEndX, cursorLineHeight - VERY_SMALL_LINE_HEIGHT)
+            incrementHeight(LARGE_LINE_HEIGHT + 0.1)
+          }
 
 
-        // TOTAL BREAKDOWN
+          if ( cursorLineHeight > highestEndY ) {
+            highestEndY = cursorLineHeight
+          }
 
-        const GAP = 0.25
-        const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
-
-        const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * 5) + TABLE_PADDING
-        const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
-
-        const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
-        const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
-        const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
-
-        const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
-        const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
-        const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
+          cursorLineHeight = startY;
 
 
-        const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
-        const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
-        const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
 
-        const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
-        const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
-        const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
-
-
-        // FIRST COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-
-        // SECOND COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
-        // THIRD COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
-        incrementHeight()
-
-        // FOURTH COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
+          cursorLineHeight = highestEndY
+        }
       }
 
-      const handleAddInvoiceFooter = (INVOICE_RECORD: InvoiceRecord) => {
+      const handleAddSummaryInvoicesFooter = (GROUPED_INVOICE: INVOICE_PER_COMPANY_AND_PROJECT) => {
+
+        const startY = cursorLineHeight
 
         cursorLineHeight = pageSizeY - marginTop - FOOTER_HEIGHT
 
-        const PADDING_X = 0.2
-        const SIGNATURE_WIDTH = 1.8
-
-        const SIGNATURE_START_X = endLineX - SIGNATURE_WIDTH - PADDING_X
-        const SIGNATURE_END_X = endLineX - PADDING_X
-        const SIGNATURE_CENTER_X = SIGNATURE_END_X - ( SIGNATURE_WIDTH / 2)
-
-        doc.setFontSize(TITLE_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text(INVOICE_RECORD.DETAILS.AUTHSG || 'xxxxxxxx', SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
-        incrementHeight(NORMAL_LINE_HEIGHT)
-
-        doc.line(SIGNATURE_START_X, cursorLineHeight - SMALL_LINE_HEIGHT, SIGNATURE_END_X, cursorLineHeight - SMALL_LINE_HEIGHT)
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text("Authorized Signature", SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
-        incrementHeight(NORMAL_LINE_HEIGHT)
-
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.FOOTER.ACNUM || "Acknowledgement Certificate No. : xxxxxxxxxxxxxxx", startLineX, cursorLineHeight, { align: 'left' })
+        doc.text(GROUPED_INVOICE.FOOTER.ACNUM || "Acknowledgement Certificate No. : xxxxxxxxxxxxxxx", startLineX, cursorLineHeight, { align: 'left' })
         incrementHeight(VERY_SMALL_LINE_HEIGHT)
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.FOOTER.ACDAT || "Date Issued : xxxx/xx/xx", startLineX, cursorLineHeight, { align: 'left' })
+        doc.text(GROUPED_INVOICE.FOOTER.ACDAT || "Date Issued : xxxx/xx/xx", startLineX, cursorLineHeight, { align: 'left' })
         incrementHeight(VERY_SMALL_LINE_HEIGHT)
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text("Series Range : " + INVOICE_RECORD.INVOICE_KEY.SERIES_RANGE, startLineX, cursorLineHeight, { align: 'left' })
-        incrementHeight(VERY_SMALL_LINE_HEIGHT)
+        doc.text("Timestamp : " + (GROUPED_INVOICE.FOOTER.DATSTP ? configStore.formatDate2(GROUPED_INVOICE.FOOTER.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (GROUPED_INVOICE.FOOTER.TIMSTP ? configStore.formatTime2(GROUPED_INVOICE.FOOTER.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
 
-        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text("Timestamp : " + (INVOICE_RECORD.DETAILS.DATSTP ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.TIMSTP ? configStore.formatTime2(INVOICE_RECORD.DETAILS.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
+        cursorLineHeight = startY
       }
 
-      const pageFormat = 'letter'
-      const pageOrientation = 'portrait'
+      const pageFormat = 'legal'
+      const pageOrientation = 'landscape'
 
       const doc = new jsPDF({
         orientation:  pageOrientation,
         unit:         "in",
-        format:       pageFormat,         // Letter size (8.5 x 11 inches)
+        format:       pageFormat,
       });
 
 
-      const pageSizeX = 8.5
-      const pageSizeY = 11
+      const pageSizeX = 14
+      const pageSizeY = 8.5
 
-      const marginLeft = 0.5;
-      const marginTop = 0.75;
+      const marginLeft = 0.25;
+      const marginTop = 0.25;
       const contentWidth = pageSizeX - (marginLeft * 2);    // Width of writable content area
       const contentHeight = pageSizeY - (marginTop * 2);    // Height of writable content area
 
@@ -1438,21 +1258,20 @@ export const useMainStore = defineStore('main', () => {
       const endLineX = pageSizeX - marginLeft
 
 
-      INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
+      groupedInvoices.forEach((GROUPED_INVOICE, index) => {
 
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica");
         doc.setLineWidth(0.01);
 
-        handleAddInvoiceHeader(INVOICE_RECORD)
+        handleAddSummaryInvoicesHeader(GROUPED_INVOICE)
 
-        const CLIENT_DESC_HEIGHT = handleAddInvoiceClientDescription(INVOICE_RECORD)
+        handleAddSummaryInvoicesFooter(GROUPED_INVOICE)
 
-        handleAddInvoiceBreakdownTable(INVOICE_RECORD, pageSizeY - ( CLIENT_DESC_HEIGHT + NORMAL_LINE_HEIGHT + 0.3 + NORMAL_LINE_HEIGHT + FOOTER_HEIGHT + marginTop ))
+        handleAddSummaryInvoicesTable(GROUPED_INVOICE, GROUPED_INVOICE.INVOICE_RECORDS, contentHeight - ( HEADER_HEIGHT + ( NORMAL_LINE_HEIGHT * 3 ) + FOOTER_HEIGHT ))
 
-        handleAddInvoiceFooter(INVOICE_RECORD)
 
-        if (index + 1 < INVOICE_RECORDS.length) {
+        if (index + 1 < groupedInvoices.length) {
           handleCreateNewPage()
         }
       })
@@ -1460,7 +1279,7 @@ export const useMainStore = defineStore('main', () => {
       return doc
     }
 
-    return generateDoc(groupedInvoice).output('blob')
+    return generateDoc(groupedInvoices).output('blob')
   }
 
   const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {

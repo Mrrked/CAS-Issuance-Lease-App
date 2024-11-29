@@ -31,7 +31,7 @@
     <div class="flex items-center gap-2">
       <Button type="button" icon="pi pi-eye" label="View Summary" @click="dialogRef.data.viewSummary()"></Button>
       <Button v-if="getNoFailedInvoices" type="button" icon="pi pi-download" label="Error Logs" @click="dialogRef.data.downloadErrorLogs()"></Button>
-      <div class="w-40 text-sm">
+      <div v-if="getNoFailedInvoices" class="w-40 text-sm">
         {{ getNoFailedInvoices }} records has failed during issuance.
       </div>
     </div>

@@ -228,10 +228,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       const issuedInvoiceRecords = response?.data.success as InvoiceRecord[] || [];
       const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS || [];
 
-      const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
-
-      configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
-
       const ShowResultFinalInvoiceDialog = dialog.open(ResultFinalInvoiceModal, {
         data: {
           issuedInvoiceRecords,
@@ -339,7 +335,27 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             loadingDialogRef.close()
           },
-          viewSuccessInvoices: () => {
+          viewSuccessInvoices: async () => {
+
+            const loadingDialogRef = dialog.open(LoadingModal, {
+              data: {
+                label: `Loading ${issuedInvoiceRecords.length} Invoices...`
+              },
+              props: {
+                style: {
+                  paddingTop: '1.5rem',
+                },
+                showHeader: false,
+                modal: true
+              },
+            })
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
+
+            configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+
             const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
             const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
               data: {
@@ -365,6 +381,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 footer: markRaw(Footer)
               },
             })
+
+            loadingDialogRef.close()
           },
           cancel: () => {
             confirm.require({

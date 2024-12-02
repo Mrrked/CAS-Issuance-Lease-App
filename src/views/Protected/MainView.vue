@@ -31,7 +31,7 @@
 
   onMounted(() => {
     coreDataStore.fetchData()
-    mainStore.handleExecuteSearch(2)
+    // mainStore.handleExecuteSearch(2)
   })
 
 </script>

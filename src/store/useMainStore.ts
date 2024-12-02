@@ -1323,7 +1323,7 @@ export const useMainStore = defineStore('main', () => {
         }
       },
       props: {
-        header: 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY + ` (${new Date(SELECTED_INVOICE_RECORD.DETAILS.DATVAL).toLocaleString('en-US', { month: 'long', year: 'numeric' })})`,
+        header: 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY,
         style: {
           width: '75vw'
         },

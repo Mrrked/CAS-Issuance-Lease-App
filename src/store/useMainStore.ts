@@ -1471,7 +1471,7 @@ export const useMainStore = defineStore('main', () => {
             } else {
               toast.add({
                 summary: 'No available record found!',
-                detail: 'There is available lease open bill for the specified month!',
+                detail: 'There is no available lease open bill for the specified month and year!',
                 severity: 'warn',
                 life: 3000,
               })

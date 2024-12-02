@@ -23,7 +23,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const configStore = useConfigStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date('2025/01/10')
+    invoiceDate: new Date()
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -138,7 +138,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         }
       },
       props: {
-        header: '(Per Batch) For Issuance of Invoice' ,
+        header: '(Per Batch) For Issuance of Invoice - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long' }),
         style: {
           width: '75vw'
         },
@@ -332,7 +332,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 }
               },
               props: {
-                header: '(Per Batch) Summary of Issued Invoices',
+                header: '(Per Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long' }),
                 style: {
                   width: '75vw'
                 },

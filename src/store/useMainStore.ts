@@ -856,14 +856,14 @@ export const useMainStore = defineStore('main', () => {
         const SIGNATURE_END_X = endLineX - PADDING_X
         const SIGNATURE_CENTER_X = SIGNATURE_END_X - ( SIGNATURE_WIDTH / 2)
 
-        doc.setFontSize(TITLE_TEXT_FONT_SIZE)
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "bold")
         doc.text(INVOICE_RECORD.DETAILS.AUTHSG || 'xxxxxxxx', SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
         incrementHeight(NORMAL_LINE_HEIGHT)
 
         doc.line(SIGNATURE_START_X, cursorLineHeight - SMALL_LINE_HEIGHT, SIGNATURE_END_X, cursorLineHeight - SMALL_LINE_HEIGHT)
 
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "bold")
         doc.text("Authorized Signature", SIGNATURE_CENTER_X, cursorLineHeight, { align: 'center' })
         incrementHeight(NORMAL_LINE_HEIGHT)
@@ -1323,7 +1323,7 @@ export const useMainStore = defineStore('main', () => {
         }
       },
       props: {
-        header: 'Preview Draft Invoice',
+        header: 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY + ` (${new Date(SELECTED_INVOICE_RECORD.DETAILS.DATVAL).toLocaleString('en-US', { month: 'long', year: 'numeric' })})`,
         style: {
           width: '75vw'
         },
@@ -1387,7 +1387,8 @@ export const useMainStore = defineStore('main', () => {
         }
       },
       props: {
-        header: 'Preview Draft Invoices',
+        header: 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`,
+
         style: {
           width: '75vw'
         },

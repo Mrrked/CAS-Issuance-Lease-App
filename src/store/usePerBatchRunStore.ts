@@ -4,7 +4,7 @@ import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 import { AxiosResponse } from 'axios';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
-import PreviewPDFModal1 from '../components/Dialog/General/PreviewPDFModal1.vue';
+import ResultFinalInvoiceModal from '../components/Dialog/General/ResultFinalInvoiceModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
 import { useConfigStore } from './useConfigStore';
@@ -228,68 +228,15 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       const issuedInvoiceRecords = response?.data.success as InvoiceRecord[] || [];
       const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS || [];
 
-      const groupedInvoiceRecords: INVOICE_PER_COMPANY_AND_PROJECT[] =
-      (
-        Object.values(
-          issuedInvoiceRecords
-            .sort((a,b) => {
-              // COMPCD LOWEST TO HIGHEST
-              if (a.INVOICE_KEY.COMPCD !== b.INVOICE_KEY.COMPCD) {
-                return a.INVOICE_KEY.COMPCD - b.INVOICE_KEY.COMPCD;
-              }
-              return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
-            })
-            .reduce((acc: any , record: InvoiceRecord) => {
-              const key = configStore.fillNumberWithZeroes(record.INVOICE_KEY.COMPCD, 2) + '_' + record.INVOICE_KEY.PROJCD
-              if (!acc[key]) {
-                // console.log('NEW PAGE FOR', key, '\n');
-                acc[key] = {
-                  COMPCD:           record.INVOICE_KEY.COMPCD,
-                  PROJCD:           record.INVOICE_KEY.PROJCD,
-
-                  HEADER: {
-                    COMPANY_NAME:   record.HEADER.COMPANY_NAME,
-                    PROJECT_NAME:   record.DETAILS.PRJNAM,
-                    ADDRESS:        record.HEADER.ADDRESS,
-                    LOGO_URL:       record.HEADER.LOGO_URL,
-                    LOGO_SIZE_INCH: record.HEADER.LOGO_SIZE_INCH,
-                    INVOICE_DATE:   record.DETAILS.DATVAL
-                  },
-
-                  FOOTER: {
-                    ACNUM:          record.FOOTER.ACDAT,
-                    ACDAT:          record.FOOTER.ACNUM,
-                    TIMSTP:         record.DETAILS.TIMSTP,
-                    DATSTP:         record.DETAILS.DATSTP
-                  },
-
-                  INVOICE_RECORDS: [],
-                };
-              }
-              // console.log(key);
-              acc[key].INVOICE_RECORDS.push(record);
-              return acc;
-            }, {})
-        ) as INVOICE_PER_COMPANY_AND_PROJECT[]
-      )
-
-      console.log('GROUPED FOR SUMMARY', groupedInvoiceRecords);
-
-      console.log('FAILED ISSUED INVOICE RECORDS', failedInvoiceRecords);
-
       const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
       configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
-      const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
-      const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
+      const ShowResultFinalInvoiceDialog = dialog.open(ResultFinalInvoiceModal, {
         data: {
-          pdfBlob: PDF_BLOB,
-          failedInvoiceRecords: failedInvoiceRecords,
-          download: () => {
-            configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
-          },
-          downloadErrorLogs: () => {
+          issuedInvoiceRecords,
+          failedInvoiceRecords,
+          downloadFailedInvoices: () => {
             const JSON_BLOB = new Blob(
               [JSON.stringify(failedInvoiceRecords, null, 2)],
               { type: 'application/json' }
@@ -301,7 +248,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             a.click();
             URL.revokeObjectURL(url);
           },
-          viewSummary: async () => {
+          viewSummarySuccessInvoices: async () => {
             const loadingDialogRef = dialog.open(LoadingModal, {
               data: {
                 label: `Generating Summary of Invoices Report...`
@@ -314,12 +261,58 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 modal: true
               },
             })
+
             await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const groupedInvoiceRecords: INVOICE_PER_COMPANY_AND_PROJECT[] =
+            (
+              Object.values(
+                issuedInvoiceRecords
+                  .sort((a,b) => {
+                    // COMPCD LOWEST TO HIGHEST
+                    if (a.INVOICE_KEY.COMPCD !== b.INVOICE_KEY.COMPCD) {
+                      return a.INVOICE_KEY.COMPCD - b.INVOICE_KEY.COMPCD;
+                    }
+                    return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
+                  })
+                  .reduce((acc: any , record: InvoiceRecord) => {
+                    const key = configStore.fillNumberWithZeroes(record.INVOICE_KEY.COMPCD, 2) + '_' + record.INVOICE_KEY.PROJCD
+                    if (!acc[key]) {
+                      // console.log('NEW PAGE FOR', key, '\n');
+                      acc[key] = {
+                        COMPCD:           record.INVOICE_KEY.COMPCD,
+                        PROJCD:           record.INVOICE_KEY.PROJCD,
+
+                        HEADER: {
+                          COMPANY_NAME:   record.HEADER.COMPANY_NAME,
+                          PROJECT_NAME:   record.DETAILS.PRJNAM,
+                          ADDRESS:        record.HEADER.ADDRESS,
+                          LOGO_URL:       record.HEADER.LOGO_URL,
+                          LOGO_SIZE_INCH: record.HEADER.LOGO_SIZE_INCH,
+                          INVOICE_DATE:   record.DETAILS.DATVAL
+                        },
+
+                        FOOTER: {
+                          ACNUM:          record.FOOTER.ACDAT,
+                          ACDAT:          record.FOOTER.ACNUM,
+                          TIMSTP:         record.DETAILS.TIMSTP,
+                          DATSTP:         record.DETAILS.DATSTP
+                        },
+
+                        INVOICE_RECORDS: [],
+                      };
+                    }
+                    // console.log(key);
+                    acc[key].INVOICE_RECORDS.push(record);
+                    return acc;
+                  }, {})
+              ) as INVOICE_PER_COMPANY_AND_PROJECT[]
+            )
 
             const PDF_BLOB1 = await mainStore.handleGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords) ;
 
             const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/SummaryFinalInvoiceModalFooter.vue'));
-            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal1, {
+            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal, {
               data: {
                 pdfBlob: PDF_BLOB1,
                 download: () => {
@@ -332,7 +325,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 }
               },
               props: {
-                header: '(Per Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long' }),
+                header: '(Per Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
                 style: {
                   width: '75vw'
                 },
@@ -346,22 +339,60 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             loadingDialogRef.close()
           },
-          submit: () => {
+          viewSuccessInvoices: () => {
+            const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
+            const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
+              data: {
+                pdfBlob: PDF_BLOB,
+                download: () => {
+                  configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+                },
+                submit: () => {
+                },
+                cancel: () => {
+                  ShowIssuedInvoices.close()
+                }
+              },
+              props: {
+                header: '(Per Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+                style: {
+                  width: '75vw'
+                },
+                showHeader: true,
+                modal: true,
+              },
+              templates: {
+                footer: markRaw(Footer)
+              },
+            })
           },
           cancel: () => {
-            ShowIssuedInvoices.close()
+            confirm.require({
+              message: `Please review the result of the batch invoice issuance. You might need to check and save the issued and/or failed invoices.`,
+              header: 'Are you sure you want to close the results modal?',
+              icon: 'pi pi-exclamation-triangle',
+              rejectProps: {
+                label: 'CANCEL AND RETURN TO HOME',
+                severity: 'secondary',
+                outlined: true
+              },
+              acceptProps: {
+                label: 'CONFIRM CLOSE RESULTS'
+              },
+              accept: () => {
+                ShowResultFinalInvoiceDialog.close()
+              },
+              reject: () => {
+              }
+            });
           }
         },
         props: {
-          header: '(Per Batch) Issued Invoices',
           style: {
-            width: '75vw'
+            width: '50vw'
           },
-          showHeader: true,
+          showHeader: false,
           modal: true,
-        },
-        templates: {
-          footer: markRaw(Footer)
         },
       })
     }

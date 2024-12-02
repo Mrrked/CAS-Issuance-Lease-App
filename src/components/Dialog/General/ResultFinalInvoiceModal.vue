@@ -46,7 +46,7 @@
         invoices has been issued successfully.
       </div>
     </div>
-    <div class="flex items-end gap-3">
+    <div v-if="hasFailedInvoices" class="flex items-end gap-3">
       <div class="w-10 text-xl font-bold text-right">
         {{ dialogRef?.data.failedInvoiceRecords.records.length || 0 }}
       </div>

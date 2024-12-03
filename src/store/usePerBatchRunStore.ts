@@ -157,6 +157,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const handleExecuteIssueFinalInvoices = async () => {
 
+    mainStore.allowReloadExitPage = false;
+
     toast.add({
       summary: 'Please do not close this tab!',
       detail: 'Ongoing Batch Issuance of Invoices',
@@ -398,6 +400,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 label: 'CONFIRM CLOSE RESULTS'
               },
               accept: () => {
+                mainStore.allowReloadExitPage = true;
                 ShowResultFinalInvoiceDialog.close()
               },
               reject: () => {

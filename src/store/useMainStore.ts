@@ -1,6 +1,6 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
-import { defineAsyncComponent, markRaw } from 'vue';
+import { defineAsyncComponent, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
@@ -19,6 +19,8 @@ export const useMainStore = defineStore('main', () => {
   // INITIAL
 
   // STATES
+
+  const allowReloadExitPage = ref<boolean>(true);
 
   const toast = useToast()
   const dialog = useDialog()
@@ -1282,7 +1284,7 @@ export const useMainStore = defineStore('main', () => {
     return generateDoc(groupedInvoices).output('blob')
   }
 
-  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
+  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => { 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const currentDate = new Date()
@@ -1535,7 +1537,25 @@ export const useMainStore = defineStore('main', () => {
     })
   }
 
+  const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+    if (!allowReloadExitPage.value) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  };
+
+  onMounted(() => {
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+    console.log('MOUNTED');
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+  });
+
   return {
+    allowReloadExitPage,
+
     getSplitClientAddress,
     getDeptCode,
     getItemName,

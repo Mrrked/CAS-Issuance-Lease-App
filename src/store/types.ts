@@ -190,8 +190,6 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
 
   INVOICE_KEY: InvoiceKey
 
-  IS_ALREADY_VERIFIED: boolean
-
   IS_VATABLE: string
   VAT_RATE: number
   WHTAX_RATE: number
@@ -235,8 +233,8 @@ export interface InvoiceKey {
   ORCOD:    string
   ORNUM:    number
 
-  YY: string
-  MM: string
+  YY: number
+  MM: number
 
   INVOICE_NAME:   string
   INVOICE_NUMBER: string

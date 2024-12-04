@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-  import { storeToRefs } from 'pinia';
   import { useConfigStore } from '../../store/useConfigStore';
   import { useLoginStore } from '../../store/useLoginStore';
   import { COLOR_SCHEMES } from '../../presets/MainPreset';
-  import ToggleSwitch from 'primevue/toggleswitch';
-  import Popover from 'primevue/popover';
-  import { ref } from 'vue';
   import { useThemeStore } from '../../store/useThemeStore';
   import { useDialog } from 'primevue/usedialog';
+  import { storeToRefs } from 'pinia';
+  import { ref } from 'vue';
 
   const dialog = useDialog();
 

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
   import { inject, Ref } from 'vue';
-  import Button from 'primevue/button';
 
   interface DialogRef  {
     data: {

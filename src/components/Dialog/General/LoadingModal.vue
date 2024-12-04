@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-  import ProgressSpinner from 'primevue/progressspinner';
   import { inject, onMounted, Ref, ref } from 'vue';
 
   interface DialogData {

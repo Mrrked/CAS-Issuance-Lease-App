@@ -1,9 +1,6 @@
 <script lang="ts" setup>
   import AppFooter from './components/Core/AppFooter.vue'
   import NavBar from './components/Core/NavBar.vue';
-  import Toast from 'primevue/toast';
-  import DynamicDialog from 'primevue/dynamicdialog';
-  import ConfirmDialog from 'primevue/confirmdialog';
 
   import 'primeicons/primeicons.css'
   import { useRoute } from 'vue-router';

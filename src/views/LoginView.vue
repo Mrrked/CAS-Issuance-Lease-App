@@ -1,7 +1,6 @@
 <script lang="ts" setup>
   import { storeToRefs } from 'pinia';
   import { useLoginStore } from '../store/useLoginStore';
-  import InputText from 'primevue/inputtext';
 
   const loginStore = useLoginStore();
 

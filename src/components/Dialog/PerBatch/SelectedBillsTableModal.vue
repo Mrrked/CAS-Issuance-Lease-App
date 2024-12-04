@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-  import Column from 'primevue/column';
-  import Button from 'primevue/button';
   import { inject, onMounted, ref, Ref } from 'vue';
   import { FilterMatchMode } from '@primevue/core/api';
   import DataTable, { DataTableRowSelectEvent } from 'primevue/datatable';

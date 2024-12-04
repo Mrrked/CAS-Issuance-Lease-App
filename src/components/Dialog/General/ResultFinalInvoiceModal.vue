@@ -1,6 +1,5 @@
 <script lang="ts" setup>
   import { computed, inject, Ref } from 'vue';
-  import Button from 'primevue/button';
   import { InvoiceRecord, FAILED_INVOICE_RECORDS } from '../../../store/types';
 
   interface DialogRef  {

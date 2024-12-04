@@ -1714,18 +1714,9 @@ export const useMainStore = defineStore('main', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
-            console.log('FETCHED OPEN BILLINGS', response.data);
-            if (response.data.length) {
-              perBatchRunStore.billings = response.data;
-              perBatchRunStore.handleOpenMainDialogBox()
-            } else {
-              toast.add({
-                summary: 'No available record found!',
-                detail: 'There is no available lease open bill for the specified month and year!',
-                severity: 'warn',
-                life: 3000,
-              })
-            }
+            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            perBatchRunStore.billings = response.data.data as LeaseBill[];
+            perBatchRunStore.handleOpenMainDialogBox()
           })
           .catch(configStore.handleError)
           .finally(() => {

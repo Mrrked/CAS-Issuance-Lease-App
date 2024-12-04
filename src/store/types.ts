@@ -190,7 +190,7 @@ export interface LeaseBill extends OutstandingBill, BillTypeRecord {
 
   INVOICE_KEY: InvoiceKey
 
-  IS_VATABLE: string
+  IS_VATABLE: boolean
   VAT_RATE: number
   WHTAX_RATE: number
   SALTYP: string
@@ -473,8 +473,9 @@ interface FAILED_INVOICE_RECORD {
 }
 
 export interface FAILED_INVOICE_RECORDS {
-  type: string
-  user: string
-  timestamp: string
-  records: FAILED_INVOICE_RECORD[]
+  RUN_TYPE: string,
+  RUN_BY: string,
+  RUN_AT: string,
+  FAILED_INVOICES: FAILED_INVOICE_RECORD[],
+  FAILED_INVOICES_LENGTH: number,
 }

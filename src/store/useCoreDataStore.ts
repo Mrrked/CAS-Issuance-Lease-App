@@ -53,17 +53,17 @@ export const useCoreDataStore = defineStore('coreData', () => {
       axios.get('issuance_lease/core/company_codes/')
         .then((response) => {
           // console.log('RESPONSE', response);
-          company_codes.value = response.data as CompanyRecord[];
+          company_codes.value = response.data.data as CompanyRecord[];
         }),
       axios.get('issuance_lease/core/bill_types/')
         .then((response) => {
           // console.log('RESPONSE', response);
-          bill_types.value = response.data as BillTypeRecord[];
+          bill_types.value = response.data.data as BillTypeRecord[];
         }),
       axios.get('issuance_lease/core/mother_bill_types/')
         .then((response) => {
           // console.log('RESPONSE', response);
-          mother_bill_types.value = response.data as MotherBillTypeRecord[];
+          mother_bill_types.value = response.data.data as MotherBillTypeRecord[];
         })
     ])
     .catch(configStore.handleError)

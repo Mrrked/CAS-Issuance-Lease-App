@@ -23,7 +23,7 @@
 
   const hasFailedInvoices = computed(() => {
     if (dialogRef) {
-      return dialogRef?.value.data.failedInvoiceRecords.records.length > 0
+      return dialogRef?.value.data.failedInvoiceRecords.FAILED_INVOICES_LENGTH > 0
     }
     return false
   })
@@ -48,7 +48,7 @@
     </div>
     <div v-if="hasFailedInvoices" class="flex items-end gap-3">
       <div class="w-10 text-xl font-bold text-right">
-        {{ dialogRef?.data.failedInvoiceRecords.records.length || 0 }}
+        {{ dialogRef?.data.failedInvoiceRecords.FAILED_INVOICES_LENGTH || 0 }}
       </div>
       <div>
         invoices encountered error during the issuance process.

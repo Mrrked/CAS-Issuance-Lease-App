@@ -225,10 +225,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     }
 
     const callback = async (response?: AxiosResponse) => {
-      // console.log('RESPONSE', response.data);
+      console.log('RESPONSE', response?.data);
 
-      const issuedInvoiceRecords = response?.data.success as InvoiceRecord[] || [];
-      const failedInvoiceRecords = response?.data.error as FAILED_INVOICE_RECORDS || [];
+      const issuedInvoiceRecords = response?.data.data.success as InvoiceRecord[] || [];
+      const failedInvoiceRecords = response?.data.data.error as FAILED_INVOICE_RECORDS || [];
 
       const ShowResultFinalInvoiceDialog = dialog.open(ResultFinalInvoiceModal, {
         data: {
@@ -242,7 +242,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             const url = URL.createObjectURL(JSON_BLOB);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `errors_invoice_issuance_${failedInvoiceRecords.timestamp}.json`;
+            a.download = `ERRORS_INVOICE_ISSUANCE_${failedInvoiceRecords.RUN_AT}.json`;
             a.click();
             URL.revokeObjectURL(url);
           },
@@ -392,7 +392,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               header: 'Are you sure you want to close the results modal?',
               icon: 'pi pi-exclamation-triangle',
               rejectProps: {
-                label: 'CANCEL AND RETURN TO HOME',
+                label: 'CANCEL AND RETURN TO RESULTS',
                 severity: 'secondary',
                 outlined: true
               },

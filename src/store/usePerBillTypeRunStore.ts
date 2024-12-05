@@ -60,59 +60,59 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   })
 
   const handleOpenMainDialogBox = () => {
-    console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
-    const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
-    const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
-      data: {
-        table_data : invoice_records_data.value,
-        table_column: invoice_records_column.value,
-        view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
-          mainStore.handleGenerateDraftInvoice(SELECTED_INVOICE_RECORD)
-        },
-        submit: () => {
-          confirm.require({
-            message: 'Are you sure you want to issue invoice?',
-            header: 'Confirm Issuance of Invoice (FINAL) ? ',
-            icon: 'pi pi-exclamation-triangle',
-            rejectProps: {
-              label: 'Cancel',
-              severity: 'secondary',
-              outlined: true
-            },
-            acceptProps: {
-              label: 'Confirm'
-            },
-            accept: () => {
-              handleExecutePrintFinalInvoices()
-            },
-            reject: () => {
-            }
-          });
-        },
-        cancel: () => {
-          PerMonthYearDialog.close()
-        }
-      },
-      props: {
-        header: 'Issuance of Invoice (Per Bill Type)' ,
-        style: {
-          width: '75vw'
-        },
-        showHeader: true,
-        maximizable: true,
-        modal: true,
-      },
-      templates: {
-        footer: markRaw(Footer)
-      },
-      onClose: () => {
-        billings.value = []
-      }
-    })
+    // console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
+    // const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
+    // const PerMonthYearDialog = dialog.open(SelectedBillsTableModal, {
+    //   data: {
+    //     table_data : invoice_records_data.value,
+    //     table_column: invoice_records_column.value,
+    //     view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
+    //       mainStore.handleGenerateDraftInvoice([SELECTED_INVOICE_RECORD])
+    //     },
+    //     submit: () => {
+    //       confirm.require({
+    //         message: 'Are you sure you want to issue invoice?',
+    //         header: 'Confirm Issuance of Invoice (FINAL) ? ',
+    //         icon: 'pi pi-exclamation-triangle',
+    //         rejectProps: {
+    //           label: 'Cancel',
+    //           severity: 'secondary',
+    //           outlined: true
+    //         },
+    //         acceptProps: {
+    //           label: 'Confirm'
+    //         },
+    //         accept: () => {
+    //           handleExecutePrintFinalInvoices()
+    //         },
+    //         reject: () => {
+    //         }
+    //       });
+    //     },
+    //     cancel: () => {
+    //       PerMonthYearDialog.close()
+    //     }
+    //   },
+    //   props: {
+    //     header: 'Issuance of Invoice (Per Bill Type)' ,
+    //     style: {
+    //       width: '75vw'
+    //     },
+    //     showHeader: true,
+    //     maximizable: true,
+    //     modal: true,
+    //   },
+    //   templates: {
+    //     footer: markRaw(Footer)
+    //   },
+    //   onClose: () => {
+    //     billings.value = []
+    //   }
+    // })
   }
 
   const handleExecutePrintFinalInvoices = () => {
-    
+
   }
 
   return {

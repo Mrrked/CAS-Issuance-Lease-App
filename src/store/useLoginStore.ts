@@ -4,11 +4,12 @@ import axios from '../axios';
 import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode';
 import { ref } from 'vue'
-import { useConfigStore } from './useConfigStore';
 import { useConfirm } from "primevue/useconfirm";
 import { useDialog } from 'primevue/usedialog';
 import { useRouter } from 'vue-router';
+import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
+import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const useLoginStore = defineStore('login', () => {
 
@@ -16,7 +17,8 @@ export const useLoginStore = defineStore('login', () => {
   const toast = useToast()
   const dialog = useDialog();
   const router = useRouter();
-  const configStore = useConfigStore();
+  const sessionStore = useSessionStore();
+  const utilStore = useUtilitiesStore()
 
   // STATES
   const username = ref<string>('');
@@ -50,7 +52,7 @@ export const useLoginStore = defineStore('login', () => {
         localStorage.setItem('access', tokens.access)
         localStorage.setItem('refresh', tokens.refresh)
 
-        configStore.authenticatedUser = {
+        sessionStore.authenticatedUser = {
           username: access_token_decoded.username,
           department: access_token_decoded.department,
           company_code: access_token_decoded.company_code,
@@ -67,7 +69,7 @@ export const useLoginStore = defineStore('login', () => {
         password.value = ''
         router.push('/')
       })
-      .catch(configStore.handleError)
+      .catch(utilStore.handleAxiosError)
       .finally(() => {
         loadingDialogRef.close()
       })

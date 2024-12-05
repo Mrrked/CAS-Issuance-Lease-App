@@ -2,21 +2,19 @@ import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
 import { defineAsyncComponent, markRaw, onMounted, onUnmounted, ref } from 'vue';
 
-import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import jsPDF from 'jspdf';
-import { useConfigStore } from './useConfigStore';
 import { useCoreDataStore } from './useCoreDataStore';
 import { useDialog } from 'primevue/usedialog';
 import { usePerBatchRunStore } from './usePerBatchRunStore';
 import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
+import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
+import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const useMainStore = defineStore('main', () => {
-
-  // INITIAL
 
   // STATES
 
@@ -24,7 +22,8 @@ export const useMainStore = defineStore('main', () => {
 
   const toast = useToast()
   const dialog = useDialog()
-  const configStore = useConfigStore()
+  const utilStore = useUtilitiesStore()
+  const sessionStore = useSessionStore()
   const coreDataStore = useCoreDataStore()
 
   const perBatchRunStore = usePerBatchRunStore()
@@ -90,6 +89,8 @@ export const useMainStore = defineStore('main', () => {
     return max
   }
 
+
+
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
@@ -108,9 +109,9 @@ export const useMainStore = defineStore('main', () => {
       let VAT_EXEMPT = 0
       let ZERO_RATE = 0
 
-      const VAT = configStore.getRoundedTwoDecimals((GROSS / GROSS_VAT_RATE) * VAT_RATE)
-      const TEMP = configStore.getRoundedTwoDecimals(GROSS - VAT)
-      const WHTAX = configStore.getRoundedTwoDecimals(TEMP * WHTAX_RATE)
+      const VAT = utilStore.convertNumberToRoundedNumber((GROSS / GROSS_VAT_RATE) * VAT_RATE)
+      const TEMP = utilStore.convertNumberToRoundedNumber(GROSS - VAT)
+      const WHTAX = utilStore.convertNumberToRoundedNumber(TEMP * WHTAX_RATE)
 
       if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
         ZERO_RATE = TEMP
@@ -120,7 +121,7 @@ export const useMainStore = defineStore('main', () => {
         VAT_SALES = TEMP
       }
 
-      const TOTAL_AMOUNT = configStore.getRoundedTwoDecimals(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
+      const TOTAL_AMOUNT = utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
 
       return {
         ...bill,
@@ -133,7 +134,7 @@ export const useMainStore = defineStore('main', () => {
         VAT_EXEMPT: VAT_EXEMPT,
         ZERO_RATE: ZERO_RATE,
 
-        TOTAL_SALE: configStore.getRoundedTwoDecimals(VAT_SALES + VAT_EXEMPT + ZERO_RATE),
+        TOTAL_SALE: utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE),
 
         // ADD
         GOVT_TAX: 0,
@@ -155,7 +156,7 @@ export const useMainStore = defineStore('main', () => {
 
       const key = bill.ID;
 
-      const invoiceDate: number = invoice_date ? configStore.formatDateToInteger(invoice_date) : 0
+      const invoiceDate: number = invoice_date ? utilStore.convertDateObjToNumberYYYYMMDD(invoice_date) : 0
       const invoiceType: 'BI' | 'VI' = bill.INVOICE_KEY.RECTYP
 
       const completeOrKey: string = bill.INVOICE_KEY.COMPLETE_OR_KEY
@@ -205,16 +206,16 @@ export const useMainStore = defineStore('main', () => {
           TOTAL_BREAKDOWN: {
             ...mergedMap[key].TOTAL_BREAKDOWN,
 
-            VATSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATSAL + bill.VAT_SALES),
-            VATEXM:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATEXM + bill.VAT_EXEMPT),
-            ZERSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.ZERSAL + bill.ZERO_RATE),
-            GOVTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.GOVTAX + bill.GOVT_TAX),
+            VATSAL:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.VATSAL + bill.VAT_SALES),
+            VATEXM:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.VATEXM + bill.VAT_EXEMPT),
+            ZERSAL:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.ZERSAL + bill.ZERO_RATE),
+            GOVTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.GOVTAX + bill.GOVT_TAX),
 
-            TOTSAL:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.TOTSAL + bill.AMOUNT),
-            NETVAT:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.NETVAT + bill.UNIT_COST),
-            VATAMT:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.VATAMT + bill.VAT),
-            PRDTAX:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
-            AMTDUE:         configStore.getRoundedTwoDecimals(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
+            TOTSAL:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.TOTSAL + bill.AMOUNT),
+            NETVAT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.NETVAT + bill.UNIT_COST),
+            VATAMT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.VATAMT + bill.VAT),
+            PRDTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
+            AMTDUE:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
           },
         }
       }
@@ -275,13 +276,13 @@ export const useMainStore = defineStore('main', () => {
             // FOOTER
             DATSTP:         0,  //UPDATE ON FINAL
             TIMSTP:         0,  //UPDATE ON FINAL
-            AUTHSG:         configStore.authenticatedUser.username || '',
+            AUTHSG:         sessionStore.authenticatedUser.username || '',
 
             // TRACKING
             STATUS:         '',
             RUNDAT:         0,  //UPDATE ON FINAL
             RUNTME:         0,  //UPDATE ON FINAL
-            RUNBY:          configStore.authenticatedUser.username || '',
+            RUNBY:          sessionStore.authenticatedUser.username || '',
 
             RPDATE:         0,
             RPTIME:         0,
@@ -346,7 +347,7 @@ export const useMainStore = defineStore('main', () => {
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
             DATOR:          0,  //UPDATE ON FINAL
-            CASHCD:         configStore.authenticatedUser.username || '',
+            CASHCD:         sessionStore.authenticatedUser.username || '',
             COLSTF:         '',
             ORAMT:          bill.TOTAL_AMOUNT,  //UPDATE ON FINAL
             NOACCT:         0,  //UPDATE ON FINAL no of months
@@ -516,7 +517,7 @@ export const useMainStore = defineStore('main', () => {
 
         doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
         doc.setFont("helvetica", "bold");
-        doc.text("Date :   " + (INVOICE_RECORD.DETAILS.DATVAL ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), endLineX, cursorLineHeight, { align: 'right' })
+        doc.text("Date :   " + (INVOICE_RECORD.DETAILS.DATVAL ? utilStore.formatDateNumberToStringYYYYMMDD(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), endLineX, cursorLineHeight, { align: 'right' })
 
         cursorLineHeight = HEADER_START_HEIGHT
         incrementHeight(HEADER_HEIGHT)
@@ -736,9 +737,9 @@ export const useMainStore = defineStore('main', () => {
           doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
           doc.setFont("helvetica", "normal");
           doc.text(`${item.QTY || 0}`, SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
-          doc.text(item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00', THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          doc.text(item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00', FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          doc.text(item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00', FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00', THIRD_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00', FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00', FIFTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           doc.text(item.ITEM || '-', FIRST_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FIRST_COL_WIDTH_X })
           TEXT_WIDTH = doc.getTextWidth(item.ITEM || '-')
           if (TEXT_WIDTH > FIRST_COL_WIDTH_X) {
@@ -808,17 +809,17 @@ export const useMainStore = defineStore('main', () => {
 
         incrementHeight()
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
 
         if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           incrementHeight()
         }
 
@@ -852,23 +853,23 @@ export const useMainStore = defineStore('main', () => {
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "bold");
 
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
         if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           incrementHeight()
         }
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
 
       }
@@ -954,26 +955,26 @@ export const useMainStore = defineStore('main', () => {
 
           doc.text(item.ITEM || '', columns[0].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[0].colWidthX })
           doc.text(`${item.QTY || ''}`, (columns[1].colStartX + columns[1].colEndX  - TABLE_PADDING) / 2, cursorLineHeight, { align: 'center', maxWidth: columns[1].colWidthX })
-          doc.text(item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00', columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
-          doc.text(item.VATSAL ? configStore.formatFloatNumber1(item.VATSAL) : '0.00', columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
-          doc.text(item.VATEXM ? configStore.formatFloatNumber1(item.VATEXM) : '0.00', columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
-          doc.text(item.ZERSAL ? configStore.formatFloatNumber1(item.ZERSAL) : '0.00', columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
-          doc.text(item.GOVTAX ? configStore.formatFloatNumber1(item.GOVTAX) : '0.00', columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
-          doc.text(item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00', columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
-          doc.text(item.WTHTAX ? configStore.formatFloatNumber1(item.WTHTAX) : '0.00', columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
-          doc.text(item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
+          doc.text(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00', columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
+          doc.text(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00', columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
+          doc.text(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00', columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
+          doc.text(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00', columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
+          doc.text(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00', columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
+          doc.text(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00', columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
+          doc.text(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00', columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
+          doc.text(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
 
           var LINES = Math.max(...[
             doc.getTextWidth(item.ITEM || '') / columns[0].colWidthX,
             doc.getTextWidth(`${item.QTY || ''}`) / columns[1].colWidthX,
-            doc.getTextWidth(item.UNTCST ? configStore.formatFloatNumber1(item.UNTCST) : '0.00') / columns[2].colWidthX,
-            doc.getTextWidth(item.VATSAL ? configStore.formatFloatNumber1(item.VATSAL) : '0.00') / columns[3].colWidthX,
-            doc.getTextWidth(item.VATEXM ? configStore.formatFloatNumber1(item.VATEXM) : '0.00') / columns[4].colWidthX,
-            doc.getTextWidth(item.ZERSAL ? configStore.formatFloatNumber1(item.ZERSAL) : '0.00') / columns[5].colWidthX,
-            doc.getTextWidth(item.GOVTAX ? configStore.formatFloatNumber1(item.GOVTAX) : '0.00') / columns[6].colWidthX,
-            doc.getTextWidth(item.VATAMT ? configStore.formatFloatNumber1(item.VATAMT) : '0.00') / columns[7].colWidthX,
-            doc.getTextWidth(item.WTHTAX ? configStore.formatFloatNumber1(item.WTHTAX) : '0.00') / columns[8].colWidthX,
-            doc.getTextWidth(item.AMTDUE ? configStore.formatFloatNumber1(item.AMTDUE) : '0.00') / columns[9].colWidthX,
+            doc.getTextWidth(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00') / columns[2].colWidthX,
+            doc.getTextWidth(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00') / columns[3].colWidthX,
+            doc.getTextWidth(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00') / columns[4].colWidthX,
+            doc.getTextWidth(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00') / columns[5].colWidthX,
+            doc.getTextWidth(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00') / columns[6].colWidthX,
+            doc.getTextWidth(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00') / columns[7].colWidthX,
+            doc.getTextWidth(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00') / columns[8].colWidthX,
+            doc.getTextWidth(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00') / columns[9].colWidthX,
           ])
 
           console.log(LINES, Math.ceil(LINES));
@@ -1045,17 +1046,17 @@ export const useMainStore = defineStore('main', () => {
 
         incrementHeight()
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
 
         if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           incrementHeight()
         }
 
@@ -1089,23 +1090,23 @@ export const useMainStore = defineStore('main', () => {
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "bold");
 
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
         if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           incrementHeight()
         }
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
         incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
         incrementHeight()
 
       }
@@ -1150,7 +1151,7 @@ export const useMainStore = defineStore('main', () => {
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text("Timestamp : " + (INVOICE_RECORD.DETAILS.DATSTP ? configStore.formatDate2(INVOICE_RECORD.DETAILS.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.TIMSTP ? configStore.formatTime2(INVOICE_RECORD.DETAILS.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
+        doc.text("Timestamp : " + (INVOICE_RECORD.DETAILS.DATSTP ? utilStore.formatDateNumberToStringYYYYMMDD(INVOICE_RECORD.DETAILS.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.TIMSTP ? utilStore.formatTimeNumberToString24H(INVOICE_RECORD.DETAILS.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
       }
 
       const pageFormat = 'letter'
@@ -1280,7 +1281,7 @@ export const useMainStore = defineStore('main', () => {
 
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal");
-        doc.text('Invoice Date : ' + (GROUPED_INVOICE.HEADER.INVOICE_DATE ? configStore.formatDate2(GROUPED_INVOICE.HEADER.INVOICE_DATE) :  'xxxx/xx/xx'), SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
+        doc.text('Invoice Date : ' + (GROUPED_INVOICE.HEADER.INVOICE_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(GROUPED_INVOICE.HEADER.INVOICE_DATE) :  'xxxx/xx/xx'), SECOND_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: SECOND_COL_WIDTH_X })
 
         cursorLineHeight = HEADER_START_HEIGHT
         incrementHeight(HEADER_HEIGHT)
@@ -1412,14 +1413,14 @@ export const useMainStore = defineStore('main', () => {
             doc.setFontSize(SMALL_TEXT_FONT_SIZE)
             doc.setFont("helvetica", "normal");
             doc.text(ITEM_BREAKDOWN.ITEM || '', columns[4].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[4].colWidthX })
-            doc.text(ITEM_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.WTHTAX ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.WTHTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(ITEM_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(ITEM_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.WTHTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(ITEM_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(ITEM_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
 
             const IS_LAST = (index + 1) === INVOICE_RECORD.ITEM_BREAKDOWNS.length ;
 
@@ -1436,14 +1437,14 @@ export const useMainStore = defineStore('main', () => {
             doc.setFontSize(SMALL_TEXT_FONT_SIZE)
             doc.setFont("helvetica", "bold");
             doc.text('TOTAL :', columns[4].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
-            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? configStore.formatFloatNumber1(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', columns[5].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', columns[6].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', columns[7].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', columns[8].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', columns[10].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', columns[11].colEndX, cursorLineHeight, { align: 'right' })
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', columns[12].colEndX, cursorLineHeight, { align: 'right' })
             doc.line(columns[5].colStartX, cursorLineHeight - VERY_SMALL_LINE_HEIGHT, columns[12].colEndX, cursorLineHeight - VERY_SMALL_LINE_HEIGHT)
             incrementHeight(LARGE_LINE_HEIGHT + 0.1)
           }
@@ -1479,7 +1480,7 @@ export const useMainStore = defineStore('main', () => {
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text("Timestamp : " + (GROUPED_INVOICE.FOOTER.DATSTP ? configStore.formatDate2(GROUPED_INVOICE.FOOTER.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (GROUPED_INVOICE.FOOTER.TIMSTP ? configStore.formatTime2(GROUPED_INVOICE.FOOTER.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
+        doc.text("Timestamp : " + (GROUPED_INVOICE.FOOTER.DATSTP ? utilStore.formatDateNumberToStringYYYYMMDD(GROUPED_INVOICE.FOOTER.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (GROUPED_INVOICE.FOOTER.TIMSTP ? utilStore.formatTimeNumberToString24H(GROUPED_INVOICE.FOOTER.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
 
         cursorLineHeight = startY
       }
@@ -1532,7 +1533,7 @@ export const useMainStore = defineStore('main', () => {
     return generateDoc(groupedInvoices).output('blob')
   }
 
-  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => { 
+  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const currentDate = new Date()
@@ -1656,58 +1657,36 @@ export const useMainStore = defineStore('main', () => {
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-        // if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-        //   const loadingDialogRef = dialog.open(LoadingModal, {
-        //     data: {
-        //       label: 'Fetching ...'
-        //     },
-        //     props: {
-        //       style: {
-        //         paddingTop: '1.5rem',
-        //       },
-        //       showHeader: false,
-        //       modal: true
-        //     }
-        //   })
-        //   const data = {
-        //     year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
-        //     month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
-        //   };
-        //   axios.post(`issuance_lease/per_batch/`, data)
-        //   .then((response) => {
-        //     console.log('FETCHED OPEN BILLINGS', response.data);
-        //     perBatchRunStore.billings = response.data;
-        //     perBatchRunStore.handleOpenMainDialogBox()
-        //   })
-        //   .catch(configStore.handleError)
-        //   .finally(() => {
-        //     loadingDialogRef.close()
-        //   })
-        // } else {
-        //   toast.add({
-        //     severity: 'warn',
-        //     summary: 'Missing Invoice Date',
-        //     detail: 'Please enter a valid invoice date!',
-        //     life: 3000
-        //   })
-        // }
+        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          // const loading = utilStore.startLoadingModal('Fetching ...')
+          // const data = {
+          //   year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+          //   month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
+          // };
+          // axios.post(`issuance_lease/per_batch/`, data)
+          // .then((response) => {
+          //   console.log('FETCHED OPEN BILLINGS', response.data);
+          //   perBatchRunStore.billings = response.data;
+          //   perBatchRunStore.handleOpenMainDialogBox()
+          // })
+          // .catch(utilStore.handleAxiosError)
+          // .finally(() => {
+          //   loading.close()
+          // })
+        } else {
+          toast.add({
+            severity: 'warn',
+            summary: 'Missing Invoice Date',
+            detail: 'Please enter a valid invoice date!',
+            life: 3000
+          })
+        }
         break;
 
       // Per Batch
       case 2:
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-          const loadingDialogRef = dialog.open(LoadingModal, {
-            data: {
-              label: 'Fetching ...'
-            },
-            props: {
-              style: {
-                paddingTop: '1.5rem',
-              },
-              showHeader: false,
-              modal: true
-            }
-          })
+          const loading = utilStore.startLoadingModal('Fetching ...')
           const data = {
             year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
             month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
@@ -1718,9 +1697,9 @@ export const useMainStore = defineStore('main', () => {
             perBatchRunStore.billings = response.data.data as LeaseBill[];
             perBatchRunStore.handleOpenMainDialogBox()
           })
-          .catch(configStore.handleError)
+          .catch(utilStore.handleAxiosError)
           .finally(() => {
-            loadingDialogRef.close()
+            loading.close()
           })
         } else {
           toast.add({
@@ -1770,7 +1749,7 @@ export const useMainStore = defineStore('main', () => {
     .then(async (response) => {
       await callback(response)
     })
-    .catch(configStore.handleError)
+    .catch(utilStore.handleAxiosError)
     .finally(() => {
       closeLoading()
     })

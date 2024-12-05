@@ -40,4 +40,4 @@
 	- set the proper IP/PORT of the backend for this frontend application where it will always make the requests
  2. Modify Login and Main Component Tree (if necessary)
  3. Set desired PORT where the program should run in vite config file
- 4. Use configStore, coreDataStore, types for centralized data and actions.
+ 4. Use sessionStore, coreDataStore, utilitiesStore types for centralized data and actions.

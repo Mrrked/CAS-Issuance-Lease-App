@@ -1,17 +1,14 @@
 <script lang="ts" setup>
-  import { useConfigStore } from '../../store/useConfigStore';
+  import { useSessionStore } from '../../store/useSessionStore';
   import { useLoginStore } from '../../store/useLoginStore';
   import { COLOR_SCHEMES } from '../../presets/MainPreset';
   import { useThemeStore } from '../../store/useThemeStore';
-  import { useDialog } from 'primevue/usedialog';
   import { storeToRefs } from 'pinia';
   import { ref } from 'vue';
 
-  const dialog = useDialog();
-
   const loginStore = useLoginStore()
   const themeStore = useThemeStore()
-  const configStore = useConfigStore()
+  const sessionStore = useSessionStore()
 
   const settings_popover = ref();
 
@@ -20,7 +17,7 @@
 
     currentDate,
     currentTime,
-  } = storeToRefs(configStore)
+  } = storeToRefs(sessionStore)
 
   const togglePopover = (event: MouseEvent) => {
     settings_popover.value.toggle(event);

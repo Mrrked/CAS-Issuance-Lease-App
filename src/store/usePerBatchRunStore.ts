@@ -7,11 +7,11 @@ import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import ResultFinalInvoiceModal from '../components/Dialog/General/ResultFinalInvoiceModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
 import { defineStore } from 'pinia';
-import { useConfigStore } from './useConfigStore';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
+import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
@@ -20,7 +20,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const confirm = useConfirm();
 
   const mainStore = useMainStore()
-  const configStore = useConfigStore()
+  const utilStore = useUtilitiesStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()
@@ -274,7 +274,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                     return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
                   })
                   .reduce((acc: any , record: InvoiceRecord) => {
-                    const key = configStore.fillNumberWithZeroes(record.INVOICE_KEY.COMPCD, 2) + '_' + record.INVOICE_KEY.PROJCD
+                    const key = utilStore.addLeadingZeroes(record.INVOICE_KEY.COMPCD, 2) + '_' + record.INVOICE_KEY.PROJCD
                     if (!acc[key]) {
                       // console.log('NEW PAGE FOR', key, '\n');
                       acc[key] = {
@@ -314,7 +314,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               data: {
                 pdfBlob: PDF_BLOB1,
                 download: () => {
-                  configStore.handleDownloadFile(PDF_BLOB1, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`)
+                  utilStore.handleDownloadFile(PDF_BLOB1, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`)
                 },
                 submit: () => {
                 },
@@ -356,14 +356,14 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
-            configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+            utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
             const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
             const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
               data: {
                 pdfBlob: PDF_BLOB,
                 download: () => {
-                  configStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+                  utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
                 },
                 submit: () => {
                 },

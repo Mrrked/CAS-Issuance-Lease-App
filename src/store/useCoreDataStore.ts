@@ -4,14 +4,14 @@ import { computed, ref } from 'vue'
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
-import { useConfigStore } from './useConfigStore';
 import { useDialog } from 'primevue/usedialog';
+import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const useCoreDataStore = defineStore('coreData', () => {
 
 
   const dialog = useDialog();
-  const configStore = useConfigStore();
+  const utilStore = useUtilitiesStore()
 
   const project_codes = ref<ProjectRecord[]>([])
   const company_codes = ref<CompanyRecord[]>([])
@@ -66,7 +66,7 @@ export const useCoreDataStore = defineStore('coreData', () => {
           mother_bill_types.value = response.data.data as MotherBillTypeRecord[];
         })
     ])
-    .catch(configStore.handleError)
+    .catch(utilStore.handleAxiosError)
     .finally(() => {
       loadingDialogRef.close();
     });

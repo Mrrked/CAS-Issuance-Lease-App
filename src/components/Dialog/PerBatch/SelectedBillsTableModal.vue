@@ -2,7 +2,7 @@
   import { inject, onMounted, ref, Ref } from 'vue';
   import { FilterMatchMode } from '@primevue/core/api';
   import DataTable, { DataTableRowSelectEvent } from 'primevue/datatable';
-  import { useConfigStore } from '../../../store/useConfigStore';
+  import { useUtilitiesStore } from '../../../store/useUtilitiesStore';
 
   interface DialogRef  {
     data: {
@@ -14,7 +14,7 @@
     },
   }
 
-  const configStore = useConfigStore()
+  const utilStore = useUtilitiesStore()
 
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
   const table_data = ref();
@@ -85,13 +85,13 @@
             {{ slotProps.data['DETAILS'].CLTNME || '-' }}
           </div>
           <div v-else-if="col.header === 'Total Sales'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].TOTSAL) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].TOTSAL) : '-' }}
           </div>
           <div v-else-if="col.header === 'Withholding Tax'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].PRDTAX) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].PRDTAX) : '-' }}
           </div>
           <div v-else-if="col.header === 'Total Amount Due'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? configStore.formatFloatNumber1(slotProps.data['TOTAL_BREAKDOWN'].AMTDUE) : '-' }}
+            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].AMTDUE) : '-' }}
           </div>
           <div v-else>
             {{ slotProps.data[col.field] || '-' }}

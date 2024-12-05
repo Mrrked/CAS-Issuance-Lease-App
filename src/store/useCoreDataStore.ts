@@ -1,16 +1,11 @@
 import { BillTypeRecord, CompanyRecord, MotherBillTypeRecord, ProjectRecord } from './types';
 import { computed, ref } from 'vue'
 
-import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios'
 import { defineStore } from 'pinia'
-import { useDialog } from 'primevue/usedialog';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const useCoreDataStore = defineStore('coreData', () => {
-
-
-  const dialog = useDialog();
   const utilStore = useUtilitiesStore()
 
   const project_codes = ref<ProjectRecord[]>([])
@@ -31,18 +26,7 @@ export const useCoreDataStore = defineStore('coreData', () => {
   })
 
   const fetchData = () => {
-    const loadingDialogRef = dialog.open(LoadingModal, {
-      data: {
-        label: 'System Loading ...'
-      },
-      props: {
-        style: {
-          paddingTop: '1.5rem',
-        },
-        showHeader: false,
-        modal: true
-      }
-    });
+    const loading = utilStore.startLoadingModal('System Loading ...')
 
     Promise.all([
       axios.get('issuance_lease/core/project_codes/')
@@ -68,7 +52,7 @@ export const useCoreDataStore = defineStore('coreData', () => {
     ])
     .catch(utilStore.handleAxiosError)
     .finally(() => {
-      loadingDialogRef.close();
+      loading.close();
     });
   };
 

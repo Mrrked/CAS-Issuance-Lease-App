@@ -2,7 +2,6 @@ import { Column, FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, Invoic
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
-import LoadingModal from '../components/Dialog/General/LoadingModal.vue'
 import PreviewPDFModal from '../components/Dialog/General/PreviewPDFModal.vue';
 import ResultFinalInvoiceModal from '../components/Dialog/General/ResultFinalInvoiceModal.vue';
 import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBillsTableModal.vue';
@@ -81,36 +80,12 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         table_data : invoice_records_data.value,
         table_column: invoice_records_column.value,
         view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
-          const loadingDialogRef = dialog.open(LoadingModal, {
-            data: {
-              label: 'Generating Draft...'
-            },
-            props: {
-              style: {
-                paddingTop: '1.5rem',
-              },
-              showHeader: false,
-              modal: true
-            },
-          })
-
-          mainStore.handleGenerateDraftInvoice(SELECTED_INVOICE_RECORD, () => loadingDialogRef.close())
+          const loading = utilStore.startLoadingModal('Generating Draft...')
+          mainStore.handleGenerateDraftInvoice(SELECTED_INVOICE_RECORD, () => loading.close())
         },
         view1: () => {
-          const loadingDialogRef = dialog.open(LoadingModal, {
-            data: {
-              label: `Generating ${invoice_records_data.value.length} Drafts...`
-            },
-            props: {
-              style: {
-                paddingTop: '1.5rem',
-              },
-              showHeader: false,
-              modal: true
-            },
-          })
-
-          mainStore.handleGenerateDraftInvoices(invoice_records_data.value, perBatchRunForm.value.invoiceDate, () => loadingDialogRef.close())
+          const loading = utilStore.startLoadingModal(`Generating ${invoice_records_data.value.length} Drafts...`)
+          mainStore.handleGenerateDraftInvoices(invoice_records_data.value, perBatchRunForm.value.invoiceDate, () => loading.close())
         },
         submit: () => {
           confirm.require({
@@ -166,18 +141,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       life: 3000,
     })
 
-    const loadingDialogRef = dialog.open(LoadingModal, {
-      data: {
-        label: `Generating ${invoice_records_data.value.length} Invoices...`
-      },
-      props: {
-        style: {
-          paddingTop: '1.5rem',
-        },
-        showHeader: false,
-        modal: true
-      },
-    })
+    const loading = utilStore.startLoadingModal(`Generating ${invoice_records_data.value.length} Invoices...`)
 
     const SELECTED_INVOICES = [
       ...invoice_records_data.value.map((INVOICE) => {
@@ -247,18 +211,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             URL.revokeObjectURL(url);
           },
           viewSummarySuccessInvoices: async () => {
-            const loadingDialogRef = dialog.open(LoadingModal, {
-              data: {
-                label: `Generating Summary of Invoices Report...`
-              },
-              props: {
-                style: {
-                  paddingTop: '1.5rem',
-                },
-                showHeader: false,
-                modal: true
-              },
-            })
+            const loading = utilStore.startLoadingModal(`Generating Summary of Invoices Report...`)
 
             await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -335,22 +288,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               },
             })
 
-            loadingDialogRef.close()
+            loading.close()
           },
           viewSuccessInvoices: async () => {
-
-            const loadingDialogRef = dialog.open(LoadingModal, {
-              data: {
-                label: `Loading ${issuedInvoiceRecords.length} Invoices...`
-              },
-              props: {
-                style: {
-                  paddingTop: '1.5rem',
-                },
-                showHeader: false,
-                modal: true
-              },
-            })
+            const loading = utilStore.startLoadingModal(`Loading ${issuedInvoiceRecords.length} Invoices...`)
 
             await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -384,7 +325,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               },
             })
 
-            loadingDialogRef.close()
+            loading.close()
           },
           cancel: () => {
             confirm.require({
@@ -392,12 +333,12 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               header: 'Are you sure you want to close the results modal?',
               icon: 'pi pi-exclamation-triangle',
               rejectProps: {
-                label: 'CANCEL AND RETURN TO RESULTS',
+                label: 'NO, return to results.',
                 severity: 'secondary',
                 outlined: true
               },
               acceptProps: {
-                label: 'CONFIRM CLOSE RESULTS'
+                label: 'YES, close results.'
               },
               accept: () => {
                 mainStore.allowReloadExitPage = true;
@@ -418,7 +359,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       })
     }
 
-    mainStore.handleExecuteIssueFinalInvoices(data, callback, () => loadingDialogRef.close())
+    mainStore.handleExecuteIssueFinalInvoices(data, callback, () => loading.close())
   }
 
   return {

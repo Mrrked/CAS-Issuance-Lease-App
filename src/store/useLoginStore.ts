@@ -1,11 +1,9 @@
 import { ExtendedJWTPayload } from './types';
-import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import axios from '../axios';
 import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode';
 import { ref } from 'vue'
 import { useConfirm } from "primevue/useconfirm";
-import { useDialog } from 'primevue/usedialog';
 import { useRouter } from 'vue-router';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
@@ -15,7 +13,6 @@ export const useLoginStore = defineStore('login', () => {
 
   const confirm = useConfirm();
   const toast = useToast()
-  const dialog = useDialog();
   const router = useRouter();
   const sessionStore = useSessionStore();
   const utilStore = useUtilitiesStore()
@@ -32,18 +29,7 @@ export const useLoginStore = defineStore('login', () => {
     }
 
     if (data.username && data.password) {
-      const loadingDialogRef = dialog.open(LoadingModal, {
-        data: {
-          label: 'Logging In ...'
-        },
-        props: {
-          style: {
-            paddingTop: '1.5rem',
-          },
-          showHeader: false,
-          modal: true
-        }
-      })
+      const loading = utilStore.startLoadingModal('Logging In ...')
       axios.post('auth/login/', data)
       .then((response) => {
 
@@ -71,7 +57,7 @@ export const useLoginStore = defineStore('login', () => {
       })
       .catch(utilStore.handleAxiosError)
       .finally(() => {
-        loadingDialogRef.close()
+        loading.close()
       })
 
     } else {

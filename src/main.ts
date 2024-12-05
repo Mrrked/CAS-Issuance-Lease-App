@@ -2,7 +2,7 @@ import App from './App.vue'
 import ConfirmationService from 'primevue/confirmationservice';
 import DialogService from 'primevue/dialogservice';
 import FocusTrap from 'primevue/focustrap';
-import {MainPreset} from './presets/MainPreset';
+import { MainPreset } from './presets/MainPreset';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';

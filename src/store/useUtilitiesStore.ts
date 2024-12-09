@@ -3,12 +3,14 @@ import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
 import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
 import { defineStore } from 'pinia'
 import { useDialog } from 'primevue/usedialog';
+import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 
 export const useUtilitiesStore = defineStore('utils', () => {
 
   const toast = useToast();
   const dialog = useDialog();
+  const sessionStore = useSessionStore()
 
   const formatTimeNumberToString12H = (number: number):string => {
     const timeStr = number.toString().padStart(6, '0');
@@ -106,24 +108,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     if (error.response?.status) {
       const errData = error.response?.data as { error: string, exception?: string };
 
-      interface ErrorLog {
-        status: number,
-        statusText: string,
-        message: string,
-        exception: string,
-        date: string,
-        time: string,
-      }
-
-      let errorLog:ErrorLog = {
-        'status': error.response.status,
-        'statusText': error.response.statusText,
-        'message': errData.error || '',
-        'exception': errData.exception || '',
-        'date': new Date().toLocaleDateString(),
-        'time': new Date().toLocaleTimeString(),
-      }
-
       toast.add({
         severity: 'error',
         summary: 'Error',
@@ -131,20 +115,42 @@ export const useUtilitiesStore = defineStore('utils', () => {
         life: 5000
       });
 
-      console.log(JSON.stringify(errorLog));
+      if (error.response?.status !== 401) {
+        interface ErrorLog {
+          status: number,
+          statusText: string,
+          message: string,
+          exception: string,
+          date: string,
+          time: string,
+          user: string,
+        }
 
-      const ERROR_LOGS = localStorage.getItem(new Date().toLocaleDateString())
-      let ERROR_LOGS_JSON: ErrorLog[] = []
+        let errorLog:ErrorLog = {
+          'status': error.response.status,
+          'statusText': error.response.statusText,
+          'message': errData.error || '',
+          'exception': errData.exception || '',
+          'date': new Date().toLocaleDateString(),
+          'time': new Date().toLocaleTimeString(),
+          'user': sessionStore.authenticatedUser.username || 'N/A'
+        }
 
-      if (ERROR_LOGS) {
-        ERROR_LOGS_JSON = JSON.parse(ERROR_LOGS) as ErrorLog[]
+        console.log(JSON.stringify(errorLog));
+
+        const ERROR_LOGS = localStorage.getItem(new Date().toLocaleDateString())
+        let ERROR_LOGS_JSON: ErrorLog[] = []
+
+        if (ERROR_LOGS) {
+          ERROR_LOGS_JSON = JSON.parse(ERROR_LOGS) as ErrorLog[]
+        }
+
+        ERROR_LOGS_JSON.push(errorLog)
+
+        console.log(ERROR_LOGS_JSON);
+
+        localStorage.setItem(new Date().toLocaleDateString(), JSON.stringify(ERROR_LOGS_JSON))
       }
-
-      ERROR_LOGS_JSON.push(errorLog)
-
-      console.log(ERROR_LOGS_JSON);
-
-      localStorage.setItem(new Date().toLocaleDateString(), JSON.stringify(ERROR_LOGS_JSON))
 
     } else {
       // SERVER IS NOT RECEIVING REQUESTS

@@ -1,17 +1,18 @@
 import axios from 'axios';
 import router from './router';
 
+const apiBaseUrl = import.meta.env.VITE_SERVER_API_BASE_URL;
+
 const instance = axios.create({
-  baseURL: 'http://192.168.8.220:9002/api/v1/',
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
-
 
 const refreshAccessToken = async () => {
   const refreshToken = localStorage.getItem('refresh');
 
   try {
-    const response = await axios.post('http://192.168.8.220:9002/api/v1/token/refresh/', {
+    const response = await axios.post(apiBaseUrl + 'token/refresh/', {
       refresh: refreshToken,
     });
 

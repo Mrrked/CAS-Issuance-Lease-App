@@ -14,8 +14,8 @@ export const useLoginStore = defineStore('login', () => {
   const confirm = useConfirm();
   const toast = useToast()
   const router = useRouter();
-  const sessionStore = useSessionStore();
   const utilStore = useUtilitiesStore()
+  const sessionStore = useSessionStore();
 
   // STATES
   const username = ref<string>('');
@@ -30,6 +30,7 @@ export const useLoginStore = defineStore('login', () => {
 
     if (data.username && data.password) {
       const loading = utilStore.startLoadingModal('Logging In ...')
+
       axios.post('auth/login/', data)
       .then((response) => {
 

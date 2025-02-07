@@ -782,14 +782,6 @@ export const MainPreset = definePreset(Aura, {
                 padding: '0'
             }
         },
-        inputgroup: {
-            addon: {
-                background: '{primary-color}',
-                borderColor: '{primary-color}',
-                color: '{form.field.icon.color}',
-                borderRadius: '{form.field.border.radius}'
-            }
-        },
         stepper: {
             root: {
                 transitionDuration: '{transition.duration}'

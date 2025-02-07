@@ -27,10 +27,6 @@
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
-  const exportCSV = () => {
-    bills_dt.value.exportCSV();
-  };
-
   onMounted(() => {
     if (dialogRef && dialogRef.value) {
       table_data.value = dialogRef.value.data.table_data
@@ -101,8 +97,5 @@
     </template>
 
     <!-- FOOTER -->
-    <template #paginatorstart>
-      <Button @click="exportCSV" type="button" icon="pi pi-download" :size="'small'" text />
-    </template>
   </DataTable>
 </template>

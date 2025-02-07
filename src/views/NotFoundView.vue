@@ -1,8 +1,5 @@
-<script lang="ts" setup>
-</script>
-
 <template>
-  <div class="flex flex-col items-center justify-center flex-1 w-full min-h-screen gap-3 ">
+  <div class="flex flex-col items-center justify-center h-full gap-3 text-center">
     <h1 class="font-semibold text-9xl">
       404
     </h1>
@@ -14,7 +11,7 @@
     </p>
     <router-link
       to="/"
-      class="px-5 py-2 tracking-wider font-semibold border-[2px] border-primary-color text-primary-color  rounded-sm hover:scale-105 focus:scale-105"
+      class="px-5 py-2 tracking-wider font-semibold border-[2px] border-primary text-primary rounded-sm hover:scale-105 focus:scale-105"
     >
       BACK TO MAIN PAGE
     </router-link>

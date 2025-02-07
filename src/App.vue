@@ -1,36 +1,33 @@
 <script lang="ts" setup>
-  import AppFooter from './components/Core/AppFooter.vue'
+  import Footer from './components/Core/Footer.vue'
   import NavBar from './components/Core/NavBar.vue';
-
-  import './main.css'
   import 'primeicons/primeicons.css'
+  import './main.css'
   import { useRoute } from 'vue-router';
   import { useThemeStore } from './store/useThemeStore';
 
   const route = useRoute()
-  const themeStore = useThemeStore()
+  useThemeStore()
 </script>
 
 <template>
-  <!-- CONFIRM DIALOG -->
+  <!-- Confirm Dialog -->
   <ConfirmDialog></ConfirmDialog>
   <!-- TOAST -->
   <Toast />
-  <!-- DYNAMIC MODAL -->
+  <!-- DynamicModal -->
   <DynamicDialog/>
   <!-- MAIN -->
-  <main v-focustrap class="flex max-h-screen min-h-screen overflow-hidden ">
-    <section v-if="route.meta.requiresAuth" class="flex flex-col w-full">
+  <main v-focustrap class="w-full overflow-hidden">
+    <section v-if="route.meta.requiresAuth" class="flex flex-col w-full max-h-screen min-h-screen">
       <NavBar />
       <main class="flex flex-col flex-grow w-full overflow-auto">
         <section class="flex flex-col items-start justify-start flex-grow px-5 pb-5">
           <router-view/>
         </section>
-        <AppFooter />
+        <Footer />
       </main>
     </section>
-    <section v-else class="w-full">
-      <router-view/>
-    </section>
+    <RouterView v-else class="min-h-screen"/>
   </main>
 </template>

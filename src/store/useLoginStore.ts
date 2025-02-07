@@ -1,27 +1,30 @@
+import { defineAsyncComponent, onMounted, ref } from 'vue'
+
 import { ExtendedJWTPayload } from './types';
 import axios from '../axios';
 import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode';
-import { ref } from 'vue'
 import { useConfirm } from "primevue/useconfirm";
+import { useDialog } from 'primevue/usedialog';
 import { useRouter } from 'vue-router';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+
+const ForgotPasswordModal = defineAsyncComponent(() => import('../components/Dialog/ForgotPasswordModal.vue'));
 
 export const useLoginStore = defineStore('login', () => {
 
   const confirm = useConfirm();
   const toast = useToast()
   const router = useRouter();
-  const utilStore = useUtilitiesStore()
+  const dialog = useDialog()
+  const utilStore = useUtilitiesStore();
   const sessionStore = useSessionStore();
 
-  // STATES
   const username = ref<string>('');
   const password = ref<string>('');
 
-  // ACTIONS
   const handleExecuteLogin = () => {
     const data = {
       username: username.value,
@@ -99,10 +102,34 @@ export const useLoginStore = defineStore('login', () => {
     });
   }
 
+  const handleExecuteForgotPassword = () => {
+    dialog.open(ForgotPasswordModal, {
+      props: {
+        header: 'Contact Us',
+        style: {
+          width: '20rem',
+        },
+        showHeader: true,
+        modal: true,
+      }
+    })
+  }
+
+  const resetStore = () => {
+    username.value = ''
+    password.value = ''
+  }
+
+  onMounted(() => {
+    resetStore()
+  })
+
   return {
     username,
     password,
+
     handleExecuteLogin,
     handleExecuteLogout,
+    handleExecuteForgotPassword,
   }
 })

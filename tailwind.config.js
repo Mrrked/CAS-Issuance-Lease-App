@@ -4,69 +4,6 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
-      colors: {
-        // PRIMARY (COLORED)
-        primary: {
-          color: 'var(--p-primary-color)',
-          contrastColor: 'var(--p-primary-contrast-color)',
-          hoverColor: 'var(--p-primary-hover-color)',
-          activeColor: 'var(--p-primary-active-color)',
-          50:  'var(--p-primary-50)',
-          100: 'var(--p-primary-100)',
-          200: 'var(--p-primary-200)',
-          300: 'var(--p-primary-300)',
-          400: 'var(--p-primary-400)',
-          500: 'var(--p-primary-500)',
-          600: 'var(--p-primary-600)',
-          700: 'var(--p-primary-700)',
-          800: 'var(--p-primary-800)',
-          900: 'var(--p-primary-900)',
-          950: 'var(--p-primary-950)',
-        },
-        // Text
-        text: {
-          color: 'var(--p-text-color)',
-          hoverColor: 'var(--p-text-hover-color)',
-          mutedColor: 'var(--p-text-muted-color)',
-          hoverMutedColor: 'var(--p-text-hover-muted-color)',
-        },
-        // Container
-        content: {
-          background: 'var(--p-content-background)',
-          hoverBackground: 'var(--p-content-hover-background)',
-          borderColor: 'var(--p-content-border-color)',
-          color: 'var(--p-content-color)',
-          hoverColor: 'var(--p-content-hover-color)',
-        },
-        surface: {
-          0:   'var(--p-surface-0)',
-          50:  'var(--p-surface-50)',
-          100: 'var(--p-surface-100)',
-          200: 'var(--p-surface-200)',
-          300: 'var(--p-surface-300)',
-          400: 'var(--p-surface-400)',
-          500: 'var(--p-surface-500)',
-          600: 'var(--p-surface-600)',
-          700: 'var(--p-surface-700)',
-          800: 'var(--p-surface-800)',
-          900: 'var(--p-surface-900)',
-          950: 'var(--p-surface-950)',
-        },
-        printout: {
-          50:  '#f3ebe8',
-          100: '#e6d7d0',
-          200: '#c8b0a5',
-          300: '#aa897a',
-          400: '#8c624f',
-          500: '#703f2a', // Main color (base color)
-          600: '#633726',
-          700: '#552e20',
-          800: '#472419',
-          900: '#391a12',
-          950: '#2d140e',
-          main:'#703f2a'
-        }
-      },
       fontFamily: {
         helvetica: ['Helvetica', 'Arial', 'sans-serif'],
       },
@@ -103,7 +40,11 @@ module.exports = {
         '29': 'repeat(29, minmax(0, 1fr))',
         '30': 'repeat(30, minmax(0, 1fr))',
       },
+      screens: {
+        '2xs': '320px',
+        'xs': '420px',
+      }
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-primeui')]
 }

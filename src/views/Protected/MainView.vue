@@ -340,8 +340,8 @@
           <Fieldset legend="Per Bill Type" class="min-w-80">
             <div class="flex flex-col gap-2">
               <InputGroup>
-                <InputGroupAddon>
-                  <label for="invoice_date" class="font-bold w-28 text-content-background">
+                <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                  <label for="invoice_date" class="font-bold w-28">
                     Invoice Date
                   </label>
                 </InputGroupAddon>
@@ -352,8 +352,8 @@
                 />
               </InputGroup>
               <InputGroup>
-                <InputGroupAddon>
-                  <label for="bill_Type" class="font-bold w-28 text-content-background">
+                <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                  <label for="bill_type" class="font-bold w-28">
                     Bill Type
                   </label>
                 </InputGroupAddon>
@@ -366,8 +366,8 @@
                 ></Select>
               </InputGroup>
               <InputGroup>
-                <InputGroupAddon>
-                  <label for="project_code" class="font-bold w-28 text-content-background">
+                <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                  <label for="project" class="font-bold w-28">
                     Project
                   </label>
                 </InputGroupAddon>
@@ -520,8 +520,8 @@
           <Fieldset legend="Batch Running" class="min-w-80">
             <div class="flex flex-col gap-2">
               <InputGroup>
-                <InputGroupAddon>
-                  <label for="invoice_date" class="font-bold w-28 text-content-background">
+                <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                  <label for="invoice_date" class="font-bold w-28">
                     Invoice Date
                   </label>
                 </InputGroupAddon>

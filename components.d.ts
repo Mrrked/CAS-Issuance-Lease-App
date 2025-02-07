@@ -17,6 +17,8 @@ declare module 'vue' {
     DynamicDialog: typeof import('primevue/dynamicdialog')['default']
     Fieldset: typeof import('primevue/fieldset')['default']
     FinalInvoiceModalFooter: typeof import('./src/components/Dialog/General/FinalInvoiceModalFooter.vue')['default']
+    Footer: typeof import('./src/components/Core/Footer.vue')['default']
+    ForgotPasswordModal: typeof import('./src/components/Dialog/ForgotPasswordModal.vue')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputText: typeof import('primevue/inputtext')['default']

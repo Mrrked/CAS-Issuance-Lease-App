@@ -35,6 +35,7 @@ declare module 'vue' {
     Select: typeof import('primevue/select')['default']
     SelectedBillsTableModal: typeof import('./src/components/Dialog/PerBatch/SelectedBillsTableModal.vue')['default']
     SelectedBillsTableModalFooter: typeof import('./src/components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue')['default']
+    SessionTimeoutModal: typeof import('./src/components/Dialog/General/SessionTimeoutModal.vue')['default']
     SummaryFinalInvoiceModalFooter: typeof import('./src/components/Dialog/General/SummaryFinalInvoiceModalFooter.vue')['default']
     Tab: typeof import('primevue/tab')['default']
     TabList: typeof import('primevue/tablist')['default']

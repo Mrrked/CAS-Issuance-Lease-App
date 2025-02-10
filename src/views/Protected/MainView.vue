@@ -1,27 +1,27 @@
 <script lang="ts" setup>
   import { usePerBillTypeRunStore } from '../../store/usePerBillTypeRunStore';
   import { usePerBatchRunStore } from '../../store/usePerBatchRunStore';
-  import { useCoreDataStore } from '../../store/useCoreDataStore';
+  import { useIssuanceStore } from '../../store/useIssuanceStore';
   import { useMainStore } from '../../store/useMainStore';
-  import { useDialog } from 'primevue/usedialog';
   import { onMounted } from 'vue'
-  import PreviewPDFModal from '../../components/Dialog/General/PreviewPDFModal.vue';
-  import { InvoiceRecord } from '../../store/types';
+  // import { useDialog } from 'primevue/usedialog';
+  // import PreviewPDFModal from '../../components/Dialog/General/PreviewPDFModal.vue';
+  // import { InvoiceRecord } from '../../store/types';
 
-  const dialog = useDialog()
+  // const dialog = useDialog()
+  const issuanceStore = useIssuanceStore()
   const mainStore = useMainStore()
-  const coreDataStore = useCoreDataStore()
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
 
   const {
     handleExecuteSearch,
     handleExecuteReset,
-  } = mainStore
+  } = issuanceStore
 
   onMounted(() => {
-    coreDataStore.fetchData()
-    // mainStore.handleExecuteSearch(2)
+    mainStore.fetchData()
+    // issuanceStore.handleExecuteSearch(2)
 
     // const SELECTED_INVOICE_RECORD: InvoiceRecord = {
     //   "PBL_KEY": "CL3 L  U001  ",
@@ -293,7 +293,7 @@
     // const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
     // const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
-    // const PDF_BLOB = mainStore.handleGenerateInvoicePDFBlob([{
+    // const PDF_BLOB = issuanceStore.handleGenerateInvoicePDFBlob([{
     //   ...SELECTED_INVOICE_RECORD,
     //   DETAILS: {
     //     ...SELECTED_INVOICE_RECORD.DETAILS,
@@ -373,7 +373,7 @@
                 </InputGroupAddon>
                 <Select
                   v-model="perBillTypeRunStore.perBillTypeRunForm.projectCode"
-                  :options="coreDataStore.project_code_options"
+                  :options="mainStore.project_code_options"
                   filter
                   optionLabel="name"
                   placeholder="Select..."

@@ -34,7 +34,7 @@ export const useLoginStore = defineStore('login', () => {
     if (data.username && data.password) {
       const loading = utilStore.startLoadingModal('Logging In ...')
 
-      axios.post('auth/login/', data)
+      axios.post('session/login/', data)
       .then((response) => {
 
         const tokens = response.data.tokens
@@ -83,7 +83,7 @@ export const useLoginStore = defineStore('login', () => {
         label: 'Logout'
       },
       accept: () => {
-        axios.post('auth/logout/')
+        axios.post('session/logout/')
         .then((response) => {
           toast.add({
             severity: 'success',

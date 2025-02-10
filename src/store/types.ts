@@ -1,4 +1,19 @@
+import { AxiosError } from "axios"
 import { JwtPayload } from "jwt-decode"
+
+export interface ExtendedAxiosError extends AxiosError {
+  expiredToken: boolean
+}
+
+export interface ExtendedJWTPayload extends JwtPayload {
+  username: string
+  department: string
+  company_code: [number]
+}
+
+export interface ExtFile extends File {
+  objectURL?: string
+}
 
 export interface StringValueName {
   value: string,

@@ -1,16 +1,18 @@
-import { AxiosError } from 'axios';
 import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
-import LoadingModal from '../components/Dialog/General/LoadingModal.vue';
+import { ExtendedAxiosError } from './types';
+import { defineAsyncComponent } from 'vue';
 import { defineStore } from 'pinia'
 import { useDialog } from 'primevue/usedialog';
-import { useSessionStore } from './useSessionStore';
+import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+
+const LoadingModal = defineAsyncComponent(() => import('../components/Dialog/General/LoadingModal.vue'));
 
 export const useUtilitiesStore = defineStore('utils', () => {
 
   const toast = useToast();
+  const router = useRouter();
   const dialog = useDialog();
-  const sessionStore = useSessionStore()
 
   const formatTimeNumberToString12H = (number: number):string => {
     const timeStr = number.toString().padStart(6, '0');
@@ -104,62 +106,68 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return loadingDialogRef;
   }
 
-  const handleAxiosError = (error: AxiosError):void => {
-    if (error.response?.status) {
-      const errData = error.response?.data as { error: string, exception?: string };
+  const handleAxiosError = (error: ExtendedAxiosError):void => {
+    if (error.response) {
+      const { status, data }: { status: number, data: { error: string, details: [], exception: string} } = error.response as any;
+      // console.error(`HTTP Status: ${status}`);
+      // console.error("Response Data:", data);
 
+      if (status === 401) {
+        toast.add({
+          severity: 'error',
+          summary: 'Session has expired.',
+          detail: 'Please login again.',
+          life: 5000
+        });
+        localStorage.removeItem('access')
+        localStorage.removeItem('refresh')
+        router.push('/login')
+      } else if (status === 500 && data?.exception) {
+        console.error('EXCEPTION: ', data.exception)
+      }
+
+      if (data?.error && data.error !== 'Invalid submission data!') {
+        // Custom error message from the server
+        console.error(`Server Error: ${data.error}`);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: data.error,
+          life: 5000
+        });
+      }
+
+      if (data?.details) {
+        console.error("Details:", data.details);
+        const details = Object.entries(data.details)
+
+        details.forEach((pair) => {
+          const key = pair[0] as string
+          const values = pair[1] as string[]
+
+          values.forEach((value) => {
+            toast.add({
+              severity: 'error',
+              summary: key !== 'non_field_errors' ? 'Invalid field: ' + key : 'Error',
+              detail: value,
+              life: 5000
+            });
+          })
+        })
+      }
+
+    } else if (error.request) {
+      toast.add({
+        severity: 'error',
+        summary: 'Exception',
+        detail: 'Server can\'t be reached.',
+        life: 5000
+      });
+    } else {
       toast.add({
         severity: 'error',
         summary: 'Error',
-        detail: errData.error ? errData.error : error.response.statusText + ': ' + error.message,
-        life: 5000
-      });
-
-      if (error.response?.status !== 401) {
-        interface ErrorLog {
-          status: number,
-          statusText: string,
-          message: string,
-          exception: string,
-          date: string,
-          time: string,
-          user: string,
-        }
-
-        let errorLog:ErrorLog = {
-          'status': error.response.status,
-          'statusText': error.response.statusText,
-          'message': errData.error || '',
-          'exception': errData.exception || '',
-          'date': new Date().toLocaleDateString(),
-          'time': new Date().toLocaleTimeString(),
-          'user': sessionStore.authenticatedUser.username || 'N/A'
-        }
-
-        console.log(JSON.stringify(errorLog));
-
-        const ERROR_LOGS = localStorage.getItem(new Date().toLocaleDateString())
-        let ERROR_LOGS_JSON: ErrorLog[] = []
-
-        if (ERROR_LOGS) {
-          ERROR_LOGS_JSON = JSON.parse(ERROR_LOGS) as ErrorLog[]
-        }
-
-        ERROR_LOGS_JSON.push(errorLog)
-
-        console.log(ERROR_LOGS_JSON);
-
-        localStorage.setItem(new Date().toLocaleDateString(), JSON.stringify(ERROR_LOGS_JSON))
-      }
-
-    } else {
-      // SERVER IS NOT RECEIVING REQUESTS
-      // SERVER COULD BE DOWN
-      console.log('Error: No Response Status Returned');
-      toast.add({
-        severity: 'warn',
-        summary: 'Error',
-        detail: 'Can\'t reach server.',
+        detail: error.message,
         life: 5000
       });
     }

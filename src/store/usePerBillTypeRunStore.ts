@@ -5,14 +5,14 @@ import SelectedBillsTableModal from '../components/Dialog/PerBatch/SelectedBills
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
-import { useMainStore } from './useMainStore';
+import { useIssuanceStore } from './useIssuanceStore';
 
 export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   const dialog = useDialog();
   const confirm = useConfirm();
 
-  const mainStore = useMainStore()
+  const issuanceStore = useIssuanceStore()
 
   const BILL_TYPE_OPTIONS = [
     { value: 'Rental and CUSA', name: 'Rental and CUSA' },
@@ -31,11 +31,11 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   });
 
   const billings_data = computed(():LeaseBill[] => {
-    return mainStore.processBillings(billings.value)
+    return issuanceStore.processBillings(billings.value)
   })
 
   const invoice_records_data = computed((): InvoiceRecord[] => {
-    return mainStore.processInvoiceRecords(billings_data.value, perBillTypeRunForm.value.invoiceDate)
+    return issuanceStore.processInvoiceRecords(billings_data.value, perBillTypeRunForm.value.invoiceDate)
   })
 
   const invoice_records_column = computed((): Column[] => {
@@ -67,7 +67,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
     //     table_data : invoice_records_data.value,
     //     table_column: invoice_records_column.value,
     //     view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
-    //       mainStore.handleGenerateDraftInvoice([SELECTED_INVOICE_RECORD])
+    //       issuanceStore.handleGenerateDraftInvoice([SELECTED_INVOICE_RECORD])
     //     },
     //     submit: () => {
     //       confirm.require({

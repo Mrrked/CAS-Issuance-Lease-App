@@ -6,8 +6,8 @@
   import { useRoute } from 'vue-router';
   import { useThemeStore } from './store/useThemeStore';
 
-  const route = useRoute()
   useThemeStore()
+  const route = useRoute()
 </script>
 
 <template>

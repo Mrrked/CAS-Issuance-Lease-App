@@ -21,31 +21,36 @@
   })
 
   onMounted(() => {
+    const refreshToken = localStorage.getItem('refresh') || '';
 
-    interval.value = setInterval(
-      () => {
-        const refreshToken = localStorage.getItem('refresh') || '';
-        const currentTime = Math.floor(Date.now() / 1000)
-        const timeRemaining = (jwtDecode(refreshToken).exp as number) - currentTime
+    if (refreshToken) {
+      try {
+        const { exp } = jwtDecode<{ exp: number }>(refreshToken);
 
-        // console.log('Session will expire in', timeRemaining);
-        if (timeRemaining >= 0) {
-          expiresIn.value = timeRemaining
-        } else {
-          clearInterval(interval.value)
-          localStorage.removeItem('access')
-          localStorage.removeItem('refresh')
-        }
-      },
-      1000
-    )
-  })
+        interval.value = setInterval(() => {
+          const currentTime = Math.floor(Date.now() / 1000);
+          const timeRemaining = exp - currentTime;
+
+          if (timeRemaining >= 0) {
+            expiresIn.value = timeRemaining;
+          } else {
+            clearInterval(interval.value!);
+            localStorage.removeItem('access');
+            localStorage.removeItem('refresh');
+          }
+        }, 1000);
+      } catch (error) {
+        console.error('Invalid token:', error);
+        localStorage.removeItem('refresh');
+      }
+    }
+  });
 
   onUnmounted(() => {
     if (interval.value) {
-      clearInterval(interval.value)
+      clearInterval(interval.value);
     }
-  })
+  });
 </script>
 
 

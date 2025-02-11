@@ -28,6 +28,7 @@ declare module 'vue' {
     Popover: typeof import('primevue/popover')['default']
     PreviewPDFModal: typeof import('./src/components/Dialog/General/PreviewPDFModal.vue')['default']
     PreviewPDFModal1: typeof import('./src/components/Dialog/General/PreviewPDFModal1.vue')['default']
+    ProgressBar: typeof import('primevue/progressbar')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     ResultFinalInvoiceModal: typeof import('./src/components/Dialog/General/ResultFinalInvoiceModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

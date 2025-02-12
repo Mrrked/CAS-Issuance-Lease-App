@@ -93,6 +93,6 @@
     />
   </div>
   <div v-else>
-    Loading ...
+    Please refresh ...
   </div>
 </template>

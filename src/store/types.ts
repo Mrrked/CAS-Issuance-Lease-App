@@ -15,15 +15,44 @@ export interface ExtFile extends File {
   objectURL?: string
 }
 
-export interface StringValueName {
-  value: string,
-  name: string
+////////////
+//  MAIN  //
+////////////
+
+export type PerBillTypeOption = 'Rental and CUSA' | 'Electricity and Generator Set' | 'Water'
+
+export interface PerBillTypeRunForm {
+  invoiceDate: Date
+  projectCode: ProjectRecord | null
+  billType:    PerBillTypeOption | null
+
+  PBL?: {
+    pcs_code: string
+    phase: string
+    block: {
+      1: string
+      2: string
+    }
+    lot: {
+      1: string
+      2: string
+      3: string
+      4: string
+    }
+    unit_code: {
+      1: string
+      2: string
+    }
+  }
 }
 
-export interface IntValueName {
-  value: number
-  name: string
+export interface PerBatchRunForm {
+  invoiceDate: Date
 }
+
+//////////////
+//  MODELS  //
+//////////////
 
 export interface ProjectRecord {
   PROJCD: string
@@ -86,47 +115,6 @@ export interface BillTypeRecord {
   FILL3: number;         // AMT FILL3, Packed(11,2)
   FILL4: string;         // TAG FILL4, Char(1)
   FILL5: string;         // CHAR FILL4, Char(5)
-}
-
-export interface PerBatchRunForm {
-  invoiceDate: Date
-}
-
-export interface PerBillTypeRunForm {
-  invoiceDate: Date
-  projectCode?: StringValueName
-  billType?:    StringValueName
-
-  PBL?: {
-    pcs_code: string
-    phase: string
-    block: {
-      1: string
-      2: string
-    }
-    lot: {
-      1: string
-      2: string
-      3: string
-      4: string
-    }
-    unit_code: {
-      1: string
-      2: string
-    }
-  }
-}
-
-
-export interface ExtendedJWTPayload extends JwtPayload {
-  username: string
-  department: string
-  company_code: [number]
-}
-
-export interface Column {
-  field: string,
-  header: string,
 }
 
 export interface BillTypeRecord {

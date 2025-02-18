@@ -3,12 +3,15 @@ import { ExtendedAxiosError } from './types';
 import { defineAsyncComponent } from 'vue';
 import { defineStore } from 'pinia'
 import { useDialog } from 'primevue/usedialog';
+import { usePrimeVue } from 'primevue/config';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const LoadingModal = defineAsyncComponent(() => import('../components/Dialog/General/LoadingModal.vue'));
 
 export const useUtilitiesStore = defineStore('utils', () => {
+
+  const $primevue = usePrimeVue();
 
   const toast = useToast();
   const router = useRouter();
@@ -66,11 +69,124 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return `${year}/${month}/${day}`;
   }
 
+  const formatBytesToFileSize = (bytes: number) => {
+    const k = 1024;
+    const dm = 3;
+    const sizes = $primevue.config.locale?.fileSizeTypes || [];
+
+    if (bytes === 0) {
+      return `0 ${sizes[0]}`;
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+
+    return `${formattedSize} ${sizes[i]}`;
+  };
+
   const convertDateObjToNumberYYYYMMDD = (date: Date):number => {
     try {
       return parseInt(`${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`)
     } catch (error) {
       return 0
+    }
+  }
+
+  const convertDateObjToStringMONDDYYYY12H = (date: string):string => {
+    try {
+      if (!date) {
+        return ''
+      }
+      const options: Intl.DateTimeFormatOptions = {
+        month: "short",    // 'Dec'
+        day: "numeric",    // '14'
+        year: "numeric",   // '2024'
+        hour: "numeric",   // '2'
+        minute: "numeric", // '10'
+        second: "numeric", // '47'
+        hour12: true       // 12-hour clock with AM/PM
+      };
+      return new Date(date).toLocaleString("en-US", options);
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const convertDateObjToStringMMDDYYYY24H = (date: string):string => {
+    try {
+      if (!date) {
+        return ''
+      }
+      const options: Intl.DateTimeFormatOptions = {
+        month: "numeric",   // '12'
+        day: "numeric",     // '14'
+        year: "numeric",    // '2024'
+        hour: "numeric",    // '2'
+        minute: "numeric",  // '10'
+        // second: "numeric",  // '47'
+        hour12: false       // 24-hour clock without AM/PM
+      };
+      return new Date(date).toLocaleString("en-US", options);
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const convertDateObjToStringMONDDYYYY = (date: string):string => {
+    try {
+      if (!date) {
+        return ''
+      }
+      const options: Intl.DateTimeFormatOptions = {
+        month: "long",    // 'December'
+        day: "numeric",    // '14'
+        year: "numeric",   // '2024'
+      };
+      return new Date(date).toLocaleString("en-US", options);
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const convertDatesObjToDurationString = (start: string, end: string):string => {
+    try {
+      if (!start || !end) {
+        return ''
+      }
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      // Calculate the difference in milliseconds
+      let duration = endDate.getTime() - startDate.getTime();
+
+      // Convert milliseconds to days, hours, minutes
+      const oneMinute = 60 * 1000;
+      const oneHour = 60 * oneMinute;
+      const oneDay = 24 * oneHour;
+
+      const days = Math.floor(duration / oneDay);
+      duration -= days * oneDay;
+
+      const hours = Math.floor(duration / oneHour);
+      duration -= hours * oneHour;
+
+      const minutes = Math.floor(duration / oneMinute);
+
+      // Build the result string
+      let result = '';
+      if (days > 0) {
+        result += `${days} day${days > 1 ? 's' : ''} `;
+      }
+      if (hours > 0) {
+        result += `${hours} hour${hours > 1 ? 's' : ''} `;
+      }
+      if (minutes > 0) {
+        result += `${minutes} minute${minutes > 1 ? 's' : ''}`;
+      }
+
+      return result.trim();
+    } catch (error) {
+      return ''
     }
   }
 
@@ -87,6 +203,15 @@ export const useUtilitiesStore = defineStore('utils', () => {
       return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     else
       return '0.00'
+  }
+
+  const isInvalidValue = (value: any): boolean => {
+    if (value === undefined) return true
+    if (value === null) return true
+    if (value === '') return true
+    if (value === 0) return true
+
+    return false
   }
 
   const startLoadingModal = (label: string): DynamicDialogInstance => {
@@ -187,13 +312,21 @@ export const useUtilitiesStore = defineStore('utils', () => {
     formatTimeNumberToString24H,
 
     formatDateNumberToStringMONTHDDYYYY,
+    convertDateObjToStringMMDDYYYY24H,
     formatDateNumberToStringYYYYMMDD,
 
+    formatBytesToFileSize,
+
     convertDateObjToNumberYYYYMMDD,
+    convertDateObjToStringMONDDYYYY12H,
+    convertDateObjToStringMONDDYYYY,
+    convertDatesObjToDurationString,
     convertNumberToRoundedNumber,
 
     addLeadingZeroes,
     formatNumberToString2DecimalNumber,
+
+    isInvalidValue,
 
     startLoadingModal,
 

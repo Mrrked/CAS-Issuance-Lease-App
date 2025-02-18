@@ -1,6 +1,6 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
-import { defineAsyncComponent, markRaw, onMounted, onUnmounted, ref } from 'vue';
+import { defineAsyncComponent, markRaw } from 'vue';
 
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -17,20 +17,15 @@ const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/
 
 export const useIssuanceStore = defineStore('issuance', () => {
 
-  // STATES
-
-  const allowReloadExitPage = ref<boolean>(true);
-
   const toast = useToast()
   const dialog = useDialog()
+
+  const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
-  const mainStore = useMainStore()
 
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
-
-  // ACTIONS
 
   const getSplitClientAddress = (CLIENT_ADDRESS: string) => {
     const firstPart = CLIENT_ADDRESS.slice(0, 80);
@@ -89,8 +84,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
     return max
   }
-
-
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
@@ -415,7 +408,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return [...Object.values(mergedMap)] as InvoiceRecord[]
   }
 
-  const handleGenerateInvoicePDFBlob = (INVOICE_RECORDS: InvoiceRecord[]):Blob => {
+  const handleActionGenerateInvoicePDFBlob = (INVOICE_RECORDS: InvoiceRecord[]):Blob => {
     console.log('GENERATE PDF BLOB FOR INVOICES', INVOICE_RECORDS)
 
     const generateDoc = (INVOICE_RECORDS: InvoiceRecord[]): jsPDF => {
@@ -1204,7 +1197,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return generateDoc(INVOICE_RECORDS).output('blob')
   }
 
-  const handleGenerateSummaryInvoicesPDFBlob = async (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
+  const handleActionGenerateSummaryInvoicesPDFBlob = async (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
     console.log('GENERATE PDF BLOB FOR SUMMARY OF INVOICES', groupedInvoices)
 
     const generateDoc = (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]): jsPDF => {
@@ -1534,14 +1527,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return generateDoc(groupedInvoices).output('blob')
   }
 
-  const handleGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
+  const handleActionGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const currentDate = new Date()
     const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
     const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
-    const PDF_BLOB = handleGenerateInvoicePDFBlob([{
+    const PDF_BLOB = handleActionGenerateInvoicePDFBlob([{
       ...SELECTED_INVOICE_RECORD,
       DETAILS: {
         ...SELECTED_INVOICE_RECORD.DETAILS,
@@ -1588,7 +1581,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     })
   }
 
-  const handleGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
+  const handleActionGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const data = {
@@ -1596,7 +1589,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       month: invoiceDate.getMonth() + 1,
     }
 
-    const PDF_BLOB = handleGenerateInvoicePDFBlob([
+    const PDF_BLOB = handleActionGenerateInvoicePDFBlob([
       ...SELECTED_INVOICE_RECORDS.map((INVOICE) => {
 
         const currentDate = new Date()
@@ -1653,7 +1646,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     })
   }
 
-  const handleExecuteSearch = (tab: number ) => {
+  const handleActionSearch = (tab: number ) => {
 
     switch (tab) {
       // Per Bill Type / PBL
@@ -1668,7 +1661,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           // .then((response) => {
           //   console.log('FETCHED OPEN BILLINGS', response.data);
           //   perBatchRunStore.billings = response.data;
-          //   perBatchRunStore.handleOpenMainDialogBox()
+          //   perBatchRunStore.handleActionViewMainDialog()
           // })
           // .catch(utilStore.handleAxiosError)
           // .finally(() => {
@@ -1696,7 +1689,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           .then((response) => {
             console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBatchRunStore.billings = response.data.data as LeaseBill[];
-            perBatchRunStore.handleOpenMainDialogBox()
+            perBatchRunStore.handleActionViewMainDialog()
           })
           .catch(utilStore.handleAxiosError)
           .finally(() => {
@@ -1717,13 +1710,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
   }
 
-  const handleExecuteReset = (tab: number) => {
+  const handleActionReset = (tab: number) => {
     // CLEAR FORM FIELDS
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
         perBillTypeRunStore.perBillTypeRunForm = {
-          invoiceDate: new Date()
+          invoiceDate: new Date(),
+          projectCode: null,
+          billType: null
         }
         break;
 
@@ -1737,7 +1732,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
   }
 
-  const handleExecuteIssueFinalInvoices = (
+  const handleActionIssueFinalInvoices = (
     data: {
       type: string
       invoices: InvoiceRecord[]
@@ -1756,25 +1751,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     })
   }
 
-  const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
-    if (!allowReloadExitPage.value) {
-      event.preventDefault();
-      event.returnValue = "";
-    }
-  };
-
-  onMounted(() => {
-    window.addEventListener("beforeunload", beforeUnloadHandler);
-    console.log('MOUNTED');
-  });
-
-  onUnmounted(() => {
-    window.removeEventListener("beforeunload", beforeUnloadHandler);
-  });
-
   return {
-    allowReloadExitPage,
-
     getSplitClientAddress,
     getDeptCode,
     getItemName,
@@ -1783,14 +1760,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
     processBillings,
     processInvoiceRecords,
 
-    handleGenerateInvoicePDFBlob,
-    handleGenerateSummaryInvoicesPDFBlob,
-    handleGenerateDraftInvoice,
-    handleGenerateDraftInvoices,
+    handleActionGenerateInvoicePDFBlob,
+    handleActionGenerateSummaryInvoicesPDFBlob,
+    handleActionGenerateDraftInvoice,
+    handleActionGenerateDraftInvoices,
 
-    handleExecuteSearch,
-    handleExecuteReset,
+    handleActionSearch,
+    handleActionReset,
 
-    handleExecuteIssueFinalInvoices,
+    handleActionIssueFinalInvoices,
   }
 })

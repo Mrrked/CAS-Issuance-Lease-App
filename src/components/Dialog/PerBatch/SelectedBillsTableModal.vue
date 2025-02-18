@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-  import { inject, onMounted, ref, Ref } from 'vue';
+  import { inject, ref, Ref } from 'vue';
   import { FilterMatchMode } from '@primevue/core/api';
   import DataTable, { DataTableRowSelectEvent } from 'primevue/datatable';
   import { useUtilitiesStore } from '../../../store/useUtilitiesStore';
+  import { InvoiceRecord } from '../../../store/types';
 
   interface DialogRef  {
     data: {
-      table_data: any[],
-      table_column: any[],
+      table_data: InvoiceRecord[],
       view: Function
       submit: Function
       cancel: Function
@@ -17,21 +17,15 @@
   const utilStore = useUtilitiesStore()
 
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
-  const table_data = ref();
-  const table_column = ref();
-
-
-  const bills_dt = ref();
 
   const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  });
-
-  onMounted(() => {
-    if (dialogRef && dialogRef.value) {
-      table_data.value = dialogRef.value.data.table_data
-      table_column.value = dialogRef.value.data.table_column
-    }
+    PBL_KEY: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    TCLTNO: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'DETAILS.CLTNME': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'TOTAL_BREAKDOWN.TOTSAL': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'TOTAL_BREAKDOWN.PRDTAX': { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'TOTAL_BREAKDOWN.AMTDUE': { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
   const onRowSelect = (event: DataTableRowSelectEvent) => {
@@ -41,61 +35,143 @@
     event.originalEvent.preventDefault();
     return;
   };
-
 </script>
 
 
 <template>
   <DataTable
-    :value="table_data"
-    v-model:filters="filters"
-    ref="bills_dt"
+    :value="dialogRef?.data.table_data"
+    dataKey="PBL_KEY"
     selectionMode="single"
+    @rowSelect="onRowSelect"
+
+    v-model:filters="filters"
+    :filterDisplay="undefined"
+    :globalFilterFields="['PBL_KEY', 'TCLTNO', 'DETAILS.CLTNME', 'TOTAL_BREAKDOWN.TOTSAL', 'TOTAL_BREAKDOWN.PRDTAX', 'TOTAL_BREAKDOWN.AMTDUE']"
+
+    scrollable
+    size="small"
+    resizableColumns
+
     stripedRows
-    paginator
-    :size="'small'"
     :rows="15"
     :rowsPerPageOptions="[15, 30, 50]"
-    tableStyle="min-width: 50rem"
+
+    paginator
     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
     currentPageReportTemplate="{first} to {last} of {totalRecords}"
-    scrollable
-    resizableColumns
-    class="w-full"
-    @rowSelect="onRowSelect"
   >
-    <!-- COLUMNS -->
-    <template v-for="col of table_column" :key="col.field">
-      <Column
-        :field="col.field"
-        :header="col.header"
-      >
-        <template #body="slotProps">
-          <div v-if="col.header === 'Project/Block/Lot'" class="whitespace-pre">
-            {{ slotProps.data[col.field] || '-' }}
-          </div>
-          <div v-else-if="col.header === 'Temp. Client #'">
-            {{ slotProps.data[col.field] || '-' }}
-          </div>
-          <div v-else-if="col.header === 'Client Name'">
-            {{ slotProps.data['DETAILS'].CLTNME || '-' }}
-          </div>
-          <div v-else-if="col.header === 'Total Sales'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].TOTSAL) : '-' }}
-          </div>
-          <div v-else-if="col.header === 'Withholding Tax'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].PRDTAX) : '-' }}
-          </div>
-          <div v-else-if="col.header === 'Total Amount Due'">
-            {{ slotProps.data['TOTAL_BREAKDOWN'] ? utilStore.formatNumberToString2DecimalNumber(slotProps.data['TOTAL_BREAKDOWN'].AMTDUE) : '-' }}
-          </div>
-          <div v-else>
-            {{ slotProps.data[col.field] || '-' }}
-          </div>
-        </template>
-      </Column>
-    </template>
 
-    <!-- FOOTER -->
+    <template #empty> No bill found. </template>
+
+    <Column header="Project / Block / Lot"
+      field="PBL_KEY"
+      filterField="PBL_KEY"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by PBL'"
+        />
+      </template>
+      <template #body="{ data }">
+        <span class="whitespace-pre">
+          {{ data.PBL_KEY }}
+        </span>
+      </template>
+    </Column>
+
+    <Column header="Temporary Client Number"
+      field="TCLTNO"
+      filterField="TCLTNO"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Temporary Client Number'"
+        />
+      </template>
+      <template #body="{ data }">
+        {{ data.TCLTNO || '-' }}
+      </template>
+    </Column>
+
+    <Column header="Client Name"
+      field="DETAILS.CLTNME"
+      filterField="DETAILS.CLTNME"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Client Name'"
+        />
+      </template>
+      <template #body="{ data }">
+        {{ data.DETAILS?.CLTNME || '-' }}
+      </template>
+    </Column>
+
+    <Column header="Total Sales"
+      field="TOTAL_BREAKDOWN.TOTSAL"
+      filterField="TOTAL_BREAKDOWN.TOTSAL"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Total Sales'"
+        />
+      </template>
+      <template #body="{ data }">
+        {{ data.TOTAL_BREAKDOWN?.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(data.TOTAL_BREAKDOWN.TOTSAL) : '-' }}
+      </template>
+    </Column>
+
+    <Column header="Withholding Tax"
+      field="TOTAL_BREAKDOWN.PRDTAX"
+      filterField="TOTAL_BREAKDOWN.PRDTAX"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Withholding Tax'"
+        />
+      </template>
+      <template #body="{ data }">
+        {{ data.TOTAL_BREAKDOWN?.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(data.TOTAL_BREAKDOWN.PRDTAX) : '-' }}
+      </template>
+    </Column>
+
+    <Column header="Total Amount Due"
+      field="TOTAL_BREAKDOWN.AMTDUE"
+      filterField="TOTAL_BREAKDOWN.AMTDUE"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Total Amount Due'"
+        />
+      </template>
+      <template #body="{ data }">
+        {{ data.TOTAL_BREAKDOWN?.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(data.TOTAL_BREAKDOWN.AMTDUE) : '-' }}
+      </template>
+    </Column>
   </DataTable>
 </template>

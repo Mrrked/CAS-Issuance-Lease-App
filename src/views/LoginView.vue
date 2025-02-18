@@ -7,7 +7,7 @@
   const themeStore = useThemeStore();
 
   const { username, password } = storeToRefs(loginStore);
-  const { handleExecuteLogin } = loginStore;
+  const { handleActionLogin } = loginStore;
 </script>
 
 <template>
@@ -92,7 +92,7 @@
               Please Login to continue
             </div>
           </div>
-          <form @submit.prevent="handleExecuteLogin" class="flex flex-col gap-4">
+          <form @submit.prevent="handleActionLogin" class="flex flex-col gap-4">
             <div class="flex flex-col gap-1">
               <label for="username" class="font-semibold tracking-wider">
                 Username
@@ -135,7 +135,7 @@
               label="LOGIN"
             />
             <div class="text-center">
-              <span @click="loginStore.handleExecuteForgotPassword" class="text-sm tracking-wide cursor-pointer hover:underline hover:underline-offset-2 hover:text-primary">
+              <span @click="loginStore.handleActionForgotPassword" class="text-sm tracking-wide cursor-pointer hover:underline hover:underline-offset-2 hover:text-primary">
                 Forgot password?
               </span>
             </div>

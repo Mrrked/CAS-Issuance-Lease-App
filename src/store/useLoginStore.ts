@@ -15,17 +15,18 @@ const ForgotPasswordModal = defineAsyncComponent(() => import('../components/Dia
 
 export const useLoginStore = defineStore('login', () => {
 
-  const confirm = useConfirm();
   const toast = useToast()
-  const router = useRouter();
+  const router = useRouter()
   const dialog = useDialog()
+  const confirm = useConfirm()
+
   const utilStore = useUtilitiesStore();
   const sessionStore = useSessionStore();
 
   const username = ref<string>('');
   const password = ref<string>('');
 
-  const handleExecuteLogin = () => {
+  const handleActionLogin = () => {
     const data = {
       username: username.value,
       password: password.value
@@ -69,7 +70,7 @@ export const useLoginStore = defineStore('login', () => {
     }
   }
 
-  const handleExecuteLogout = () => {
+  const handleActionLogout = () => {
     confirm.require({
       message: 'Are you sure you want to logout?',
       header: 'Confirm Logout',
@@ -102,7 +103,7 @@ export const useLoginStore = defineStore('login', () => {
     });
   }
 
-  const handleExecuteForgotPassword = () => {
+  const handleActionForgotPassword = () => {
     dialog.open(ForgotPasswordModal, {
       props: {
         header: 'Contact Us',
@@ -128,8 +129,8 @@ export const useLoginStore = defineStore('login', () => {
     username,
     password,
 
-    handleExecuteLogin,
-    handleExecuteLogout,
-    handleExecuteForgotPassword,
+    handleActionLogin,
+    handleActionLogout,
+    handleActionForgotPassword,
   }
 })

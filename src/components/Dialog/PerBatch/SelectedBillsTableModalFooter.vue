@@ -1,10 +1,10 @@
 <script lang="ts" setup>
   import { inject, Ref } from 'vue';
+  import { InvoiceRecord } from '../../../store/types';
 
   interface DialogRef  {
     data: {
-      table_data: any[],
-      table_column: any[],
+      table_data: InvoiceRecord[],
       view: Function
       view1: Function
       submit: Function

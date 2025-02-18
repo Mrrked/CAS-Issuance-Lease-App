@@ -1,4 +1,4 @@
-import { Column, FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
@@ -6,6 +6,7 @@ import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
 import { useIssuanceStore } from './useIssuanceStore';
+import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
@@ -19,8 +20,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const dialog = useDialog();
   const confirm = useConfirm();
 
-  const issuanceStore = useIssuanceStore()
+  const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
+  const issuanceStore = useIssuanceStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date()
@@ -52,41 +54,19 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     })
   })
 
-  const invoice_records_column = computed((): Column[] => {
-    return [
-      { field: 'PBL_KEY',  header: 'Project/Block/Lot' },
-      { field: 'TCLTNO',  header: 'Temp. Client #' },
-      { field: 'DESC.CLTNME',  header: 'Client Name' },
-      // { field: 'BILL_TYPE', header: 'Bill Type' },
-      // { field: 'DATDUE', header: 'Due Date'},
-      // { field: 'PERIOD', header: 'Billing Period' },
-      // { field: 'BILAMT',  header: 'Billing Amount' },
-      // { field: 'BALAMT', header: 'Amount Due' },
-      // { field: 'VAT_SALES', header: 'VAT Sales' },
-      // { field: 'ZERO_RATE', header: 'Zero-Rated' },
-      // { field: 'VAT_EXEMPT', header: 'VAT Exempt' },
-      // { field: 'VAT', header: 'VAT' },
-      // { field: 'GOVT_TAX', header: 'Govt. Tax' },
-      { field: 'TOTAL_BREAKDOWN.TOTSAL', header: 'Total Sales' },
-      { field: 'TOTAL_BREAKDOWN.PRDTAX', header: 'Withholding Tax' },
-      { field: 'TOTAL_BREAKDOWN.AMTDUE', header: 'Total Amount Due' },
-    ]
-  })
-
-  const handleOpenMainDialogBox = () => {
+  const handleActionViewMainDialog = () => {
     console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
     const PerBatchRunDialog = dialog.open(SelectedBillsTableModal, {
       data: {
         table_data : invoice_records_data.value,
-        table_column: invoice_records_column.value,
         view: (SELECTED_INVOICE_RECORD: InvoiceRecord) => {
           const loading = utilStore.startLoadingModal('Generating Draft...')
-          issuanceStore.handleGenerateDraftInvoice(SELECTED_INVOICE_RECORD, () => loading.close())
+          issuanceStore.handleActionGenerateDraftInvoice(SELECTED_INVOICE_RECORD, () => loading.close())
         },
         view1: () => {
           const loading = utilStore.startLoadingModal(`Generating ${invoice_records_data.value.length} Drafts...`)
-          issuanceStore.handleGenerateDraftInvoices(invoice_records_data.value, perBatchRunForm.value.invoiceDate, () => loading.close())
+          issuanceStore.handleActionGenerateDraftInvoices(invoice_records_data.value, perBatchRunForm.value.invoiceDate, () => loading.close())
         },
         submit: () => {
           confirm.require({
@@ -102,7 +82,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               label: 'Confirm'
             },
             accept: () => {
-              handleExecuteIssueFinalInvoices()
+              handleActionIssueFinalInvoices()
               PerBatchRunDialog.close()
             },
             reject: () => {
@@ -131,9 +111,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     })
   }
 
-  const handleExecuteIssueFinalInvoices = async () => {
+  const handleActionIssueFinalInvoices = async () => {
 
-    issuanceStore.allowReloadExitPage = false;
+    mainStore.allowReloadExitPage = false;
 
     toast.add({
       summary: 'Please do not close this tab!',
@@ -261,7 +241,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               ) as INVOICE_PER_COMPANY_AND_PROJECT[]
             )
 
-            const PDF_BLOB1 = await issuanceStore.handleGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords) ;
+            const PDF_BLOB1 = await issuanceStore.handleActionGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords) ;
 
             const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/SummaryFinalInvoiceModalFooter.vue'));
             const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal, {
@@ -296,7 +276,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            const PDF_BLOB = issuanceStore.handleGenerateInvoicePDFBlob(issuedInvoiceRecords)
+            const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
             utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
@@ -342,7 +322,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 label: 'YES, close results.'
               },
               accept: () => {
-                issuanceStore.allowReloadExitPage = true;
+                mainStore.allowReloadExitPage = true;
                 ShowResultFinalInvoiceDialog.close()
               },
               reject: () => {
@@ -360,7 +340,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       })
     }
 
-    issuanceStore.handleExecuteIssueFinalInvoices(data, callback, () => loading.close())
+    issuanceStore.handleActionIssueFinalInvoices(data, callback, () => loading.close())
   }
 
   return {
@@ -369,6 +349,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
     invoice_records_data,
 
-    handleOpenMainDialogBox,
+    handleActionViewMainDialog,
   }
 })

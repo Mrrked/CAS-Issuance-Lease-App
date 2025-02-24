@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center justify-center h-full gap-3 text-center">
+  <div class="flex flex-col items-center justify-center w-full h-full gap-3 my-auto text-center">
     <h1 class="font-semibold text-9xl">
       404
     </h1>

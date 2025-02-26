@@ -340,8 +340,8 @@ export const usePrintingStore = defineStore('print', () => {
     axios.get(`issuance_lease/unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
     .then((response) => {
       selectedUnit.value = undefined
+      selectedHistoryOfIssuedDocument.value = []
       selectedUnit.value = response.data.data
-      console.log(selectedUnit.value?.historyOfIssuedDocuments[0]);
     })
     .catch(utilStore.handleAxiosError)
     .finally(() => {

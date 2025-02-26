@@ -173,12 +173,16 @@
         "TIMSTP": 104542,
         "AUTHSG": "IT_MARK",
         "STATUS": "",
-        "RUNDAT": 20241203,
-        "RUNTME": 104542,
-        "RUNBY": "IT_MARK",
+        "PRSTAT": "",
+
+        "PRCNT":  0,
         "RPDATE": 0,
         "RPTIME": 0,
-        "REPRBY": ""
+        "REPRBY": "",
+
+        "RUNDAT": 20241203,
+        "RUNTME": 104542,
+        "RUNBY": "IT_MARK"
       },
       "ITEM_BREAKDOWNS": [
         {
@@ -376,7 +380,7 @@
                 ></Select>
               </InputGroup>
 
-              <div v-if="perBillTypeRunStore.showPBLForm" class="grid grid-cols-23 gap-4 mt-3 max-w-[50rem]">
+              <div v-if="perBillTypeRunStore.isShowPBLForm" class="grid grid-cols-23 gap-4 mt-3 max-w-[50rem]">
                 <div class="flex flex-col items-center justify-center col-span-3 gap-2">
                   <label name="pcs_code" class="font-bold text-center">
                     PCS Code

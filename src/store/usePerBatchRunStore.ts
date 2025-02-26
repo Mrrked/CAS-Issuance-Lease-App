@@ -138,6 +138,9 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           DETAILS: {
             ...INVOICE.DETAILS,
 
+            PRSTAT: 'P',
+            PRCNT: 1,
+
             DATSTP: stampDate,
             TIMSTP: stampTime,
 
@@ -166,7 +169,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),
       month: perBatchRunForm.value.invoiceDate.getMonth() + 1,
       type: 'BATCH',
-      invoices: SELECTED_INVOICES,
+      invoices: SELECTED_INVOICES as InvoiceRecord[],
     }
 
     const callback = async (response?: AxiosResponse) => {

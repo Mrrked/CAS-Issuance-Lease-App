@@ -268,19 +268,22 @@ export const useIssuanceStore = defineStore('issuance', () => {
             PBLKEY:         bill.PBL_KEY     || '',
 
             // FOOTER
-            DATSTP:         0,  //UPDATE ON FINAL
-            TIMSTP:         0,  //UPDATE ON FINAL
+            DATSTP:         0,
+            TIMSTP:         0,
             AUTHSG:         sessionStore.authenticatedUser.username || '',
 
             // TRACKING
             STATUS:         '',
-            RUNDAT:         0,  //UPDATE ON FINAL
-            RUNTME:         0,  //UPDATE ON FINAL
-            RUNBY:          sessionStore.authenticatedUser.username || '',
+            PRSTAT:         '',
+            PRCNT:          0,
 
             RPDATE:         0,
             RPTIME:         0,
             REPRBY:         '',
+
+            RUNDAT:         0,
+            RUNTME:         0,
+            RUNBY:          sessionStore.authenticatedUser.username || '',
           },
           // CIRBRKPF
           ITEM_BREAKDOWNS: [
@@ -512,6 +515,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
         doc.setFontSize(TITLE_TEXT_FONT_SIZE - 1)
         doc.setFont("helvetica", "bold");
         doc.text("Date :   " + (INVOICE_RECORD.DETAILS.DATVAL ? utilStore.formatDateNumberToStringYYYYMMDD(INVOICE_RECORD.DETAILS.DATVAL) :  'xxxx/xx/xx'), endLineX, cursorLineHeight, { align: 'right' })
+
+        if (INVOICE_RECORD.DETAILS.PRSTAT === 'R') {
+          incrementHeight(LARGE_LINE_HEIGHT + 0.10)
+
+          doc.setFontSize(INVOICE_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "bold");
+          doc.text("REPRINT", endLineX, cursorLineHeight, { align: 'right' })
+        }
 
         cursorLineHeight = HEADER_START_HEIGHT
         incrementHeight(HEADER_HEIGHT)
@@ -1141,11 +1152,31 @@ export const useIssuanceStore = defineStore('issuance', () => {
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
         doc.text("Series Range : " + INVOICE_RECORD.INVOICE_KEY.SERIES_RANGE, startLineX, cursorLineHeight, { align: 'left' })
+
+        if (INVOICE_RECORD.DETAILS.PRSTAT === 'R') {
+          doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text("Reprint Timestamp : ", endLineX - 0.9, cursorLineHeight, { align: 'right' })
+
+          doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text((INVOICE_RECORD.DETAILS.RPDATE ? utilStore.formatDateNumberToStringYYYYMMDD(INVOICE_RECORD.DETAILS.RPDATE) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.RPTIME ? utilStore.formatTimeNumberToString24H(INVOICE_RECORD.DETAILS.RPTIME) :  'xx:xx:xx'), endLineX - 0.85, cursorLineHeight, { align: 'left' })
+        }
         incrementHeight(VERY_SMALL_LINE_HEIGHT)
 
         doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
         doc.text("Timestamp : " + (INVOICE_RECORD.DETAILS.DATSTP ? utilStore.formatDateNumberToStringYYYYMMDD(INVOICE_RECORD.DETAILS.DATSTP) :  'xxxx/xx/xx' ) + '  ' +  (INVOICE_RECORD.DETAILS.TIMSTP ? utilStore.formatTimeNumberToString24H(INVOICE_RECORD.DETAILS.TIMSTP) :  'xx:xx:xx' ), startLineX, cursorLineHeight, { align: 'left' })
+
+        if (INVOICE_RECORD.DETAILS.PRSTAT === 'R') {
+          doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text("Reprint By : ", endLineX - 0.9, cursorLineHeight, { align: 'right' })
+
+          doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
+          doc.text(INVOICE_RECORD.DETAILS.REPRBY, endLineX - 0.85, cursorLineHeight, { align: 'left' })
+        }
       }
 
       const pageFormat = 'letter'

@@ -4,11 +4,16 @@
   import { COLOR_SCHEMES } from '../../presets/MainPreset';
   import { useThemeStore } from '../../store/useThemeStore';
   import { ref } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+
+  const route = useRoute()
+  const router = useRouter()
 
   const loginStore = useLoginStore()
   const themeStore = useThemeStore()
   const sessionStore = useSessionStore()
 
+  const isShowMenu = ref(false);
   const settings_popover = ref();
 
   const togglePopover = (event: MouseEvent) => {
@@ -42,6 +47,37 @@
         </div>
       </span>
     </div>
+
+    <Button
+      icon="pi pi-sync"
+      :label="route.name === 'Issuance for Lease System' ? 'Invoice Issuance' : 'Invoice Reprinting'"
+      @click="isShowMenu = true"
+      outlined
+      severity="primary"
+    />
+    <Drawer v-model:visible="isShowMenu" position="top" style="height: auto">
+      <template #container="{ }">
+        <div class="flex items-center justify-center gap-4 min-h-20">
+          <Button
+            icon="pi pi-file"
+            label="Invoice Issuance"
+            @click="router.replace('/')"
+            outlined
+            severity="primary"
+            :disabled="route.name === 'Issuance for Lease System'"
+          />
+          <Button
+            icon="pi pi-file"
+            label="Invoice Reprinting"
+            @click="router.replace('/reprint')"
+            outlined
+            severity="primary"
+            :disabled="route.name === 'Reprinting of Invoice'"
+          />
+        </div>
+      </template>
+    </Drawer>
+
     <div class="items-center hidden gap-10 px-3 sm:flex ">
       <div class="flex justify-between gap-2 ">
         <div class="flex flex-col text-right">

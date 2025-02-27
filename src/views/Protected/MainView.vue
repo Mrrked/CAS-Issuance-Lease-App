@@ -14,6 +14,9 @@
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
 
+  const ALLOW_ADVANCE_BATCH = import.meta.env.VITE_ALLOW_ADVANCE_BATCH || 'FALSE';
+  const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
+
   onMounted(() => {
     mainStore.fetchAllData()
   })
@@ -175,7 +178,7 @@
         "STATUS": "",
         "PRSTAT": "",
 
-        "PRCNT":  0,
+        "PRCNT": 0,
         "RPDATE": 0,
         "RPTIME": 0,
         "REPRBY": "",
@@ -222,70 +225,81 @@
         "AMTDUE": 599.34
       },
       "CORFPF": {
-          "COMPCD": 1,
-          "BRANCH": 1,
-          "DEPTCD": 11,
-          "ORCOD" : "",
-          "ORNUM" : 0,
-          "DATOR" : 0,
-          "CASHCD": "IT_MARK",
-          "COLSTF": "",
-          "ORAMT" : 86487.03,
-          "NOACCT": 0,
-          "PAYTYP": "Y",
-          "INTRST": 0,
-          "PNALTY": 0,
-          "OTHERS": 0,
-          "OVRPAY": 0,
-          "UNDPAY": 0,
-          "PROJCD": "CL3",
-          "PCSCOD": " ",
-          "PHASE" : "L",
-          "BLOCK" : "  ",
-          "LOT"   : "U001",
-          "UNITCD": "  ",
-          "PAYCOD": "",
-          "PAYEE" : "AT GROUP SERVICES LIMITED - PHILIPP",
-          "PN#": 0,
-          "DATVAL": 20250101,
-          "DATPRT": 0,
-          "BANKCD": "",
-          "BNKACT": "",
-          "NOCHK" : 0,
-          "PRNO"  : 0,
-          "CSHAMT": 0,
-          "TCHKAM": 0,
-          "LEAFNO": 0,
-          "NORMRK": 0,
-          "DATCAN": 0,
-          "RETCOD": "",
-          "UPDCOD": "",
-          "NOMOS" : 0,
-          "TRANSN": 0,
-          "DELOR" : ""
+        "COMPCD": 1,
+        "BRANCH": 1,
+        "DEPTCD": 11,
+        "ORCOD": "",
+        "ORNUM": 0,
+        "DATOR": 0,
+        "CASHCD": "IT_MARK",
+        "COLSTF": "",
+        "ORAMT": 86487.03,
+        "NOACCT": 0,
+        "PAYTYP": "Y",
+        "INTRST": 0,
+        "PNALTY": 0,
+        "OTHERS": 0,
+        "OVRPAY": 0,
+        "UNDPAY": 0,
+        "PROJCD": "CL3",
+        "PCSCOD": " ",
+        "PHASE": "L",
+        "BLOCK": "  ",
+        "LOT": "U001",
+        "UNITCD": "  ",
+        "PAYCOD": "",
+        "PAYEE": "AT GROUP SERVICES LIMITED - PHILIPP",
+        "PN#": 0,
+        "DATVAL": 20250101,
+        "DATPRT": 0,
+        "BANKCD": "",
+        "BNKACT": "",
+        "NOCHK": 0,
+        "PRNO": 0,
+        "CSHAMT": 0,
+        "TCHKAM": 0,
+        "LEAFNO": 0,
+        "NORMRK": 0,
+        "DATCAN": 0,
+        "RETCOD": "",
+        "UPDCOD": "",
+        "NOMOS": 0,
+        "TRANSN": 0,
+        "DELOR": ""
       },
       "CORTPF": {
-          "COMPCD": 1,
-          "BRANCH": 1,
-          "DEPTCD": 11,
-          "ORCOD": "",
-          "ORNUM": 0,
-          "DATVAL": 20250101,
-          "PROJCD": "CL3",
-          "PCSCOD": " ",
-          "PHASE": "L",
-          "BLOCK": "  ",
-          "LOT": "U001",
-          "UNITCD": "  ",
-          "PAYTYP": "Y",
-          "CLTNUM": 0,
-          "PDSCOD": "L",
-          "PDSNUM": 0,
-          "TCLTNO": 2405014,
-          "DATINS": 20250113,
-          "BALRUN": 0,
-          "PAYNO": 0,
-          "NOMOS": 0
+        "COMPCD": 1,
+        "BRANCH": 1,
+        "DEPTCD": 11,
+        "ORCOD": "",
+        "ORNUM": 0,
+        "DATVAL": 20250101,
+        "PROJCD": "CL3",
+        "PCSCOD": " ",
+        "PHASE": "L",
+        "BLOCK": "  ",
+        "LOT": "U001",
+        "UNITCD": "  ",
+        "PAYTYP": "Y",
+        "CLTNUM": 0,
+        "PDSCOD": "L",
+        "PDSNUM": 0,
+        "TCLTNO": 2405014,
+        "DATINS": 20250113,
+        "BALRUN": 0,
+        "PAYNO": 0,
+        "NOMOS": 0
+      },
+      "CRMKPF": {
+        COMPCD: 0,
+        BRANCH: 0,
+        DEPTCD: 0,
+        ORCOD: '',
+        ORNUM: 0,
+        RMARK1: '',
+        RMARK2: '',
+        RMARK3: '',
+        RMARK4: ''
       }
     }
 
@@ -348,6 +362,7 @@
                 <DatePicker
                   v-model="perBillTypeRunStore.perBillTypeRunForm.invoiceDate"
                   :minDate="new Date()"
+                  :maxDate="ALLOW_ADVANCE_SINGLE === 'TRUE' ? undefined : new Date()"
                   placeholder="Select..."
                 />
               </InputGroup>
@@ -528,6 +543,7 @@
                 <DatePicker
                   v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
                   :minDate="new Date()"
+                  :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
                   placeholder="Select..."
                 />
               </InputGroup>

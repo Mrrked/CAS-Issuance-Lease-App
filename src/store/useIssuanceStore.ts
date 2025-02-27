@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
-import { INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
+import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
 import { defineAsyncComponent, markRaw } from 'vue';
 
 import axios from '../axios'
@@ -85,6 +85,55 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return max
   }
 
+  const getInvoiceRemarks = (bill: LeaseBill, existing_bills: LeaseBill[], currentCRMK?: CRMKPF) => {
+    const remarksBillTypeDescription = bill.BDESC
+    const remarksPeriod = utilStore.formatDateNumberToStringYYYYMMDD(bill.FRBILL) + ' - ' + utilStore.formatDateNumberToStringYYYYMMDD(bill.TOBILL)
+
+    if (currentCRMK) {
+
+      if (remarksBillTypeDescription.startsWith('PEN')) {
+        return [
+          currentCRMK.RMARK1,
+          currentCRMK.RMARK2,
+          currentCRMK.RMARK3,
+          currentCRMK.RMARK4,
+        ]
+      }
+
+      if (currentCRMK.RMARK1.startsWith('PEN')) {
+        return [
+          remarksBillTypeDescription,
+          'for the period of',
+          remarksPeriod,
+          '',
+        ]
+      }
+
+      if (currentCRMK.RMARK2 === 'for the period of') {
+        return [
+          currentCRMK.RMARK1,
+          remarksBillTypeDescription,
+          currentCRMK.RMARK2,
+          currentCRMK.RMARK3,
+        ]
+      }
+
+      return [
+        currentCRMK.RMARK1,
+        remarksBillTypeDescription,
+        currentCRMK.RMARK2,
+        currentCRMK.RMARK3,
+      ]
+    }
+
+    return [
+      remarksBillTypeDescription,
+      'for the period of',
+      remarksPeriod,
+      ''
+    ]
+  }
+
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
       const BT_UNIQUE_STYPE = [1, 4, 2]
@@ -147,7 +196,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
 
     billings.forEach((bill) => {
-
       const key = bill.ID;
 
       const invoiceDate: number = invoice_date ? utilStore.convertDateObjToNumberYYYYMMDD(invoice_date) : 0
@@ -157,6 +205,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       // EXISTING INVOICE GROUP
       if (mergedMap[key]) {
+        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, mergedMap[key].BILLINGS, mergedMap[key].CRMKPF)
+
         mergedMap[key] = {
           ...mergedMap[key],
 
@@ -211,6 +261,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
             PRDTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
             AMTDUE:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
           },
+
+          CRMKPF: {
+            ...mergedMap[key].CRMKPF,
+            RMARK1:         remarks1 === '' ? mergedMap[key].CRMKPF.RMARK1 : remarks1,
+            RMARK2:         remarks2 === '' ? mergedMap[key].CRMKPF.RMARK2 : remarks2,
+            RMARK3:         remarks3 === '' ? mergedMap[key].CRMKPF.RMARK3 : remarks3,
+            RMARK4:         remarks4 === '' ? mergedMap[key].CRMKPF.RMARK4 : remarks4,
+          }
         }
       }
 
@@ -220,6 +278,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS || COMPANIES[0]
 
         const [CLIENT_ADDRESS_1, CLIENT_ADDRESS_2] = getSplitClientAddress(bill.CLIENT_ADDRESS)
+        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, [])
 
         mergedMap[key] = {
           PBL_KEY:          bill.PBL_KEY || '',
@@ -402,10 +461,20 @@ export const useIssuanceStore = defineStore('issuance', () => {
             BALRUN:         0,
             PAYNO:          0,
             NOMOS:          0   //UPDATE ON FINAL no of months
+          },
+          CRMKPF: {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            RMARK1:         remarks1,
+            RMARK2:         remarks2,
+            RMARK3:         remarks3,
+            RMARK4:         remarks4
           }
         }
       }
-
     })
 
     return [...Object.values(mergedMap)] as InvoiceRecord[]

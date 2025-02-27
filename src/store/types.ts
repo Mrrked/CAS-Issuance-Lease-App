@@ -674,6 +674,7 @@ export interface InvoiceRecord {
   // CASH OR FILES
   CORFPF: CORFPF
   CORTPF: CORTPF
+  CRMKPF: CRMKPF
 }
 
 export interface INVOICE_PER_COMPANY_AND_PROJECT {
@@ -747,7 +748,6 @@ interface CORFPF {
   DELOR: string; // DELOR (CHAR 1)
 }
 
-
 interface CORTPF {
   COMPCD: number;  // COMPANY CODE
   BRANCH: number;  // BRANCH CODE
@@ -770,6 +770,18 @@ interface CORTPF {
   BALRUN: number;  // RUNNING BALANCE
   PAYNO: number;   // PAYMENT NUMBER
   NOMOS: number;   // NO. OF MONTHS
+}
+
+export interface CRMKPF {
+  COMPCD: number; // COMPANY CODE (ZONED 2, 0)
+  BRANCH: number; // BRANCH CODE (ZONED 1, 0)
+  DEPTCD: number; // DEPARTMENT CODE (ZONED 2, 0)
+  ORCOD: string; // O.R. CODE (CHAR 2)
+  ORNUM: number; // O.R. NUMBER (ZONED 6, 0)
+  RMARK1: string;
+  RMARK2: string;
+  RMARK3: string;
+  RMARK4: string;
 }
 
 interface FAILED_INVOICE_RECORD {

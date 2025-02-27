@@ -445,8 +445,7 @@ export const usePrintingStore = defineStore('print', () => {
 
   const handleActionPrintOriginal = () => {
     if (selectedHistoryOfIssuedDocument.value.length > 0) {
-      const password = prompt('Enter password: ')
-      if (password === ADMIN_PASSWORD) {
+      utilStore.handleActionConfirmAdminPassword(ADMIN_PASSWORD, () => {
         confirm.require({
           message: 'Are you sure you want to print the selected document(s)?',
           header: 'Confirm Printing of Selected Documents',
@@ -480,6 +479,8 @@ export const usePrintingStore = defineStore('print', () => {
                     }
                   }
                 })
+                .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
+
             const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(ORIGINAL_ISSUED_DOCUMENTS)
 
             const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
@@ -521,7 +522,7 @@ export const usePrintingStore = defineStore('print', () => {
           reject: () => {
           }
         });
-      }
+      })
     }
   }
 
@@ -578,6 +579,7 @@ export const usePrintingStore = defineStore('print', () => {
                 }
               }
             })
+            .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
 
         const data = {
           FOR_UPDATE_CIRCLTPF: FOR_UPDATE_CIRCLTPF

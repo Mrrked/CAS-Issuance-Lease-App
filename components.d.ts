@@ -21,6 +21,7 @@ declare module 'vue' {
     DraftInvoiceModalFooter: typeof import('./src/components/Dialog/General/DraftInvoiceModalFooter.vue')['default']
     Drawer: typeof import('primevue/drawer')['default']
     DynamicDialog: typeof import('primevue/dynamicdialog')['default']
+    EnterPasswordDialogModal: typeof import('./src/components/Dialog/General/EnterPasswordDialogModal.vue')['default']
     Fieldset: typeof import('primevue/fieldset')['default']
     FinalInvoiceModalFooter: typeof import('./src/components/Dialog/General/FinalInvoiceModalFooter.vue')['default']
     Footer: typeof import('./src/components/Core/Footer.vue')['default']

@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const LoadingModal = defineAsyncComponent(() => import('../components/Dialog/General/LoadingModal.vue'));
+const EnterPasswordDialogModal = defineAsyncComponent(() => import('../components/Dialog/General/EnterPasswordDialogModal.vue'));
 
 export const useUtilitiesStore = defineStore('utils', () => {
 
@@ -307,6 +308,29 @@ export const useUtilitiesStore = defineStore('utils', () => {
     URL.revokeObjectURL(url);
   }
 
+  const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
+    const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
+      data: {
+        password,
+        submit: () => {
+          EnterPasswordDialogRef.close()
+          callback()
+        },
+        cancel: () => {
+          EnterPasswordDialogRef.close()
+        }
+      },
+      props: {
+        header: 'Enter Password',
+        style: {
+          width: '20rem'
+        },
+        showHeader: true,
+        modal: true
+      }
+    })
+  }
+
   return {
     formatTimeNumberToString12H,
     formatTimeNumberToString24H,
@@ -332,5 +356,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
 
     handleAxiosError,
     handleDownloadFile,
+    handleActionConfirmAdminPassword,
   }
 })

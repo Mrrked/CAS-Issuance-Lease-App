@@ -675,6 +675,7 @@ export interface InvoiceRecord {
   CORFPF: CORFPF
   CORTPF: CORTPF
   CRMKPF: CRMKPF
+  // CORF4PF: CORF4PF
 }
 
 export interface INVOICE_PER_COMPANY_AND_PROJECT {
@@ -782,6 +783,40 @@ export interface CRMKPF {
   RMARK2: string;
   RMARK3: string;
   RMARK4: string;
+}
+
+interface CORF4PF {
+  COMPCD: number; // COMPANY CODE (ZONED 2,0)
+  BRANCH: number; // BRANCH CODE (ZONED 1,0)
+  DEPTCD: number; // DEPARTMENT CODE (ZONED 2,0)
+  ORCOD: string; // O. R. CODE (CHAR 2)
+  ORNUM: number; // O. R. NUMBER (ZONED 6,0)
+  DATVAL: number; // VALUE DATE (ZONED 8,0)
+  PROJCD: string; // PROJECT CODE (CHAR 3)
+  PCSCOD: string; // PCS CODE (CHAR 1)
+  PHASE: string; // PHASE (CHAR 1)
+  BLOCK: string; // BLOCK (CHAR 2)
+  LOT: string; // LOT/UNIT (CHAR 4)
+  UNITCD: string; // UNIT CODE (CHAR 2)
+  PAYTYP: string; // PAYMENT TYPE (CHAR 1)
+  BTYPE: number; // BILL TYPE (ZONED 2,0)
+  MBTYPE: number; // MOTHER BILL TYPE (ZONED 2,0)
+  LESDES: string; // LEASE DESCRIPTION (CHAR 30)
+  ORAMT: number; // OR AMOUNT (PACKED 11,2)
+  VATSAL: number; // VATABLE SALES (PACKED 11,2)
+  VATXMP: number; // VAT-EXEMPT SALES (PACKED 11,2)
+  VATZRO: number; // ZERO RATED SALES (PACKED 11,2)
+  TOTSAL: number; // TOTAL SALES (PACKED 11,2)
+  VATAMT: number; // VAT AMOUNT (PACKED 11,2)
+  WITTAX: number; // WITHHOLDING TAX (PACKED 11,2)
+  GRSAMT: number; // GROSS AMOUNT (PACKED 11,2)
+  ENTDES: string; // ACK.REC-ENTRY DESCRIPTION (CHAR 25)
+  ENTAMT: number; // ACK.REC.-ENTRY AMOUNT (PACKED 11,2)
+  LESRF: number; // LESS: RES. FEE (PACKED 11,0)
+  ORTYPE: string; // OR TYPE (CHAR 1)
+  DATENT: number; // DATE ENTERED (ZONED 8,0)
+  TIMENT: number; // TIME ENTERED (ZONED 6,0)
+  USRENT: string; // USER NAME (CHAR 10)
 }
 
 interface FAILED_INVOICE_RECORD {

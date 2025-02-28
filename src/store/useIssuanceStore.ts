@@ -27,6 +27,32 @@ export const useIssuanceStore = defineStore('issuance', () => {
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
 
+  const BILL_TYPES_WITH_PENALTY_TYPE  = [1, 2, 3, 4, 5, 6, 7]
+  const PENALTY_BILL_TYPES            = [11, 21, 31, 41, 51, 61, 71]
+  const UTILITY_BILL_TYPES            = [5, 6, 7]
+  const BILL_TYPES_WITH_UNIQUE_STYPE  = [1, 4, 2]
+  const UTILITY_BILL_TYPES_WITH_PENALTY = [5, 6, 7, 51, 61, 71]
+  const UTILITY_MOTHER_BILL_TYPE_GROUPS  = [
+    {
+      current: 5,
+      ungroup: [53, 54, 55, 56],
+    },
+    {
+      current: 6,
+      ungroup: [63, 64, 65, 66],
+    },
+    {
+      current: 7,
+      ungroup: [73, 74],
+    },
+  ]
+  const UTILITY_BILL_TYPE_PER_CLASSIFICATION = {
+    VAT_SALES:  [53, 63, 73],
+    VAT:        [54, 64, 74],
+    VAT_EXEMPT: [55, 65],
+    GOVT_TAX:   [56, 66],
+  }
+
   const getSplitClientAddress = (CLIENT_ADDRESS: string) => {
     const firstPart = CLIENT_ADDRESS.slice(0, 80);
     const secondPart = CLIENT_ADDRESS.slice(80, 160);
@@ -48,7 +74,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const getItemName = (bill: LeaseBill) => {
-    const BT_UNIQUE_STYPE = [1, 4, 2]
+    const BILL_TYPES_WITH_UNIQUE_STYPE = [1, 4, 2]
 
     const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
       bill.SALTYP === 'VAT'  ? 'V' :
@@ -62,9 +88,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       bill.BDESC,
       dateObj.toLocaleString('default', { month: 'long' }),
       dateObj.getFullYear(),
-      BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
+      BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
         'Zero-Rated' :
-      BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
+      BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
         'VAT Exempt' :
         'VATable'
     ]
@@ -85,7 +111,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return max
   }
 
-  const getInvoiceRemarks = (bill: LeaseBill, existing_bills: LeaseBill[], currentCRMK?: CRMKPF) => {
+  const getInvoiceRemarks = (bill: LeaseBill, currentCRMK?: CRMKPF) => {
     const remarksBillTypeDescription = bill.BDESC
     const remarksPeriod = utilStore.formatDateNumberToStringYYYYMMDD(bill.FRBILL) + ' - ' + utilStore.formatDateNumberToStringYYYYMMDD(bill.TOBILL)
 
@@ -136,9 +162,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     return billings.map((bill, index) => {
-      const BT_UNIQUE_STYPE = [1, 4, 2]
-
-      const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+      const SALES_TYPE =
+        bill.SALTYP === 'ZERO' ? 'Z' :
         bill.SALTYP === 'VAT'  ? 'V' :
         bill.SALTYP === 'NVAT' ? 'N' : ''
 
@@ -156,9 +181,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const TEMP = utilStore.convertNumberToRoundedNumber(GROSS - VAT)
       const WHTAX = utilStore.convertNumberToRoundedNumber(TEMP * WHTAX_RATE)
 
-      if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
+      if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
         ZERO_RATE = TEMP
-      } else if (BT_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N') {
+      } else if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N') {
         VAT_EXEMPT = TEMP
       } else {
         VAT_SALES = TEMP
@@ -205,7 +230,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       // EXISTING INVOICE GROUP
       if (mergedMap[key]) {
-        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, mergedMap[key].BILLINGS, mergedMap[key].CRMKPF)
+        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, mergedMap[key].CRMKPF)
 
         mergedMap[key] = {
           ...mergedMap[key],
@@ -278,7 +303,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS || COMPANIES[0]
 
         const [CLIENT_ADDRESS_1, CLIENT_ADDRESS_2] = getSplitClientAddress(bill.CLIENT_ADDRESS)
-        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, [])
+        const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill)
 
         mergedMap[key] = {
           PBL_KEY:          bill.PBL_KEY || '',

@@ -7,10 +7,13 @@
   import { useDialog } from 'primevue/usedialog';
   import PreviewPDFModal from '../../components/Dialog/General/PreviewPDFModal.vue';
   import { InvoiceRecord } from '../../store/types';
+  import { useUtilitiesStore } from '../../store/useUtilitiesStore';
 
   const dialog = useDialog()
-  const issuanceStore = useIssuanceStore()
+
   const mainStore = useMainStore()
+  const utilStore = useUtilitiesStore()
+  const issuanceStore = useIssuanceStore()
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
 
@@ -209,6 +212,1350 @@
           "TODATE": 20250212,
           "DUEDAT": 20250113
         },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
+        {
+          "RECTYP": "BI",
+          "ORNUM": "01111xxxxxxxx",
+          "ITEMNO": 1,
+          "BILTYP": 1,
+          "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
+          "QTY": 1,
+          "UNTCST": 596.36,
+          "VATAMT": 0,
+          "VATSAL": 0,
+          "VATEXM": 596.36,
+          "ZERSAL": 0,
+          "NETVAT": 596.36,
+          "WTHTAX": 11.93,
+          "GOVTAX": 14.91,
+          "WTXRAT": 2,
+          "AMTDUE": 596.36,
+          "FRDATE": 20250113,
+          "TODATE": 20250212,
+          "DUEDAT": 20250113
+        },
       ],
       "TOTAL_BREAKDOWN": {
         "RECTYP": "BI",
@@ -350,8 +1697,8 @@
         <Tab value="2">Test Billing Invoice</Tab>
       </TabList>
       <TabPanels>
-        <TabPanel value="0" class="flex flex-col items-start justify-start ">
-          <Fieldset legend="Per Bill Type" class="min-w-80">
+        <TabPanel value="0" class="flex flex-col items-center justify-start">
+          <Fieldset legend="Bill Type Group Running" class="min-w-[600px] max-w-[600px]">
             <div class="flex flex-col gap-2">
               <InputGroup>
                 <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
@@ -375,8 +1722,8 @@
                 <Select
                   v-model="perBillTypeRunStore.perBillTypeRunForm.billType"
                   :options="perBillTypeRunStore.BILL_TYPE_OPTIONS"
-                  filter
                   optionLabel="name"
+                  option-value="value"
                   placeholder="Select..."
                 ></Select>
               </InputGroup>
@@ -390,8 +1737,9 @@
                   v-model="perBillTypeRunStore.perBillTypeRunForm.projectCode"
                   :options="mainStore.getProjectCodeOptions"
                   filter
-                  optionLabel="name"
+                  optionLabel="option_name"
                   placeholder="Select..."
+                  filter-placeholder="Search Project"
                 ></Select>
               </InputGroup>
 
@@ -401,6 +1749,7 @@
                     PCS Code
                   </label>
                   <InputText
+                    v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.pcs_code"
                     name="pcs_code"
                     maxlength="1"
                     class="font-semibold text-center uppercase w-11"
@@ -413,6 +1762,7 @@
                     Phase
                   </label>
                   <InputText
+                    v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.phase"
                     name="phase"
                     maxlength="1"
                     class="font-semibold text-center uppercase w-11"
@@ -426,6 +1776,7 @@
                   </label>
                   <div class="flex gap-1">
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.block['1']"
                       name="block"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -433,6 +1784,7 @@
                       autocomplete="off"
                     />
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.block['2']"
                       name="block"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -455,6 +1807,7 @@
                   </label>
                   <div class="flex gap-1">
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.lot['1']"
                       name="lot"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -462,6 +1815,7 @@
                       autocomplete="off"
                     />
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.lot['2']"
                       name="lot"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -469,6 +1823,7 @@
                       autocomplete="off"
                     />
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.lot['3']"
                       name="lot"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -476,6 +1831,7 @@
                       autocomplete="off"
                     />
                     <InputText
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.lot['4']"
                       name="lot"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
@@ -498,14 +1854,16 @@
                   </label>
                   <div class="flex gap-1">
                     <InputText
-                      name="lot"
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['1']"
+                      name="unit_code"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
                       size="large"
                       autocomplete="off"
                     />
                     <InputText
-                      name="lot"
+                      v-model="perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['2']"
+                      name="unit_code"
                       maxlength="1"
                       class="font-semibold text-center uppercase w-11"
                       size="large"
@@ -531,9 +1889,44 @@
             </div>
           </Fieldset>
         </TabPanel>
-        <TabPanel value="1" class="flex flex-col items-start justify-start ">
-          <Fieldset legend="Batch Running" class="min-w-80">
-            <div class="flex flex-col gap-2">
+        <TabPanel value="1" class="flex flex-col items-center justify-start ">
+          <Fieldset legend="Batch Running" class="min-w-[600px] max-w-[600px]">
+            <div class="flex flex-col">
+              <div class="p-2 text-xs">
+                Schedule of Batch Running
+              </div>
+              <div class="flex flex-col gap-4">
+                <div class="grid grid-cols-9 gap-4">
+                  <InputGroup class="col-span-4">
+                    <InputGroupAddon>
+                      <label for="invoice_date" class="w-24 font-bold text-color">
+                        Current
+                      </label>
+                    </InputGroupAddon>
+                    <InputText
+                      :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
+                    />
+                  </InputGroup>
+                  <InputGroup class="col-span-4">
+                    <InputGroupAddon>
+                      <label for="invoice_date" class="w-24 font-bold text-color">
+                        Next
+                      </label>
+                    </InputGroupAddon>
+                    <InputText
+                      :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
+                    />
+                  </InputGroup>
+                  <Button
+                    @click="perBatchRunStore.handleActionViewScheduleOfBatchIssuance"
+                    icon="pi pi-info-circle"
+                    severity="info"
+                  />
+                </div>
+              </div>
+
+              <Divider />
+
               <InputGroup>
                 <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
                   <label for="invoice_date" class="font-bold w-28">
@@ -547,17 +1940,29 @@
                   placeholder="Select..."
                 />
               </InputGroup>
-              <div class="flex justify-between w-full gap-3 mt-3">
+              <div class="p-2 text-xs">
+                This option can only be executed on the first business day of each month.
+              </div>
+
+              <div class="flex justify-between w-full gap-3 mt-5">
                 <Button @click="issuanceStore.handleActionReset(2)"
                   raised
                   type="reset"
                   label="Reset"
                 />
-                <Button @click="issuanceStore.handleActionSearch(2)"
+                <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch(2)"
                   raised
                   type="submit"
                   label="Find All"
                   icon="pi pi-search"
+                />
+                <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
+                  @wheel="perBatchRunStore.handleActionAdminBatchIssuance"
+                  raised
+                  type="submit"
+                  label="Find All"
+                  icon="pi pi-search"
+                  disabled
                 />
               </div>
             </div>

@@ -74,28 +74,42 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const getItemName = (bill: LeaseBill) => {
-    const BILL_TYPES_WITH_UNIQUE_STYPE = [1, 4, 2]
-
-    const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
-      bill.SALTYP === 'VAT'  ? 'V' :
-      bill.SALTYP === 'NVAT' ? 'N' : ''
-
     let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
 
     let dateObj = new Date(extractYear, extractMonth - 1, 1);
 
-    const [bill_desc, month, year, type] = [
+    const [bill_desc, month, year] = [
       bill.BDESC,
       dateObj.toLocaleString('default', { month: 'long' }),
       dateObj.getFullYear(),
-      BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
-        'Zero-Rated' :
-      BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
-        'VAT Exempt' :
-        'VATable'
     ]
 
-    return `${bill_desc} ( ${month} ${year} ) ${type}`
+    if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE)) {
+      const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+      bill.SALTYP === 'VAT'  ? 'V' :
+      bill.SALTYP === 'NVAT' ? 'N' : ''
+
+      let type = BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
+          'Zero-Rated' :
+        BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
+          'VAT Exempt' :
+          'VATable'
+
+      return `${bill_desc} ( ${month} ${year} ) ${type}`
+
+    } else {
+      let type = ''
+      if (bill.VAT_SALES !== 0) {
+        type = 'VATable'
+      } else if (bill.VAT_EXEMPT !== 0) {
+        type = 'VAT Exempt'
+      } else if (bill.ZERO_RATE !== 0) {
+        type = 'Zero-Rated'
+      }
+
+      return `${bill_desc} ( ${month} ${year} ) ${type}`
+    }
+
   }
 
   const getNOMOS = (invoiceRecord: InvoiceRecord, billTypes: number[]) => {
@@ -135,7 +149,25 @@ export const useIssuanceStore = defineStore('issuance', () => {
         ]
       }
 
-      if (currentCRMK.RMARK2 === 'for the period of') {
+      if (currentCRMK.RMARK1 === remarksBillTypeDescription && currentCRMK.RMARK2 === 'for the period of') {
+        return [
+          currentCRMK.RMARK1,
+          currentCRMK.RMARK2,
+          remarksPeriod,
+          currentCRMK.RMARK4,
+        ]
+      }
+
+      if (currentCRMK.RMARK2 === remarksBillTypeDescription && currentCRMK.RMARK3 === 'for the period of') {
+        return [
+          currentCRMK.RMARK1,
+          currentCRMK.RMARK2,
+          currentCRMK.RMARK3,
+          remarksPeriod
+        ]
+      }
+
+      if (currentCRMK.RMARK2 === 'for the period of' && currentCRMK.RMARK1 !== remarksBillTypeDescription) {
         return [
           currentCRMK.RMARK1,
           remarksBillTypeDescription,
@@ -161,7 +193,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
-    return billings.map((bill, index) => {
+    const mergedMap: { [key: string]: LeaseBill } = {};
+
+    let index = 0
+
+    // console.log('SIZE', billings.length);
+
+    billings.map((bill, idx) => {
+
+      const key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}`;
+
       const SALES_TYPE =
         bill.SALTYP === 'ZERO' ? 'Z' :
         bill.SALTYP === 'VAT'  ? 'V' :
@@ -170,50 +211,153 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const VAT_RATE = bill.VAT_RATE ? bill.VAT_RATE / 100 : 0
       const WHTAX_RATE = bill.WHTAX_RATE ? bill.WHTAX_RATE / 100 : 0
 
-      const GROSS = bill.BALAMT
+      const GROSS = bill.BILAMT
       const GROSS_VAT_RATE = 1 + VAT_RATE
 
-      let VAT_SALES = 0
-      let VAT_EXEMPT = 0
-      let ZERO_RATE = 0
+      // console.log(bill.BILL_TYPE, bill.OLD_BILL_TYPE);
 
-      const VAT = utilStore.convertNumberToRoundedNumber((GROSS / GROSS_VAT_RATE) * VAT_RATE)
-      const TEMP = utilStore.convertNumberToRoundedNumber(GROSS - VAT)
-      const WHTAX = utilStore.convertNumberToRoundedNumber(TEMP * WHTAX_RATE)
+      // FOR UTILITY BILL TYPES
+      if (UTILITY_BILL_TYPES.includes(bill.BILL_TYPE)){
+        if (mergedMap[key]) {
+          mergedMap[key].BALAMT += bill.BALAMT;
+          mergedMap[key].BILAMT += bill.BILAMT;
+          mergedMap[key].AMTPD += bill.AMTPD;
+          mergedMap[key].PRPTAX += bill.PRPTAX;
+        } else if(!mergedMap[key]) {
+          mergedMap[key] = {
+            ...bill,
+            INDEX: index++,
 
-      if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
-        ZERO_RATE = TEMP
-      } else if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N') {
-        VAT_EXEMPT = TEMP
+            UNIT_COST: 0,     //SALE
+            AMOUNT: 0,        //SALE + VAT
+
+            VAT_SALES: 0,
+            VAT_EXEMPT: 0,
+            ZERO_RATE: 0,
+
+            // ADD
+            GOVT_TAX: 0,
+            VAT: 0,
+
+            // LESS
+            WITHHOLDING_TAX: 0,
+
+            TOTAL_AMOUNT: 0,
+          };
+        }
+
+        if (bill.BILL_TYPE !== bill.OLD_BILL_TYPE) {
+          // VAT SALES
+          if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.VAT_SALES.includes(bill.OLD_BILL_TYPE)) {
+            const WHTAX_VAT_SALES = utilStore.convertNumberToRoundedNumber(bill.BILAMT * WHTAX_RATE)
+
+            mergedMap[key].AMOUNT += bill.BILAMT
+            mergedMap[key].UNIT_COST += bill.BILAMT
+
+            mergedMap[key].VAT_SALES += bill.BILAMT
+            mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_SALES
+            mergedMap[key].TOTAL_AMOUNT += bill.BILAMT - WHTAX_VAT_SALES
+          }
+
+          // VAT EXEMPT
+          else if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.VAT_EXEMPT.includes(bill.OLD_BILL_TYPE)) {
+            const WHTAX_VAT_EXEMPT = utilStore.convertNumberToRoundedNumber(bill.BILAMT * WHTAX_RATE)
+
+            mergedMap[key].AMOUNT += bill.BILAMT
+            mergedMap[key].UNIT_COST += bill.BILAMT
+
+            mergedMap[key].VAT_EXEMPT += bill.BILAMT
+            mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_EXEMPT
+            mergedMap[key].TOTAL_AMOUNT += bill.BILAMT - WHTAX_VAT_EXEMPT
+
+          }
+
+          // VAT
+          else if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.VAT.includes(bill.OLD_BILL_TYPE)) {
+            mergedMap[key].AMOUNT += bill.BILAMT
+            // mergedMap[key].UNIT_COST += bill.BILAMT
+
+            mergedMap[key].VAT += bill.BILAMT
+            mergedMap[key].TOTAL_AMOUNT += bill.BILAMT
+          }
+
+          // GOVT TAX
+          else if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.GOVT_TAX.includes(bill.OLD_BILL_TYPE)) {
+            mergedMap[key].GOVT_TAX += bill.BILAMT
+            mergedMap[key].TOTAL_AMOUNT += bill.BILAMT
+          }
+        }
+        if (idx + 1 < billings.length && bill.BILL_TYPE !== billings[idx + 1].BILL_TYPE && bill.YYYYMM !== billings[idx + 1].YYYYMM) {
+          mergedMap[key] = {
+            ...mergedMap[key],
+            AMOUNT: utilStore.convertNumberToRoundedNumber(mergedMap[key].AMOUNT),
+            UNIT_COST: utilStore.convertNumberToRoundedNumber(mergedMap[key].UNIT_COST),
+
+            BALAMT: utilStore.convertNumberToRoundedNumber(mergedMap[key].BALAMT),
+            BILAMT: utilStore.convertNumberToRoundedNumber(mergedMap[key].BILAMT),
+            AMTPD: utilStore.convertNumberToRoundedNumber(mergedMap[key].AMTPD),
+            PRPTAX: utilStore.convertNumberToRoundedNumber(mergedMap[key].PRPTAX),
+
+            VAT_SALES: utilStore.convertNumberToRoundedNumber(mergedMap[key].VAT_SALES),
+            VAT_EXEMPT: utilStore.convertNumberToRoundedNumber(mergedMap[key].VAT_EXEMPT),
+            ZERO_RATE: utilStore.convertNumberToRoundedNumber(mergedMap[key].ZERO_RATE),
+
+            GOVT_TAX: utilStore.convertNumberToRoundedNumber(mergedMap[key].GOVT_TAX),
+            VAT: utilStore.convertNumberToRoundedNumber(mergedMap[key].VAT),
+
+            WITHHOLDING_TAX: utilStore.convertNumberToRoundedNumber(mergedMap[key].WITHHOLDING_TAX),
+
+            TOTAL_AMOUNT: utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_AMOUNT),
+          };
+        }
       } else {
-        VAT_SALES = TEMP
-      }
+        let VAT_SALES = 0
+        let VAT_EXEMPT = 0
+        let ZERO_RATE = 0
 
-      const TOTAL_AMOUNT = utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
+        const VAT = utilStore.convertNumberToRoundedNumber((GROSS / GROSS_VAT_RATE) * VAT_RATE)
+        const TEMP = utilStore.convertNumberToRoundedNumber(GROSS - VAT)
+        const WHTAX = utilStore.convertNumberToRoundedNumber(TEMP * WHTAX_RATE)
 
-      return {
-        ...bill,
-        INDEX: index++,
+        if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z') {
+          ZERO_RATE = TEMP
+        } else if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N') {
+          VAT_EXEMPT = TEMP
+        } else {
+          VAT_SALES = TEMP
+        }
 
-        UNIT_COST: TEMP,  //SALE
-        AMOUNT: GROSS,    //SALE + VAT
+        // const NET_VAT = utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE)
+        const TOTAL_AMOUNT = utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE + VAT - WHTAX)
 
-        VAT_SALES: VAT_SALES,
-        VAT_EXEMPT: VAT_EXEMPT,
-        ZERO_RATE: ZERO_RATE,
+        mergedMap[key] = {
+          ...bill,
+          INDEX: index++,
 
-        TOTAL_SALE: utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE),
+          UNIT_COST: TEMP,  //SALE
+          AMOUNT: GROSS,    //SALE + VAT
 
-        // ADD
-        GOVT_TAX: 0,
-        VAT: VAT,
+          VAT_SALES: VAT_SALES,
+          VAT_EXEMPT: VAT_EXEMPT,
+          ZERO_RATE: ZERO_RATE,
 
-        // LESS
-        WITHHOLDING_TAX: WHTAX,
+          TOTAL_SALE: utilStore.convertNumberToRoundedNumber(VAT_SALES + VAT_EXEMPT + ZERO_RATE),
 
-        TOTAL_AMOUNT: TOTAL_AMOUNT, //SALE + VAT - WTHTAX
+          // ADD
+          GOVT_TAX: 0,
+          VAT: VAT,
+
+          // LESS
+          WITHHOLDING_TAX: WHTAX,
+
+          TOTAL_AMOUNT: TOTAL_AMOUNT, //SALE + VAT - WTHTAX
+        }
+
       }
     })
+
+    // console.log('SIZE', [...Object.values(mergedMap)].length);
+    return [...Object.values(mergedMap)] as LeaseBill[]
   }
 
   const processInvoiceRecords = (billings: LeaseBill[], invoice_date: Date): InvoiceRecord[] => {
@@ -550,7 +694,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         // 2ND COLUMN
         const SECOND_COL_START_X = startLineX + LOGO_WIDTH + 0.2
         const SECOND_COL_WIDTH_X = 4.25
-        const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
+        // const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
 
         // doc.line(SECOND_COL_END_X , cursorLineHeight - NORMAL_LINE_HEIGHT, SECOND_COL_END_X, cursorLineHeight - NORMAL_LINE_HEIGHT + HEADER_HEIGHT )
 
@@ -646,7 +790,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         const FOURTH_COL_START_X = THIRD_COL_END_X + 0.2
         const FOURTH_COL_WIDTH_X = endLineX - FOURTH_COL_START_X
-        const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
+        // const FOURTH_COL_END_X   = FOURTH_COL_START_X + FOURTH_COL_WIDTH_X
 
         // 1ST COLUMN
 
@@ -755,8 +899,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         doc.setFontSize(SMALL_TEXT_FONT_SIZE)
         doc.setFont("helvetica", "normal")
-        doc.text(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,), FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
-        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,) || '-')
+        doc.text(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,).trim(), FOURTH_COL_START_X, cursorLineHeight, { align: 'left', maxWidth: FOURTH_COL_WIDTH_X })
+        TEXT_WIDTH = doc.getTextWidth(INVOICE_RECORD.DETAILS.PBLKEY.slice(3,).trim() || '-')
         if (TEXT_WIDTH > FOURTH_COL_WIDTH_X) {
           const times = TEXT_WIDTH / FOURTH_COL_WIDTH_X
           incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
@@ -773,7 +917,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         return HIGHEST_CURSOR_LINE_HEIGHT
       }
 
-      const handleAddInvoiceBreakdownTable1 = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number) => {
+      const handleAddInvoiceBreakdownTable = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number, initial: boolean = false) => {
 
         const TABLE_START_Y = cursorLineHeight;
         const TABLE_END_Y = cursorLineHeight + HEIGHT_VACANT_FOR_BODY;
@@ -832,7 +976,22 @@ export const useIssuanceStore = defineStore('issuance', () => {
         // MAX WITH FOOTER = 18 - 21
         // MAX WITHOUT FOOTER = 25 - 28
 
-        INVOICE_RECORD.ITEM_BREAKDOWNS.forEach((item) => {
+        // TOTAL BREAKDOWN PART 1
+
+        const isBillingInv = INVOICE_RECORD.INVOICE_KEY.TRNTYP === 'B'
+
+        const GAP = 0.25
+        const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
+
+        const LINES = isBillingInv ? 6 : 5;
+        const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * LINES) + TABLE_PADDING
+        const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
+
+        let count = 0
+        let isForNewPage = false
+
+        for (const item of INVOICE_RECORD.ITEM_BREAKDOWNS) {
+          count += 1
           doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
           doc.setFont("helvetica", "normal");
           doc.text(`${item.QTY || 0}`, SECOND_COL_START_X, cursorLineHeight, { align: 'center' })
@@ -847,368 +1006,391 @@ export const useIssuanceStore = defineStore('issuance', () => {
           } else {
             incrementHeight()
           }
-        })
 
+          // ITEM OVERFLOW HANDLING
+          isForNewPage = cursorLineHeight > BOTTOM_BREAKDOWN_START_Y
 
-        // TOTAL BREAKDOWN
-
-        const isBillingInv = INVOICE_RECORD.INVOICE_KEY.TRNTYP === 'B'
-
-        const GAP = 0.25
-        const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
-
-        const LINES = isBillingInv ? 6 : 5;
-        const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * LINES) + TABLE_PADDING
-        const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
-
-        const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
-        const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
-        const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
-
-        const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
-        const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
-        const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
-
-        const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
-        const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
-        const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
-
-        const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
-        const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
-        const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
-
-
-        // FIRST COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-
-        if (isBillingInv) {
-          doc.text("Government Taxes", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-          incrementHeight()
-        }
-
-        // SECOND COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
-        if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          incrementHeight()
-        }
-
-        // THIRD COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        if (isBillingInv) {
-          doc.text("Add: Government Taxes", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-          incrementHeight()
-        }
-        doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
-        incrementHeight()
-
-        // FOURTH COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          incrementHeight()
-        }
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
-      }
-
-      const handleAddInvoiceBreakdownTable = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number) => {
-
-        const TABLE_START_Y = cursorLineHeight;
-        const TABLE_END_Y = cursorLineHeight + HEIGHT_VACANT_FOR_BODY;
-
-        const COLUMN_HEIGHT = 0.3
-
-        const TABLE_PADDING = 0.07
-
-        interface ColumnPosition {
-          colStartX: number,
-          colWidthX: number,
-          colEndX: number
-        }
-
-        const columns: ColumnPosition[] = [];
-        let previousColEndX = startLineX;
-
-        const sizes = [1.25, 0.1, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59]
-
-        for (let i = 0; i < 10; i++) {
-          var colStartX = 0;
-          var colWidthX = 0;
-          var colEndX = 0;
-
-          if (i < 9) {
-            colStartX = previousColEndX + TABLE_PADDING;
-            colWidthX = sizes[i];
-            colEndX   = colStartX + colWidthX + TABLE_PADDING;
-
-            doc.line(colEndX , cursorLineHeight, colEndX, cursorLineHeight + COLUMN_HEIGHT )
-
-          } else {
-            colStartX = previousColEndX + TABLE_PADDING;
-            colWidthX = endLineX - colStartX - TABLE_PADDING;
-            colEndX   = colStartX + colWidthX;
+          if (isForNewPage && cursorLineHeight > TABLE_END_Y) {
+            break;
           }
 
-          columns.push({
-            colStartX,
-            colWidthX,
-            colEndX
-          });
-
-          previousColEndX = colEndX;
         }
 
-        doc.rect(startLineX, TABLE_START_Y, contentWidth, HEIGHT_VACANT_FOR_BODY );
+        if (isForNewPage) {
+          handleAddInvoiceFooter(INVOICE_RECORD)
 
-        // TABLE COLUMN HEADER
-        incrementHeight(SMALL_LINE_HEIGHT)
-        doc.line(startLineX, TABLE_START_Y + COLUMN_HEIGHT, endLineX, TABLE_START_Y + COLUMN_HEIGHT );
+          console.log('NEW PAGE');
 
-        doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE + 0.5)
-        doc.setFont("helvetica", "bold");
+          handleCreateNewPage()
 
-        doc.text("Item / Description", columns[0].colStartX, cursorLineHeight, { align: 'left' })
-        doc.text("Qty", (columns[1].colStartX + columns[1].colEndX  - TABLE_PADDING) / 2, cursorLineHeight, { align: 'center' })
-        doc.text("Unit Cost", columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
-        doc.text("Vatable Sales", columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
-        doc.text("Vat Exempt Sales", columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
-        doc.text("Zero Rated Sales", columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
-        doc.text("Government Taxes", columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
-        doc.text("VAT", columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
-        doc.text("Withholding Tax", columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
-        doc.text("Amount Due", columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica");
+          doc.setLineWidth(0.01);
 
-        incrementHeight(LARGE_LINE_HEIGHT + 0.08)
+          handleAddInvoiceHeader(INVOICE_RECORD)
+
+          const CLIENT_DESC_HEIGHT = handleAddInvoiceClientDescription(INVOICE_RECORD)
+
+          const NEW_INVOICE_RECORD = {
+            ...INVOICE_RECORD,
+            ITEM_BREAKDOWNS: INVOICE_RECORD.ITEM_BREAKDOWNS
+              .filter((_item, index) => index + 1 > count)
+          }
+
+          handleAddInvoiceBreakdownTable(NEW_INVOICE_RECORD, pageSizeY - ( CLIENT_DESC_HEIGHT + NORMAL_LINE_HEIGHT + 0.3 + NORMAL_LINE_HEIGHT + FOOTER_HEIGHT + marginTop ))
+        }
+
+        if (initial) {
+          // TOTAL BREAKDOWN PART 2
+
+          const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
+          const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
+          const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
+
+          const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
+          const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
+          const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
+
+          const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
+          const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
+          const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
+
+          const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
+          const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
+          const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
 
 
-        // TABLE ROWS
+          // FIRST COLUMN
+          cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
 
-        // MAX WITH FOOTER = 18 - 21
-        // MAX WITHOUT FOOTER = 25 - 28
-
-        INVOICE_RECORD.ITEM_BREAKDOWNS.forEach((item) => {
-          doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE + 0.5)
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
           doc.setFont("helvetica", "normal");
 
-          doc.text(item.ITEM || '', columns[0].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[0].colWidthX })
-          doc.text(`${item.QTY || ''}`, (columns[1].colStartX + columns[1].colEndX  - TABLE_PADDING) / 2, cursorLineHeight, { align: 'center', maxWidth: columns[1].colWidthX })
-          doc.text(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00', columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
-          doc.text(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00', columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
-          doc.text(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00', columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
-          doc.text(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00', columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
-          doc.text(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00', columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
-          doc.text(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00', columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
-          doc.text(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00', columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
-          doc.text(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
+          incrementHeight()
+          incrementHeight()
+          doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
 
-          var LINES = Math.max(...[
-            doc.getTextWidth(item.ITEM || '') / columns[0].colWidthX,
-            doc.getTextWidth(`${item.QTY || ''}`) / columns[1].colWidthX,
-            doc.getTextWidth(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00') / columns[2].colWidthX,
-            doc.getTextWidth(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00') / columns[3].colWidthX,
-            doc.getTextWidth(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00') / columns[4].colWidthX,
-            doc.getTextWidth(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00') / columns[5].colWidthX,
-            doc.getTextWidth(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00') / columns[6].colWidthX,
-            doc.getTextWidth(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00') / columns[7].colWidthX,
-            doc.getTextWidth(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00') / columns[8].colWidthX,
-            doc.getTextWidth(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00') / columns[9].colWidthX,
-          ])
-
-          console.log(LINES, Math.ceil(LINES));
-
-          if (Math.ceil(LINES) > 1) {
-            incrementHeight(SMALL_LINE_HEIGHT + (0.07 * Math.ceil(LINES)))
-          } else {
-            incrementHeight(SMALL_LINE_HEIGHT)
+          if (isBillingInv) {
+            doc.text("Government Taxes", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+            incrementHeight()
           }
 
-        })
+          // SECOND COLUMN
+          cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
 
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "bold");
 
-        // TOTAL BREAKDOWN
+          incrementHeight()
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
 
-        const isBillingInv = INVOICE_RECORD.INVOICE_KEY.TRNTYP === 'B'
+          if (isBillingInv) {
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+            incrementHeight()
+          }
 
-        const GAP = 0.25
-        const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
+          // THIRD COLUMN
+          cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
 
-        const LINES = isBillingInv ? 6 : 5;
-        const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * LINES) + TABLE_PADDING
-        const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal");
 
-        const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
-        const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
-        const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
+          doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          if (isBillingInv) {
+            doc.text("Add: Government Taxes", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+            incrementHeight()
+          }
+          doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          incrementHeight()
+          doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+          doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
+          incrementHeight()
 
-        const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
-        const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
-        const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
+          // FOURTH COLUMN
+          cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
 
-        const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
-        const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
-        const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "bold");
 
-        const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
-        const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
-        const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
-
-
-        // FIRST COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-
-        if (isBillingInv) {
-          doc.text("Government Taxes", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          incrementHeight()
+          if (isBillingInv) {
+            doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+            incrementHeight()
+          }
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+          doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+          incrementHeight()
+          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
           incrementHeight()
         }
-
-        // SECOND COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        incrementHeight()
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
-        if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          incrementHeight()
-        }
-
-        // THIRD COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal");
-
-        doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        if (isBillingInv) {
-          doc.text("Add: Government Taxes", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-          incrementHeight()
-        }
-        doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        incrementHeight()
-        doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
-        doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
-        incrementHeight()
-
-        // FOURTH COLUMN
-        cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
-
-        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold");
-
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-        if (isBillingInv) {
-          doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-          incrementHeight()
-        }
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
-        incrementHeight()
-        doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
-        incrementHeight()
-
       }
+
+      // const handleAddInvoiceBreakdownTable1 = (INVOICE_RECORD: InvoiceRecord, HEIGHT_VACANT_FOR_BODY: number) => {
+
+      //   const TABLE_START_Y = cursorLineHeight;
+      //   const TABLE_END_Y = cursorLineHeight + HEIGHT_VACANT_FOR_BODY;
+
+      //   const COLUMN_HEIGHT = 0.3
+
+      //   const TABLE_PADDING = 0.07
+
+      //   interface ColumnPosition {
+      //     colStartX: number,
+      //     colWidthX: number,
+      //     colEndX: number
+      //   }
+
+      //   const columns: ColumnPosition[] = [];
+      //   let previousColEndX = startLineX;
+
+      //   const sizes = [1.25, 0.1, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59]
+
+      //   for (let i = 0; i < 10; i++) {
+      //     var colStartX = 0;
+      //     var colWidthX = 0;
+      //     var colEndX = 0;
+
+      //     if (i < 9) {
+      //       colStartX = previousColEndX + TABLE_PADDING;
+      //       colWidthX = sizes[i];
+      //       colEndX   = colStartX + colWidthX + TABLE_PADDING;
+
+      //       doc.line(colEndX , cursorLineHeight, colEndX, cursorLineHeight + COLUMN_HEIGHT )
+
+      //     } else {
+      //       colStartX = previousColEndX + TABLE_PADDING;
+      //       colWidthX = endLineX - colStartX - TABLE_PADDING;
+      //       colEndX   = colStartX + colWidthX;
+      //     }
+
+      //     columns.push({
+      //       colStartX,
+      //       colWidthX,
+      //       colEndX
+      //     });
+
+      //     previousColEndX = colEndX;
+      //   }
+
+      //   doc.rect(startLineX, TABLE_START_Y, contentWidth, HEIGHT_VACANT_FOR_BODY );
+
+      //   // TABLE COLUMN HEADER
+      //   incrementHeight(SMALL_LINE_HEIGHT)
+      //   doc.line(startLineX, TABLE_START_Y + COLUMN_HEIGHT, endLineX, TABLE_START_Y + COLUMN_HEIGHT );
+
+      //   doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE + 0.5)
+      //   doc.setFont("helvetica", "bold");
+
+      //   doc.text("Item / Description", columns[0].colStartX, cursorLineHeight, { align: 'left' })
+      //   doc.text("Qty", (columns[1].colStartX + columns[1].colEndX  - TABLE_PADDING) / 2, cursorLineHeight, { align: 'center' })
+      //   doc.text("Unit Cost", columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
+      //   doc.text("Vatable Sales", columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
+      //   doc.text("Vat Exempt Sales", columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
+      //   doc.text("Zero Rated Sales", columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
+      //   doc.text("Government Taxes", columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
+      //   doc.text("VAT", columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
+      //   doc.text("Withholding Tax", columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
+      //   doc.text("Amount Due", columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
+
+      //   incrementHeight(LARGE_LINE_HEIGHT + 0.08)
+
+
+      //   // TABLE ROWS
+
+      //   // MAX WITH FOOTER = 18 - 21
+      //   // MAX WITHOUT FOOTER = 25 - 28
+
+      //   INVOICE_RECORD.ITEM_BREAKDOWNS.forEach((item) => {
+      //     doc.setFontSize(VERY_SMALL_TEXT_FONT_SIZE + 0.5)
+      //     doc.setFont("helvetica", "normal");
+
+      //     doc.text(item.ITEM || '', columns[0].colStartX, cursorLineHeight, { align: 'left', maxWidth: columns[0].colWidthX })
+      //     doc.text(`${item.QTY || ''}`, (columns[1].colStartX + columns[1].colEndX  - TABLE_PADDING) / 2, cursorLineHeight, { align: 'center', maxWidth: columns[1].colWidthX })
+      //     doc.text(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00', columns[2].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[2].colWidthX })
+      //     doc.text(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00', columns[3].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[3].colWidthX })
+      //     doc.text(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00', columns[4].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[4].colWidthX })
+      //     doc.text(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00', columns[5].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[5].colWidthX })
+      //     doc.text(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00', columns[6].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[6].colWidthX })
+      //     doc.text(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00', columns[7].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[7].colWidthX })
+      //     doc.text(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00', columns[8].colEndX - TABLE_PADDING, cursorLineHeight, { align: 'right', maxWidth: columns[8].colWidthX })
+      //     doc.text(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00', columns[9].colEndX, cursorLineHeight, { align: 'right', maxWidth: columns[9].colWidthX })
+
+      //     var LINES = Math.max(...[
+      //       doc.getTextWidth(item.ITEM || '') / columns[0].colWidthX,
+      //       doc.getTextWidth(`${item.QTY || ''}`) / columns[1].colWidthX,
+      //       doc.getTextWidth(item.UNTCST ? utilStore.formatNumberToString2DecimalNumber(item.UNTCST) : '0.00') / columns[2].colWidthX,
+      //       doc.getTextWidth(item.VATSAL ? utilStore.formatNumberToString2DecimalNumber(item.VATSAL) : '0.00') / columns[3].colWidthX,
+      //       doc.getTextWidth(item.VATEXM ? utilStore.formatNumberToString2DecimalNumber(item.VATEXM) : '0.00') / columns[4].colWidthX,
+      //       doc.getTextWidth(item.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(item.ZERSAL) : '0.00') / columns[5].colWidthX,
+      //       doc.getTextWidth(item.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(item.GOVTAX) : '0.00') / columns[6].colWidthX,
+      //       doc.getTextWidth(item.VATAMT ? utilStore.formatNumberToString2DecimalNumber(item.VATAMT) : '0.00') / columns[7].colWidthX,
+      //       doc.getTextWidth(item.WTHTAX ? utilStore.formatNumberToString2DecimalNumber(item.WTHTAX) : '0.00') / columns[8].colWidthX,
+      //       doc.getTextWidth(item.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(item.AMTDUE) : '0.00') / columns[9].colWidthX,
+      //     ])
+
+      //     console.log(LINES, Math.ceil(LINES));
+
+      //     if (Math.ceil(LINES) > 1) {
+      //       incrementHeight(SMALL_LINE_HEIGHT + (0.07 * Math.ceil(LINES)))
+      //     } else {
+      //       incrementHeight(SMALL_LINE_HEIGHT)
+      //     }
+
+      //   })
+
+
+      //   // TOTAL BREAKDOWN
+
+      //   const isBillingInv = INVOICE_RECORD.INVOICE_KEY.TRNTYP === 'B'
+
+      //   const GAP = 0.25
+      //   const FOUR_EQ_WIDTH = ( contentWidth - GAP ) / 4
+
+      //   const LINES = isBillingInv ? 6 : 5;
+      //   const BOTTOM_BREAKDOWN_HEIGHT = (NORMAL_LINE_HEIGHT * LINES) + TABLE_PADDING
+      //   const BOTTOM_BREAKDOWN_START_Y = TABLE_END_Y - BOTTOM_BREAKDOWN_HEIGHT
+
+      //   const BRK_FIRST_COL_START_X  = startLineX + TABLE_PADDING
+      //   const BRK_FIRST_COL_WIDTH_X  = FOUR_EQ_WIDTH - (TABLE_PADDING * 2)
+      //   const BRK_FIRST_COL_END_X    = BRK_FIRST_COL_START_X + BRK_FIRST_COL_WIDTH_X  + TABLE_PADDING
+
+      //   const BRK_SECOND_COL_START_X = BRK_FIRST_COL_END_X + TABLE_PADDING
+      //   const BRK_SECOND_COL_WIDTH_X = 1.5 - (TABLE_PADDING * 2)
+      //   const BRK_SECOND_COL_END_X   = BRK_SECOND_COL_START_X + BRK_SECOND_COL_WIDTH_X + TABLE_PADDING
+
+      //   const BRK_THIRD_COL_START_X  = BRK_SECOND_COL_END_X + TABLE_PADDING + GAP
+      //   const BRK_THIRD_COL_WIDTH_X  = 1.5 - (TABLE_PADDING * 2)
+      //   const BRK_THIRD_COL_END_X    = BRK_THIRD_COL_START_X + BRK_THIRD_COL_WIDTH_X
+
+      //   const BRK_FOURTH_COL_START_X = BRK_THIRD_COL_END_X + TABLE_PADDING
+      //   const BRK_FOURTH_COL_WIDTH_X = (pageSizeX - BRK_THIRD_COL_END_X - marginLeft) - (TABLE_PADDING * 2)
+      //   const BRK_FOURTH_COL_END_X   = BRK_FOURTH_COL_START_X + BRK_FOURTH_COL_WIDTH_X + TABLE_PADDING
+
+
+      //   // FIRST COLUMN
+      //   cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+      //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "normal");
+
+      //   incrementHeight()
+      //   incrementHeight()
+      //   doc.text("VATable Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("VAT Amount", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("VAT Exempt Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("Zero-Rated Sales", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+
+      //   if (isBillingInv) {
+      //     doc.text("Government Taxes", BRK_FIRST_COL_START_X, cursorLineHeight, { align: 'left' })
+      //     incrementHeight()
+      //   }
+
+      //   // SECOND COLUMN
+      //   cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+      //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "bold");
+
+      //   incrementHeight()
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATEXM) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.ZERSAL) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+
+      //   if (isBillingInv) {
+      //     doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_SECOND_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //     incrementHeight()
+      //   }
+
+      //   // THIRD COLUMN
+      //   cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+      //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "normal");
+
+      //   doc.text("Total Sales", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("Less: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("Amount: Net of VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("Add: VAT", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   if (isBillingInv) {
+      //     doc.text("Add: Government Taxes", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //     incrementHeight()
+      //   }
+      //   doc.text("Less: Withholding Tax", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   incrementHeight()
+      //   doc.text("Total Amount Due", BRK_THIRD_COL_START_X, cursorLineHeight, { align: 'left' })
+      //   doc.text("PHP", BRK_THIRD_COL_START_X + ((BRK_THIRD_COL_WIDTH_X + BRK_FOURTH_COL_WIDTH_X) / 2), cursorLineHeight, { align: 'center' })
+      //   incrementHeight()
+
+      //   // FOURTH COLUMN
+      //   cursorLineHeight = BOTTOM_BREAKDOWN_START_Y
+
+      //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "bold");
+
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.TOTSAL) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.NETVAT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.VATAMT) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+      //   if (isBillingInv) {
+      //     doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.GOVTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //     incrementHeight()
+      //   }
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.PRDTAX) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   doc.line(BRK_THIRD_COL_START_X, cursorLineHeight + 0.03, BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight + 0.03);
+      //   incrementHeight()
+      //   doc.text(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE ? utilStore.formatNumberToString2DecimalNumber(INVOICE_RECORD.TOTAL_BREAKDOWN.AMTDUE) : '0.00', BRK_FOURTH_COL_END_X - TABLE_PADDING, cursorLineHeight, { align: 'right' })
+      //   incrementHeight()
+
+      // }
 
       const handleAddInvoiceFooter = (INVOICE_RECORD: InvoiceRecord) => {
 
@@ -1289,7 +1471,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const marginLeft = 0.5;
       const marginTop = 0.75;
       const contentWidth = pageSizeX - (marginLeft * 2);    // Width of writable content area
-      const contentHeight = pageSizeY - (marginTop * 2);    // Height of writable content area
+      // const contentHeight = pageSizeY - (marginTop * 2);    // Height of writable content area
 
       var cursorLineHeight = marginTop + NORMAL_LINE_HEIGHT
 
@@ -1298,7 +1480,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
 
       INVOICE_RECORDS.forEach((INVOICE_RECORD, index) => {
-
         doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
         doc.setFont("helvetica");
         doc.setLineWidth(0.01);
@@ -1307,7 +1488,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         const CLIENT_DESC_HEIGHT = handleAddInvoiceClientDescription(INVOICE_RECORD)
 
-        handleAddInvoiceBreakdownTable1(INVOICE_RECORD, pageSizeY - ( CLIENT_DESC_HEIGHT + NORMAL_LINE_HEIGHT + 0.3 + NORMAL_LINE_HEIGHT + FOOTER_HEIGHT + marginTop ))
+        handleAddInvoiceBreakdownTable(INVOICE_RECORD, pageSizeY - ( CLIENT_DESC_HEIGHT + NORMAL_LINE_HEIGHT + 0.3 + NORMAL_LINE_HEIGHT + FOOTER_HEIGHT + marginTop ), true)
 
         handleAddInvoiceFooter(INVOICE_RECORD)
 
@@ -1364,7 +1545,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         // 2ND COLUMN
         const SECOND_COL_START_X = startLineX + LOGO_WIDTH + 0.2
         const SECOND_COL_WIDTH_X = endLineX - SECOND_COL_START_X
-        const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
+        // const SECOND_COL_END_X   = SECOND_COL_START_X + SECOND_COL_WIDTH_X
 
         doc.setFontSize(TITLE_TEXT_FONT_SIZE + 1)
         doc.setFont("helvetica", "bold");
@@ -1776,27 +1957,36 @@ export const useIssuanceStore = defineStore('issuance', () => {
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-          // const loading = utilStore.startLoadingModal('Fetching ...')
-          // const data = {
-          //   year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
-          //   month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
-          // };
-          // axios.post(`issuance_lease/per_batch/`, data)
-          // .then((response) => {
-          //   console.log('FETCHED OPEN BILLINGS', response.data);
-          //   perBatchRunStore.billings = response.data;
-          //   perBatchRunStore.handleActionViewMainDialog()
-          // })
-          // .catch(utilStore.handleAxiosError)
-          // .finally(() => {
-          //   loading.close()
-          // })
+        if (perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString() && perBillTypeRunStore.perBillTypeRunForm.billType && perBillTypeRunStore.perBillTypeRunForm.projectCode) {
+          const loading = utilStore.startLoadingModal('Fetching ...')
+          const form = perBillTypeRunStore.perBillTypeRunForm
+          const data = {
+            year: form.invoiceDate.getFullYear(),
+            month: form.invoiceDate.getMonth() + 1,
+            billType: form.billType,
+            PROJCD: form.projectCode?.PROJCD,
+            PCSCOD: form.PBL?.pcs_code || ' ',
+            PHASE: form.PBL?.phase || ' ',
+            BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+            LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+            UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+          };
+
+          axios.post(`issuance_lease/per_bill_type/`, data)
+          .then((response) => {
+            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            perBillTypeRunStore.billings = response.data.data as LeaseBill[];
+            perBillTypeRunStore.handleActionViewMainDialog()
+          })
+          .catch(utilStore.handleAxiosError)
+          .finally(() => {
+            loading.close()
+          })
         } else {
           toast.add({
             severity: 'warn',
-            summary: 'Missing Invoice Date',
-            detail: 'Please enter a valid invoice date!',
+            summary: 'Missing Required Fields',
+            detail: 'Please select a valid invoice date, bill type, and project!',
             life: 3000
           })
         }
@@ -1843,7 +2033,25 @@ export const useIssuanceStore = defineStore('issuance', () => {
         perBillTypeRunStore.perBillTypeRunForm = {
           invoiceDate: new Date(),
           projectCode: null,
-          billType: null
+          billType: '',
+          PBL: {
+            pcs_code: '',
+            phase: '',
+            block: {
+              1: '',
+              2: ''
+            },
+            lot: {
+              1: '',
+              2: '',
+              3: '',
+              4: ''
+            },
+            unit_code: {
+              1: '',
+              2: ''
+            },
+          }
         }
         break;
 
@@ -1877,6 +2085,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   return {
+    BILL_TYPES_WITH_PENALTY_TYPE,
+    PENALTY_BILL_TYPES,
+    UTILITY_BILL_TYPES,
+    BILL_TYPES_WITH_UNIQUE_STYPE,
+    UTILITY_BILL_TYPES_WITH_PENALTY,
+    UTILITY_MOTHER_BILL_TYPE_GROUPS,
+    UTILITY_BILL_TYPE_PER_CLASSIFICATION,
+
     getSplitClientAddress,
     getDeptCode,
     getItemName,

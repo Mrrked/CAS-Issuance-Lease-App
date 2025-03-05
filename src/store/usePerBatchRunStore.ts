@@ -13,6 +13,9 @@ import { useUtilitiesStore } from './useUtilitiesStore';
 const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/PreviewPDFModal.vue'));
 const ResultFinalInvoiceModal = defineAsyncComponent(() => import('../components/Dialog/General/ResultFinalInvoiceModal.vue'));
 const SelectedBillsTableModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModal.vue'));
+const ViewScheduleBatchIssuanceModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/ViewScheduleBatchIssuanceModal.vue'));
+
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
@@ -52,6 +55,63 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
       return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
     })
+  })
+
+  const getCurrentYear = computed(() => {
+    return new Date().getFullYear()
+  })
+
+  const getCurrentMonth = computed(() => {
+    return new Date().getMonth() + 1
+  })
+
+  const getFirstBusinessDayPerMonth = computed(() => {
+    let position = -1;
+    const previousYear = getCurrentYear.value - 1
+    const nextYear = getCurrentYear.value + 1
+
+    return mainStore.first_business_days
+      .filter((business_day) => {
+        if (business_day.YEAR === previousYear) {
+          if (business_day.MONTH >= 11) {
+            return true
+          }
+          return false
+        } else if (business_day.YEAR === nextYear) {
+          if (business_day.MONTH <= 2) {
+            return true
+          }
+          return false
+        }
+        return true
+      })
+      .map((business_day) => {
+        let newPosition = position
+        if (business_day.MONTH === getCurrentMonth.value && business_day.YEAR === getCurrentYear.value) {
+          newPosition = 0
+          position = 1
+        }
+
+        return {
+          ...business_day,
+          position: newPosition,
+        }
+      })
+  })
+
+  const getCurrentSchedule = computed(() => {
+    return getFirstBusinessDayPerMonth.value
+      .find((business_day) => business_day.position === 0)
+  })
+
+  const getNextSchedule = computed(() => {
+    return getFirstBusinessDayPerMonth.value
+      .find((business_day) => business_day.position === 1)
+  })
+
+  const canRunBatchIssuance = computed(() => {
+    const currentDate = new Date()
+    return utilStore.convertDateObjToNumberYYYYMMDD(currentDate) === getCurrentSchedule.value?.EARLIEST_CWORK_DATE
   })
 
   const handleActionViewMainDialog = () => {
@@ -94,7 +154,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         }
       },
       props: {
-        header: '(Per Batch) For Issuance of Invoice - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long' }),
+        header: '(Batch) For Issuance of Invoice - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long' }),
         style: {
           width: '75vw'
         },
@@ -260,7 +320,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 }
               },
               props: {
-                header: '(Per Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+                header: '(Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
                 style: {
                   width: '75vw'
                 },
@@ -297,7 +357,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 }
               },
               props: {
-                header: '(Per Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
+                header: '(Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
                 style: {
                   width: '75vw'
                 },
@@ -346,12 +406,42 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     issuanceStore.handleActionIssueFinalInvoices(data, callback, () => loading.close())
   }
 
+  const handleActionViewScheduleOfBatchIssuance = () => {
+    dialog.open(ViewScheduleBatchIssuanceModal, {
+      props: {
+        header: 'Schedule For Batch Issuance of Invoice',
+        style: {
+          width: '40vw'
+        },
+        showHeader: true,
+        maximizable: true,
+        modal: true,
+      },
+    })
+  }
+
+  const handleActionAdminBatchIssuance = () => {
+    utilStore.handleActionConfirmAdminPassword(ADMIN_PASSWORD, () => {
+      issuanceStore.handleActionSearch(2)
+    })
+  }
+
   return {
     perBatchRunForm,
     billings,
 
     invoice_records_data,
 
+    getFirstBusinessDayPerMonth,
+    getCurrentSchedule,
+    getNextSchedule,
+    getCurrentYear,
+    getCurrentMonth,
+
+    canRunBatchIssuance,
+
     handleActionViewMainDialog,
+    handleActionViewScheduleOfBatchIssuance,
+    handleActionAdminBatchIssuance
   }
 })

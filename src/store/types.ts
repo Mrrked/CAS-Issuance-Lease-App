@@ -31,9 +31,9 @@ export interface Config {
 export interface PerBillTypeRunForm {
   invoiceDate: Date
   projectCode: ProjectRecord | null
-  billType:    PerBillTypeOption | null
+  billType:    'A' | 'B' | 'C' | ''
 
-  PBL?: {
+  PBL: {
     pcs_code: string
     phase: string
     block: {
@@ -84,6 +84,12 @@ export interface ClientForm {
 //////////////
 //  MODELS  //
 //////////////
+
+export interface BusinessDay {
+  MONTH: number
+  YEAR: number
+  EARLIEST_CWORK_DATE: number
+}
 
 export interface PaymentType {
   initial: string;

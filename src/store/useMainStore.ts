@@ -1,4 +1,4 @@
-import { BillTypeRecord, CompanyRecord, MotherBillTypeRecord, PaymentType, ProjectRecord } from './types';
+import { BillTypeRecord, BusinessDay, CompanyRecord, MotherBillTypeRecord, PaymentType, ProjectRecord } from './types';
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import axios from '../axios'
@@ -15,6 +15,7 @@ export const useMainStore = defineStore('main', () => {
   const company_codes = ref<CompanyRecord[]>([])
   const bill_types = ref<BillTypeRecord[]>([])
   const mother_bill_types = ref<MotherBillTypeRecord[]>([])
+  const first_business_days = ref<BusinessDay[]>([])
 
   const PAYMENT_TYPES: PaymentType[] = [
     { initial: 'A', name: 'Amortization'},
@@ -86,6 +87,11 @@ export const useMainStore = defineStore('main', () => {
       axios.get('issuance_lease/core/mother_bill_types/')
         .then((response) => {
           mother_bill_types.value = response.data.data as MotherBillTypeRecord[];
+        }),
+      axios.get('issuance_lease/business_day/' + new Date().getFullYear())
+        .then((response) => {
+          console.log(response.data.data);
+          first_business_days.value = response.data.data as BusinessDay[];
         })
     ])
     .catch(utilStore.handleAxiosError)
@@ -116,6 +122,7 @@ export const useMainStore = defineStore('main', () => {
     company_codes,
     bill_types,
     mother_bill_types,
+    first_business_days,
 
     PAYMENT_TYPES,
 

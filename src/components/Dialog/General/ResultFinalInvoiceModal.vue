@@ -34,7 +34,7 @@
 
 <template>
   <div class="pt-4 text-xl font-bold">
-    (Per Batch) Issued Invoices Results
+    Issued Invoices Results
   </div>
   <div class="flex flex-col my-4">
     <div class="flex items-end gap-3">

@@ -1,6 +1,7 @@
+import { defineAsyncComponent, ref } from 'vue';
+
 import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
 import { ExtendedAxiosError } from './types';
-import { defineAsyncComponent } from 'vue';
 import { defineStore } from 'pinia'
 import { useDialog } from 'primevue/usedialog';
 import { usePrimeVue } from 'primevue/config';
@@ -17,6 +18,8 @@ export const useUtilitiesStore = defineStore('utils', () => {
   const toast = useToast();
   const router = useRouter();
   const dialog = useDialog();
+
+  const isOpenConfirmAdminPassword = ref(false);
 
   const formatTimeNumberToString12H = (number: number):string => {
     const timeStr = number.toString().padStart(6, '0');
@@ -309,26 +312,32 @@ export const useUtilitiesStore = defineStore('utils', () => {
   }
 
   const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
-    const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
-      data: {
-        password,
-        submit: () => {
-          EnterPasswordDialogRef.close()
-          callback()
+    if (!isOpenConfirmAdminPassword.value) {
+      isOpenConfirmAdminPassword.value = true
+      const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
+        data: {
+          password,
+          submit: () => {
+            EnterPasswordDialogRef.close()
+            callback()
+          },
+          cancel: () => {
+            EnterPasswordDialogRef.close()
+          }
         },
-        cancel: () => {
-          EnterPasswordDialogRef.close()
+        props: {
+          header: '(OVERRIDE) Authorization Required!',
+          style: {
+            width: '26rem'
+          },
+          showHeader: true,
+          modal: true,
+        },
+        onClose: () => {
+          isOpenConfirmAdminPassword.value = false
         }
-      },
-      props: {
-        header: 'Enter Password',
-        style: {
-          width: '20rem'
-        },
-        showHeader: true,
-        modal: true
-      }
-    })
+      })
+    }
   }
 
   return {

@@ -50,6 +50,9 @@
 
 <template>
   <form @submit.prevent="submitForm" class="flex flex-col gap-2">
+    <span class="text-sm">
+      Please enter password to continue.
+    </span>
     <InputText
       v-model="password"
       type="password"

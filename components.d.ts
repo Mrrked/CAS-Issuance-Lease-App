@@ -18,6 +18,7 @@ declare module 'vue' {
     ConfirmSelectedBillsModal: typeof import('./src/components/Dialog/Printing/ConfirmSelectedBillsModal.vue')['default']
     DataTable: typeof import('primevue/datatable')['default']
     DatePicker: typeof import('primevue/datepicker')['default']
+    Divider: typeof import('primevue/divider')['default']
     DraftInvoiceModalFooter: typeof import('./src/components/Dialog/General/DraftInvoiceModalFooter.vue')['default']
     Drawer: typeof import('primevue/drawer')['default']
     DynamicDialog: typeof import('primevue/dynamicdialog')['default']
@@ -73,6 +74,8 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     UnitDataTable: typeof import('./src/components/Reprint/UnitDataTable.vue')['default']
+    ViewScheduleBatchIssuance: typeof import('./src/components/Dialog/PerBatch/ViewScheduleBatchIssuance.vue')['default']
+    ViewScheduleBatchIssuanceModal: typeof import('./src/components/Dialog/PerBatch/ViewScheduleBatchIssuanceModal.vue')['default']
   }
   export interface ComponentCustomProperties {
     FocusTrap: typeof import('primevue/focustrap')['default']

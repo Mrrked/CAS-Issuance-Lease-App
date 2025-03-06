@@ -28,7 +28,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const issuanceStore = useIssuanceStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date(2025, 9, 1)
+    invoiceDate: new Date()
   })
 
   const billings = ref<LeaseBill[]>([])

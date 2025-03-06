@@ -90,7 +90,6 @@ export const useMainStore = defineStore('main', () => {
         }),
       axios.get('issuance_lease/business_day/' + new Date().getFullYear())
         .then((response) => {
-          console.log(response.data.data);
           first_business_days.value = response.data.data as BusinessDay[];
         })
     ])

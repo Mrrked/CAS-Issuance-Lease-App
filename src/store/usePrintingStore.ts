@@ -261,7 +261,7 @@ export const usePrintingStore = defineStore('print', () => {
     axios.get(`issuance_lease/unit/${pbl}/`)
     .then((response) => {
       selectedUnit.value = response.data.data
-      console.log(selectedUnit.value);
+      // console.log(selectedUnit.value);
       activateCallback(pos)
       config.value.isMainScreen = true
     })

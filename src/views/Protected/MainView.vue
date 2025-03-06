@@ -1647,7 +1647,8 @@
         RMARK2: '',
         RMARK3: '',
         RMARK4: ''
-      }
+      },
+      "CORF4PF": []
     }
 
     const currentDate = new Date()
@@ -1698,7 +1699,7 @@
       </TabList>
       <TabPanels>
         <TabPanel value="0" class="flex flex-col items-center justify-start">
-          <Fieldset legend="Bill Type Group Running" class="min-w-[600px] max-w-[600px]">
+          <Fieldset legend="Bill Type Group Running" class="min-w-[700px] max-w-[700px]">
             <div class="flex flex-col gap-2">
               <InputGroup>
                 <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">

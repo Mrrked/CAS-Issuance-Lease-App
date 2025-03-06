@@ -28,7 +28,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const issuanceStore = useIssuanceStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date()
+    invoiceDate: new Date(2025, 9, 1)
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -115,7 +115,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   })
 
   const handleActionViewMainDialog = () => {
-    console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
+    // console.log('OPEN INITIAL / DRAFT INVOICE RECORDS', invoice_records_data.value);
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
     const PerBatchRunDialog = dialog.open(SelectedBillsTableModal, {
       data: {
@@ -221,9 +221,19 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             NOMOS: NO_OF_MONTHS,
           },
+          CORF4PF: INVOICE.CORF4PF
+            .map((record) => {
+              return {
+                ...record,
+                DATENT: stampDate,
+                TIMENT: stampTime,
+              }
+            }),
         }
       })
     ]
+
+    // console.log("FOR ISSUANCE", SELECTED_INVOICES);
 
     const data = {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),
@@ -233,7 +243,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     }
 
     const callback = async (response?: AxiosResponse) => {
-      console.log('RESPONSE', response?.data);
+      // console.log('RESPONSE', response?.data);
 
       const issuedInvoiceRecords = response?.data.data.success as InvoiceRecord[] || [];
       const failedInvoiceRecords = response?.data.data.error as FAILED_INVOICE_RECORDS || [];

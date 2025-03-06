@@ -681,7 +681,7 @@ export interface InvoiceRecord {
   CORFPF: CORFPF
   CORTPF: CORTPF
   CRMKPF: CRMKPF
-  // CORF4PF: CORF4PF
+  CORF4PF: CORF4PF[]
 }
 
 export interface INVOICE_PER_COMPANY_AND_PROJECT {

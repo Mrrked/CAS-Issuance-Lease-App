@@ -376,6 +376,65 @@ export const useIssuanceStore = defineStore('issuance', () => {
       if (mergedMap[key]) {
         const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill, mergedMap[key].CRMKPF)
 
+        const mergedCORF4PF = mergedMap[key].CORF4PF
+          .some((record) => record.BTYPE === bill.BILL_TYPE) ?
+            // HAS EXISTING BILL TYPE IN THE CORF4PF RECORD
+            [
+              ...mergedMap[key].CORF4PF.map((record) => {
+                if (record.BTYPE === bill.BILL_TYPE) {
+                  return {
+                    ...record,
+                    ORAMT:        utilStore.convertNumberToRoundedNumber(record.ORAMT  + bill.TOTAL_AMOUNT),
+                    VATSAL:       utilStore.convertNumberToRoundedNumber(record.VATSAL + bill.VAT_SALES),
+                    VATXMP:       utilStore.convertNumberToRoundedNumber(record.VATXMP + bill.VAT_EXEMPT),
+                    VATZRO:       utilStore.convertNumberToRoundedNumber(record.VATZRO + bill.ZERO_RATE),
+                    TOTSAL:       utilStore.convertNumberToRoundedNumber(record.TOTSAL + bill.AMOUNT + bill.GOVT_TAX),
+                    VATAMT:       utilStore.convertNumberToRoundedNumber(record.VATAMT + bill.VAT),
+                    WITTAX:       utilStore.convertNumberToRoundedNumber(record.WITTAX + bill.WITHHOLDING_TAX),
+                    GRSAMT:       utilStore.convertNumberToRoundedNumber(record.GRSAMT + bill.AMOUNT + bill.GOVT_TAX),
+                  }
+                }
+                return record
+              })
+            ] :
+            // HAS NO EXISTING BILL TYPE IN THE CORF4PF RECORD
+            [
+              ...mergedMap[key].CORF4PF,
+              {
+                COMPCD:       bill.INVOICE_KEY.COMPCD,
+                BRANCH:       bill.INVOICE_KEY.BRANCH,
+                DEPTCD:       bill.INVOICE_KEY.DEPTCD,
+                ORCOD:        bill.INVOICE_KEY.ORCOD,
+                ORNUM:        bill.INVOICE_KEY.ORNUM,
+                DATVAL:       invoiceDate,
+                PROJCD:       bill.PROJCD,
+                PCSCOD:       bill.PCSCOD,
+                PHASE:        bill.PHASE,
+                BLOCK:        bill.BLOCK,
+                LOT:          bill.LOT,
+                UNITCD:       bill.UNITCD,
+                PAYTYP:       bill.PAYTYP,
+                BTYPE:        bill.BILL_TYPE,
+                MBTYPE:       bill.BILL_TYPE,
+                LESDES:       bill.BDESC,
+                ORAMT:        bill.TOTAL_AMOUNT,
+                VATSAL:       bill.VAT_SALES,
+                VATXMP:       bill.VAT_EXEMPT,
+                VATZRO:       bill.ZERO_RATE,
+                TOTSAL:       utilStore.convertNumberToRoundedNumber(bill.AMOUNT + bill.GOVT_TAX),
+                VATAMT:       bill.VAT,
+                WITTAX:       bill.WITHHOLDING_TAX,
+                GRSAMT:       utilStore.convertNumberToRoundedNumber(bill.AMOUNT + bill.GOVT_TAX),
+                ENTDES:       '',
+                ENTAMT:       0,
+                LESRF:        0,
+                ORTYPE:       '',
+                DATENT:       0,
+                TIMENT:       0,
+                USRENT:       sessionStore.authenticatedUser.username || '',
+              }
+            ]
+
         mergedMap[key] = {
           ...mergedMap[key],
 
@@ -437,7 +496,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RMARK2:         remarks2 === '' ? mergedMap[key].CRMKPF.RMARK2 : remarks2,
             RMARK3:         remarks3 === '' ? mergedMap[key].CRMKPF.RMARK3 : remarks3,
             RMARK4:         remarks4 === '' ? mergedMap[key].CRMKPF.RMARK4 : remarks4,
-          }
+          },
+
+          CORF4PF: mergedCORF4PF
         }
       }
 
@@ -571,11 +632,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
-            DATOR:          0,  //UPDATE ON FINAL
+            DATOR:          0, //UPDATE ON FINAL
             CASHCD:         sessionStore.authenticatedUser.username || '',
             COLSTF:         '',
-            ORAMT:          bill.TOTAL_AMOUNT,  //UPDATE ON FINAL
-            NOACCT:         0,  //UPDATE ON FINAL no of months
+            ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
+            NOACCT:         0, //UPDATE ON FINAL no of months
             PAYTYP:         bill.PAYTYP,
             INTRST:         0,
             PNALTY:         0,
@@ -641,7 +702,42 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RMARK2:         remarks2,
             RMARK3:         remarks3,
             RMARK4:         remarks4
-          }
+          },
+          CORF4PF: [
+            {
+              COMPCD:       bill.INVOICE_KEY.COMPCD,
+              BRANCH:       bill.INVOICE_KEY.BRANCH,
+              DEPTCD:       bill.INVOICE_KEY.DEPTCD,
+              ORCOD:        bill.INVOICE_KEY.ORCOD,
+              ORNUM:        bill.INVOICE_KEY.ORNUM,
+              DATVAL:       invoiceDate,
+              PROJCD:       bill.PROJCD,
+              PCSCOD:       bill.PCSCOD,
+              PHASE:        bill.PHASE,
+              BLOCK:        bill.BLOCK,
+              LOT:          bill.LOT,
+              UNITCD:       bill.UNITCD,
+              PAYTYP:       bill.PAYTYP,
+              BTYPE:        bill.BILL_TYPE,
+              MBTYPE:       bill.BILL_TYPE,
+              LESDES:       bill.BDESC,
+              ORAMT:        bill.TOTAL_AMOUNT,
+              VATSAL:       bill.VAT_SALES,
+              VATXMP:       bill.VAT_EXEMPT,
+              VATZRO:       bill.ZERO_RATE,
+              TOTSAL:       utilStore.convertNumberToRoundedNumber(bill.AMOUNT + bill.GOVT_TAX),
+              VATAMT:       bill.VAT,
+              WITTAX:       bill.WITHHOLDING_TAX,
+              GRSAMT:       utilStore.convertNumberToRoundedNumber(bill.AMOUNT + bill.GOVT_TAX),
+              ENTDES:       '',
+              ENTAMT:       0,
+              LESRF:        0,
+              ORTYPE:       '',
+              DATENT:       0,
+              TIMENT:       0,
+              USRENT:       sessionStore.authenticatedUser.username || '',
+            }
+          ]
         }
       }
     })
@@ -650,7 +746,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const handleActionGenerateInvoicePDFBlob = (INVOICE_RECORDS: InvoiceRecord[]):Blob => {
-    console.log('GENERATE PDF BLOB FOR INVOICES', INVOICE_RECORDS)
+    // console.log('GENERATE PDF BLOB FOR INVOICES', INVOICE_RECORDS)
 
     const generateDoc = (INVOICE_RECORDS: InvoiceRecord[]): jsPDF => {
 
@@ -1019,7 +1115,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (isForNewPage) {
           handleAddInvoiceFooter(INVOICE_RECORD)
 
-          console.log('NEW PAGE');
+          // console.log('NEW PAGE');
 
           handleCreateNewPage()
 
@@ -1291,7 +1387,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (isForNewPage) {
           handleAddInvoiceFooter(INVOICE_RECORD)
 
-          console.log('NEW PAGE');
+          // console.log('NEW PAGE');
 
           handleCreateNewPage()
 
@@ -1539,7 +1635,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const handleActionGenerateSummaryInvoicesPDFBlob = async (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
-    console.log('GENERATE PDF BLOB FOR SUMMARY OF INVOICES', groupedInvoices)
+    // console.log('GENERATE PDF BLOB FOR SUMMARY OF INVOICES', groupedInvoices)
 
     const generateDoc = (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]): jsPDF => {
 
@@ -1603,7 +1699,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         if (projectNameWidth > SECOND_COL_WIDTH_X) {
           const times = projectNameWidth / SECOND_COL_WIDTH_X
-          console.log(Math.ceil(times), projectNameWidth, SECOND_COL_WIDTH_X );
+          // console.log(Math.ceil(times), projectNameWidth, SECOND_COL_WIDTH_X );
           incrementHeight(NORMAL_LINE_HEIGHT + (0.09 * Math.ceil(times)))
         } else {
           incrementHeight(NORMAL_LINE_HEIGHT)
@@ -2009,7 +2105,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           axios.post(`issuance_lease/per_bill_type/`, data)
           .then((response) => {
-            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            // console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBillTypeRunStore.billings = response.data.data as LeaseBill[];
             perBillTypeRunStore.handleActionViewMainDialog()
           })
@@ -2037,7 +2133,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
-            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            // console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBatchRunStore.billings = response.data.data as LeaseBill[];
             perBatchRunStore.handleActionViewMainDialog()
           })
@@ -2108,9 +2204,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
     callback: Function,
     closeLoading: Function
   ) => {
-    console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
+    // console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
     .then(async (response) => {
+      console.log(response.data.data);
       await callback(response)
     })
     .catch(utilStore.handleAxiosError)

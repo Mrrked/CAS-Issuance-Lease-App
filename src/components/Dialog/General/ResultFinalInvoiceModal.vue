@@ -7,7 +7,7 @@
       issuedInvoiceRecords: InvoiceRecord[]
       failedInvoiceRecords: FAILED_INVOICE_RECORDS
       downloadFailedInvoices: Function
-      viewSummarySuccessInvoices: Function
+      viewSummarySuccessInvoices: Function | null
       viewSuccessInvoices: Function
       cancel: Function
     }
@@ -34,7 +34,7 @@
 
 <template>
   <div class="pt-4 text-xl font-bold">
-    Issued Invoices Results
+    Invoice Issuance Results
   </div>
   <div class="flex flex-col my-4">
     <div class="flex items-end gap-3">
@@ -56,7 +56,7 @@
   </div>
   <div v-if="dialogRef" class="flex justify-between w-full">
     <div class="flex gap-2">
-      <Button v-if="hasIssuedInvoices" type="button" icon="pi pi-eye" label="Summary Report" severity="primary" @click="dialogRef.data.viewSummarySuccessInvoices()"></Button>
+      <Button v-if="hasIssuedInvoices && dialogRef.data.viewSummarySuccessInvoices" type="button" icon="pi pi-eye" label="Summary Report" severity="primary" @click="dialogRef.data.viewSummarySuccessInvoices()"></Button>
       <Button v-if="hasFailedInvoices" type="button" icon="pi pi-download" label="Error Logs"  severity="primary" @click="dialogRef.data.downloadFailedInvoices()"></Button>
     </div>
     <div class="flex gap-2">

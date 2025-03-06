@@ -2207,7 +2207,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     // console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
     .then(async (response) => {
-      console.log(response.data.data);
+      // console.log(response.data.data);
       await callback(response)
     })
     .catch(utilStore.handleAxiosError)

@@ -10,7 +10,6 @@ import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
-const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/PreviewPDFModal.vue'));
 const ResultFinalInvoiceModal = defineAsyncComponent(() => import('../components/Dialog/General/ResultFinalInvoiceModal.vue'));
 const SelectedBillsTableModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModal.vue'));
 
@@ -228,31 +227,8 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
             utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
-            const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
-            const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
-              data: {
-                pdfBlob: PDF_BLOB,
-                download: () => {
-                  utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
-                },
-                submit: () => {
-                },
-                cancel: () => {
-                  ShowIssuedInvoices.close()
-                }
-              },
-              props: {
-                header: 'Issued Invoices - ' + perBillTypeRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-                style: {
-                  width: '75vw'
-                },
-                showHeader: true,
-                modal: true,
-              },
-              templates: {
-                footer: markRaw(Footer)
-              },
-            })
+            const header = 'Issued Invoices - ' + perBillTypeRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+            utilStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },

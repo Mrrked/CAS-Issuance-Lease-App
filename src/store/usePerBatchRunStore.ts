@@ -10,7 +10,6 @@ import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
-const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/PreviewPDFModal.vue'));
 const ResultFinalInvoiceModal = defineAsyncComponent(() => import('../components/Dialog/General/ResultFinalInvoiceModal.vue'));
 const SelectedBillsTableModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModal.vue'));
 const ViewScheduleBatchIssuanceModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/ViewScheduleBatchIssuanceModal.vue'));
@@ -28,7 +27,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const issuanceStore = useIssuanceStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date()
+    invoiceDate: new Date(2025, 11, 1)
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -314,33 +313,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
               ) as INVOICE_PER_COMPANY_AND_PROJECT[]
             )
 
-            const PDF_BLOB1 = await issuanceStore.handleActionGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords) ;
+            const PDF_BLOB = await issuanceStore.handleActionGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords)
 
-            const Footer1 = defineAsyncComponent(() => import('../components/Dialog/General/SummaryFinalInvoiceModalFooter.vue'));
-            const ShowSummaryIssuedInvoices = dialog.open(PreviewPDFModal, {
-              data: {
-                pdfBlob: PDF_BLOB1,
-                download: () => {
-                  utilStore.handleDownloadFile(PDF_BLOB1, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`)
-                },
-                submit: () => {
-                },
-                cancel: () => {
-                  ShowSummaryIssuedInvoices.close()
-                }
-              },
-              props: {
-                header: '(Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-                style: {
-                  width: '75vw'
-                },
-                showHeader: true,
-                modal: true,
-              },
-              templates: {
-                footer: markRaw(Footer1)
-              },
-            })
+            const header = '(Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+            utilStore.handleActionViewFilePDF(header, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },
@@ -353,31 +329,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
-            const Footer = defineAsyncComponent(() => import('../components/Dialog/General/FinalInvoiceModalFooter.vue'));
-            const ShowIssuedInvoices = dialog.open(PreviewPDFModal, {
-              data: {
-                pdfBlob: PDF_BLOB,
-                download: () => {
-                  utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
-                },
-                submit: () => {
-                },
-                cancel: () => {
-                  ShowIssuedInvoices.close()
-                }
-              },
-              props: {
-                header: '(Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' }),
-                style: {
-                  width: '75vw'
-                },
-                showHeader: true,
-                modal: true,
-              },
-              templates: {
-                footer: markRaw(Footer)
-              },
-            })
+            const header = '(Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+            utilStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },

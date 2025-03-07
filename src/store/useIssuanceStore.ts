@@ -1,11 +1,9 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
-import { defineAsyncComponent, markRaw } from 'vue';
 
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import jsPDF from 'jspdf';
-import { useDialog } from 'primevue/usedialog';
 import { useMainStore } from './useMainStore';
 import { usePerBatchRunStore } from './usePerBatchRunStore';
 import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
@@ -13,12 +11,9 @@ import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
-const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/PreviewPDFModal.vue'));
-
 export const useIssuanceStore = defineStore('issuance', () => {
 
   const toast = useToast()
-  const dialog = useDialog()
 
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
@@ -1986,36 +1981,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
     callback()
 
-    const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
-    const ShowDraftInvoice = dialog.open(PreviewPDFModal, {
-      data: {
-        pdfBlob: PDF_BLOB,
-        download: () => {
-          const url = URL.createObjectURL(PDF_BLOB);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = '(DRAFT) Invoice.pdf';
-          a.click();
-          URL.revokeObjectURL(url);
-        },
-        submit: () => {
-        },
-        cancel: () => {
-          ShowDraftInvoice.close()
-        }
-      },
-      props: {
-        header: 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY,
-        style: {
-          width: '75vw'
-        },
-        showHeader: true,
-        modal: true,
-      },
-      templates: {
-        footer: markRaw(Footer)
-      },
-    })
+    const header = 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
+    utilStore.handleActionViewFilePDF(header, `(DRAFT) Invoice.pdf`, PDF_BLOB, null, () => {}, () => {})
   }
 
   const handleActionGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
@@ -2050,37 +2017,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
     callback()
 
-    const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
-    const ShowDraftInvoices = dialog.open(PreviewPDFModal, {
-      data: {
-        pdfBlob: PDF_BLOB,
-        download: () => {
-          const url = URL.createObjectURL(PDF_BLOB);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `(DRAFTS) Invoice ${data.year}-${data.month}.pdf`;
-          a.click();
-          URL.revokeObjectURL(url);
-        },
-        submit: () => {
-        },
-        cancel: () => {
-          ShowDraftInvoices.close()
-        }
-      },
-      props: {
-        header: 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`,
-
-        style: {
-          width: '75vw'
-        },
-        showHeader: true,
-        modal: true,
-      },
-      templates: {
-        footer: markRaw(Footer)
-      },
-    })
+    const header = 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`
+    utilStore.handleActionViewFilePDF(header, `(DRAFTS) Invoice ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
   }
 
   const handleActionSearch = (tab: number ) => {

@@ -74,6 +74,8 @@ declare module 'vue' {
     Toast: typeof import('primevue/toast')['default']
     ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     UnitDataTable: typeof import('./src/components/Reprint/UnitDataTable.vue')['default']
+    ViewImageModal: typeof import('./src/components/Dialog/General/File/ViewImageModal.vue')['default']
+    ViewPDFModal: typeof import('./src/components/Dialog/General/File/ViewPDFModal.vue')['default']
     ViewScheduleBatchIssuance: typeof import('./src/components/Dialog/PerBatch/ViewScheduleBatchIssuance.vue')['default']
     ViewScheduleBatchIssuanceModal: typeof import('./src/components/Dialog/PerBatch/ViewScheduleBatchIssuanceModal.vue')['default']
   }

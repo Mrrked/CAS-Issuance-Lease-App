@@ -4,12 +4,8 @@
   import { useIssuanceStore } from '../../store/useIssuanceStore';
   import { useMainStore } from '../../store/useMainStore';
   import { onMounted } from 'vue'
-  import { useDialog } from 'primevue/usedialog';
-  import PreviewPDFModal from '../../components/Dialog/General/PreviewPDFModal.vue';
   import { InvoiceRecord } from '../../store/types';
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
-
-  const dialog = useDialog()
 
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
@@ -1668,24 +1664,8 @@
       }
     }])
 
-    const ShowDraftInvoice = dialog.open(PreviewPDFModal, {
-      data: {
-        pdfBlob: PDF_BLOB,
-        submit: () => {
-        },
-        cancel: () => {
-          ShowDraftInvoice.close()
-        }
-      },
-      props: {
-        header: 'Preview Draft Billing Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY,
-        style: {
-          width: '75vw'
-        },
-        showHeader: true,
-        modal: true,
-      },
-    })
+    const header = 'Preview Draft Billing Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
+    utilStore.handleActionViewFilePDF(header, `file.pdf`, PDF_BLOB, null, null, null)
   }
 </script>
 

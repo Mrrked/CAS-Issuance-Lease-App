@@ -1,6 +1,6 @@
 import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
 import { CheckDetails, Client, ClientForm, Config, GenHeader, HistoryOfPayment, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
-import { computed, defineAsyncComponent, markRaw, onMounted, ref } from 'vue';
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
 import axios from '../axios';
 import { defineStore } from 'pinia';
@@ -17,8 +17,6 @@ const HistoryOfPaymentsTableModal = defineAsyncComponent(() => import('../compon
 const OfficialReceiptModal = defineAsyncComponent(() => import('../components/Dialog/Printing/OfficialReceiptModal.vue'));
 const BillTypesTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/BillTypesTableModal.vue'));
 const RemarksTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/RemarksTableModal.vue'));
-
-const PreviewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/PreviewPDFModal.vue'));
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
@@ -483,39 +481,8 @@ export const usePrintingStore = defineStore('print', () => {
 
             const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(ORIGINAL_ISSUED_DOCUMENTS)
 
-            const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
-            const ShowDraftInvoices = dialog.open(PreviewPDFModal, {
-              data: {
-                pdfBlob: PDF_BLOB,
-                download: () => {
-                  const url = URL.createObjectURL(PDF_BLOB);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                },
-                submit: () => {
-                },
-                cancel: () => {
-                  ShowDraftInvoices.close()
-                }
-              },
-              props: {
-                header: '(ORIGINAL) Selected Documents',
-                style: {
-                  width: '75vw'
-                },
-                showHeader: true,
-                modal: true,
-              },
-              templates: {
-                footer: markRaw(Footer)
-              },
-              onClose: () => {
-                selectedHistoryOfIssuedDocument.value = []
-              }
-            })
+            const header = '(ORIGINAL) Selected Documents'
+            utilStore.handleActionViewFilePDF(header, `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },
@@ -595,39 +562,8 @@ export const usePrintingStore = defineStore('print', () => {
           })
           const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(REPRINTED_ISSUED_DOCUMENTS)
 
-          const Footer = defineAsyncComponent(() => import('../components/Dialog/General/DraftInvoiceModalFooter.vue'));
-          const ShowDraftInvoices = dialog.open(PreviewPDFModal, {
-            data: {
-              pdfBlob: PDF_BLOB,
-              download: () => {
-                const url = URL.createObjectURL(PDF_BLOB);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`;
-                a.click();
-                URL.revokeObjectURL(url);
-              },
-              submit: () => {
-              },
-              cancel: () => {
-                ShowDraftInvoices.close()
-              }
-            },
-            props: {
-              header: '(REPRINTED) Selected Documents',
-              style: {
-                width: '75vw'
-              },
-              showHeader: true,
-              modal: true,
-            },
-            templates: {
-              footer: markRaw(Footer)
-            },
-            onClose: () => {
-              selectedHistoryOfIssuedDocument.value = []
-            }
-          })
+          const header = '(REPRINTED) Selected Documents'
+          utilStore.handleActionViewFilePDF(header, `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
         })
         .catch(utilStore.handleAxiosError)
         .finally(() => {

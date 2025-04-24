@@ -212,7 +212,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             DATOR: stampDate,
             ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
             NOACCT: NO_OF_MONTHS,
-            DATPRT: stampDate,
+            DATPRT: Number.parseInt(`${stampTime}` + (INVOICE.TOTAL_BREAKDOWN.VATAMT > 0 ? '01' : '00')),
             NOMOS: NO_OF_MONTHS,
           },
           CORTPF: {

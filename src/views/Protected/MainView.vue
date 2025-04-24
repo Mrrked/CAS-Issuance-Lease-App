@@ -1689,6 +1689,7 @@
                 </InputGroupAddon>
                 <DatePicker
                   v-model="perBillTypeRunStore.perBillTypeRunForm.invoiceDate"
+                  dateFormat="yy/mm/dd"
                   :minDate="new Date()"
                   :maxDate="ALLOW_ADVANCE_SINGLE === 'TRUE' ? undefined : new Date()"
                   placeholder="Select..."
@@ -1885,6 +1886,7 @@
                       </label>
                     </InputGroupAddon>
                     <InputText
+                      readonly
                       :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
                     />
                   </InputGroup>
@@ -1895,6 +1897,7 @@
                       </label>
                     </InputGroupAddon>
                     <InputText
+                      readonly
                       :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
                     />
                   </InputGroup>
@@ -1916,6 +1919,7 @@
                 </InputGroupAddon>
                 <DatePicker
                   v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
+                  dateFormat="yy/mm/dd"
                   :minDate="new Date()"
                   :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
                   placeholder="Select..."

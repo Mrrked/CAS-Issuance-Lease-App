@@ -5,6 +5,7 @@ import { AxiosResponse } from 'axios';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
+import { useFileStore } from './useFileStore';
 import { useIssuanceStore } from './useIssuanceStore';
 import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
@@ -19,6 +20,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   const dialog = useDialog();
   const confirm = useConfirm();
 
+  const fileStore = useFileStore()
   const mainStore = useMainStore();
   const utilStore = useUtilitiesStore();
   const issuanceStore = useIssuanceStore();
@@ -225,10 +227,10 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
             const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
-            utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+            fileStore.handleActionDownloadFileBlob(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
             const header = 'Issued Invoices - ' + perBillTypeRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
-            utilStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
+            fileStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },

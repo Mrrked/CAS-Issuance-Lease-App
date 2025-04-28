@@ -4,6 +4,7 @@ import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } fro
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import jsPDF from 'jspdf';
+import { useFileStore } from './useFileStore';
 import { useMainStore } from './useMainStore';
 import { usePerBatchRunStore } from './usePerBatchRunStore';
 import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
@@ -15,6 +16,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
   const toast = useToast()
 
+  const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
@@ -1982,7 +1984,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     callback()
 
     const header = 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
-    utilStore.handleActionViewFilePDF(header, `(DRAFT) Invoice.pdf`, PDF_BLOB, null, () => {}, () => {})
+    fileStore.handleActionViewFilePDF(header, `(DRAFT) Invoice.pdf`, PDF_BLOB, null, () => {}, () => {})
   }
 
   const handleActionGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
@@ -2018,7 +2020,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     callback()
 
     const header = 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`
-    utilStore.handleActionViewFilePDF(header, `(DRAFTS) Invoice ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
+    fileStore.handleActionViewFilePDF(header, `(DRAFTS) Invoice ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
   }
 
   const handleActionSearch = (tab: number ) => {

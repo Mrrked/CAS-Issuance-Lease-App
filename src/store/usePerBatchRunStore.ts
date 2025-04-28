@@ -5,6 +5,7 @@ import { AxiosResponse } from 'axios';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
+import { useFileStore } from './useFileStore';
 import { useIssuanceStore } from './useIssuanceStore';
 import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
@@ -22,6 +23,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const dialog = useDialog();
   const confirm = useConfirm();
 
+  const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const issuanceStore = useIssuanceStore()
@@ -316,7 +318,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
             const PDF_BLOB = await issuanceStore.handleActionGenerateSummaryInvoicesPDFBlob(groupedInvoiceRecords)
 
             const header = '(Batch) Summary of Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
-            utilStore.handleActionViewFilePDF(header, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
+            fileStore.handleActionViewFilePDF(header, `Summary of Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },
@@ -327,10 +329,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
             const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(issuedInvoiceRecords)
 
-            utilStore.handleDownloadFile(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
+            fileStore.handleActionDownloadFileBlob(PDF_BLOB, `Issued Invoices ${data.year}-${data.month}.pdf`)
 
             const header = '(Batch) Issued Invoices - ' + perBatchRunForm.value.invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })
-            utilStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
+            fileStore.handleActionViewFilePDF(header, `Issued Invoices ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },

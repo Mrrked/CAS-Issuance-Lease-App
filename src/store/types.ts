@@ -15,6 +15,19 @@ export interface ExtFile extends File {
   objectURL?: string
 }
 
+export interface FileAttachment {
+  name: string
+  type: string
+  size: number
+
+  category: 'User' | 'IT'
+  added_by: number | string
+  timestamp: Date | string
+
+  file?: ExtFile
+  url?: string
+}
+
 ////////////
 //  MAIN  //
 ////////////

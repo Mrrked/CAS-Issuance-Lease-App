@@ -6,6 +6,7 @@ import axios from '../axios';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
 import { useDialog } from 'primevue/usedialog';
+import { useFileStore } from './useFileStore';
 import { useIssuanceStore } from './useIssuanceStore';
 import { useMainStore } from './useMainStore';
 import { useSessionStore } from './useSessionStore';
@@ -40,6 +41,7 @@ export const usePrintingStore = defineStore('print', () => {
   const dialog = useDialog();
   const confirm = useConfirm()
 
+  const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
@@ -482,7 +484,7 @@ export const usePrintingStore = defineStore('print', () => {
             const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(ORIGINAL_ISSUED_DOCUMENTS)
 
             const header = '(ORIGINAL) Selected Documents'
-            utilStore.handleActionViewFilePDF(header, `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
+            fileStore.handleActionViewFilePDF(header, `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
 
             loading.close()
           },
@@ -563,7 +565,7 @@ export const usePrintingStore = defineStore('print', () => {
           const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(REPRINTED_ISSUED_DOCUMENTS)
 
           const header = '(REPRINTED) Selected Documents'
-          utilStore.handleActionViewFilePDF(header, `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
+          fileStore.handleActionViewFilePDF(header, `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
         })
         .catch(utilStore.handleAxiosError)
         .finally(() => {

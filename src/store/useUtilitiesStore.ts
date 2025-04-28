@@ -9,8 +9,6 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const LoadingModal = defineAsyncComponent(() => import('../components/Dialog/General/LoadingModal.vue'));
-const ViewImageModal = defineAsyncComponent(() => import('../components/Dialog/General/File/ViewImageModal.vue'));
-const ViewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/File/ViewPDFModal.vue'));
 const EnterPasswordDialogModal = defineAsyncComponent(() => import('../components/Dialog/General/EnterPasswordDialogModal.vue'));
 
 export const useUtilitiesStore = defineStore('utils', () => {
@@ -304,61 +302,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     }
   };
 
-  const handleDownloadFile = (blob: Blob, fileName: string):void => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  const handleActionViewFilePDF = (header: string, filename: string, pdfBlob: Blob | null, pdfURL: string | null, printCallback: Function | null, downloadCallback: Function | null) => {
-    let url: string | null = null
-
-    if (!pdfURL && pdfBlob) {
-      url = URL.createObjectURL(pdfBlob);
-    } else {
-      url = pdfURL || null
-    }
-    if (url) {
-      dialog.open(ViewPDFModal, {
-        data: {
-          filename: filename,
-          pdfURL: url,
-          printCallback,
-          downloadCallback
-        },
-        props: {
-          header: header,
-          style: {
-            width: '60rem',
-          },
-          showHeader: true,
-          modal: true,
-          maximizable: true,
-        }
-      })
-    }
-  }
-
-  const handleActionViewFileImage = (url: string, header: string) => {
-    dialog.open(ViewImageModal, {
-      data: {
-        url: url,
-      },
-      props: {
-        header: header,
-        style: {
-          width: '60rem',
-        },
-        showHeader: true,
-        modal: true,
-        maximizable: true,
-      }
-    })
-  }
-
   const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
     if (!isOpenConfirmAdminPassword.value) {
       isOpenConfirmAdminPassword.value = true
@@ -412,9 +355,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     startLoadingModal,
 
     handleAxiosError,
-    handleDownloadFile,
-    handleActionViewFilePDF,
-    handleActionViewFileImage,
     handleActionConfirmAdminPassword,
   }
 })

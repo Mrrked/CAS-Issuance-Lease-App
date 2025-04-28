@@ -6,7 +6,9 @@
   import { onMounted } from 'vue'
   import { InvoiceRecord } from '../../store/types';
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
+  import { useFileStore } from '../../store/useFileStore';
 
+  const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const issuanceStore = useIssuanceStore()
@@ -1665,7 +1667,7 @@
     }])
 
     const header = 'Preview Draft Billing Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
-    utilStore.handleActionViewFilePDF(header, `file.pdf`, PDF_BLOB, null, null, null)
+    fileStore.handleActionViewFilePDF(header, `file.pdf`, PDF_BLOB, null, null, null)
   }
 </script>
 

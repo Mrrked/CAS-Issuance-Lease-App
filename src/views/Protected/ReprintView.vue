@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { useMainStore } from '../../store/useMainStore';
   import { usePrintingStore } from '../../store/usePrintingStore';
-  import { defineAsyncComponent, onMounted } from 'vue';
+  import { defineAsyncComponent, nextTick, onMounted, ref } from 'vue';
 
   const ClientDataTable = defineAsyncComponent(() => import('../../components/Reprint/ClientDataTable.vue'));
   const UnitDataTable = defineAsyncComponent(() => import('../../components/Reprint/UnitDataTable.vue'));
@@ -10,6 +10,57 @@
 
   const mainStore = useMainStore()
   const printStore = usePrintingStore()
+
+  const blockLength = 2;
+  const blockKeys = ['1', '2'] as const
+  const blockRefs = ref<(HTMLInputElement | null)[]>([]);
+
+  const lotLength = 4;
+  const lotKeys = ['1', '2', '3', '4'] as const
+  const lotRefs = ref<(HTMLInputElement | null)[]>([]);
+
+  const unitCodeLength = 2;
+  const unitCodeKeys = ['1', '2'] as const
+  const unitCodeRefs = ref<(HTMLInputElement | null)[]>([]);
+
+  const onInputBlock = (index: number) => {
+    const current = printStore.queryUnitForm.block[blockKeys[index]];
+    if (current.length === 1 && index < blockLength - 1) {
+      nextTick(() => blockRefs.value[index + 1]?.focus());
+    }
+  }
+
+  const onBackspaceBlock = (index: number) => {
+    if (printStore.queryUnitForm.block[blockKeys[index]] === '' && index > 0) {
+      nextTick(() => blockRefs.value[index - 1]?.focus());
+    }
+  }
+
+  const onInputLot = (index: number) => {
+    const current = printStore.queryUnitForm.lot[lotKeys[index]];
+    if (current.length === 1 && index < lotLength - 1) {
+      nextTick(() => lotRefs.value[index + 1]?.focus());
+    }
+  }
+
+  const onBackspaceLot = (index: number) => {
+    if (printStore.queryUnitForm.lot[lotKeys[index]] === '' && index > 0) {
+      nextTick(() => lotRefs.value[index - 1]?.focus());
+    }
+  }
+
+  const onInputUnitCode = (index: number) => {
+    const current = printStore.queryUnitForm.unit_code[unitCodeKeys[index]];
+    if (current.length === 1 && index < unitCodeLength - 1) {
+      nextTick(() => unitCodeRefs.value[index + 1]?.focus());
+    }
+  }
+
+  const onBackspaceUnitCode = (index: number) => {
+    if (printStore.queryUnitForm.unit_code[unitCodeKeys[index]] === '' && index > 0) {
+      nextTick(() => unitCodeRefs.value[index - 1]?.focus());
+    }
+  }
 
   onMounted(() => {
     mainStore.fetchAllData()
@@ -183,53 +234,41 @@
                     autofocus
                   ></Select>
                 </InputGroup>
-                <div class="grid grid-cols-23 gap-4 max-w-[50rem]">
+                <div class="grid grid-cols-23 gap-4 max-w-[50rem] h-20">
                   <div class="flex flex-col items-center justify-center col-span-3 gap-2">
                     <label name="pcs_code" class="font-bold text-center">
                       PCS Code
                     </label>
-                    <InputText
-                      name="pcs_code"
+                    <input
                       v-model="printStore.queryUnitForm.pcs_code"
                       maxlength="1"
-                      class="font-semibold text-center uppercase w-11"
-                      size="large"
-                      autocomplete="off"
+                      class="h-full text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                     />
                   </div>
                   <div class="flex flex-col items-center justify-center col-span-3 gap-2">
                     <label name="phase" class="font-bold text-center">
                       Phase
                     </label>
-                    <InputText
-                      name="phase"
+                    <input
                       v-model="printStore.queryUnitForm.phase"
                       maxlength="1"
-                      class="font-semibold text-center uppercase w-11"
-                      size="large"
-                      autocomplete="off"
+                      class="h-full text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                     />
                   </div>
                   <div class="flex flex-col items-center justify-center col-span-4 gap-2">
                     <label name="block" class="font-bold text-center">
                       Block
                     </label>
-                    <div class="flex gap-1">
-                      <InputText
-                        name="block"
-                        v-model="printStore.queryUnitForm.block['1']"
+                    <div class="flex h-full gap-1">
+                      <input
+                        v-for="(value, index) in blockKeys"
+                        :key="index"
+                        v-model="printStore.queryUnitForm.block[value]"
+                        ref="blockRefs"
                         maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
-                      />
-                      <InputText
-                        name="block"
-                        v-model="printStore.queryUnitForm.block['2']"
-                        maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
+                        @input="onInputBlock(index)"
+                        @keydown.backspace="onBackspaceBlock(index)"
+                        class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                       />
                     </div>
                   </div>
@@ -245,38 +284,16 @@
                     <label name="lot" class="font-bold text-center">
                       Lot
                     </label>
-                    <div class="flex gap-1">
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.lot['1']"
+                    <div class="flex h-full gap-1">
+                      <input
+                        v-for="(value, index) in lotKeys"
+                        :key="index"
+                        v-model="printStore.queryUnitForm.lot[value]"
+                        ref="lotRefs"
                         maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
-                      />
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.lot['2']"
-                        maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
-                      />
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.lot['3']"
-                        maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
-                      />
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.lot['4']"
-                        maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
+                        @input="onInputLot(index)"
+                        @keydown.backspace="onBackspaceLot(index)"
+                        class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                       />
                     </div>
                   </div>
@@ -292,22 +309,16 @@
                     <label name="unit_code" class="font-bold text-center">
                       Unit Code
                     </label>
-                    <div class="flex gap-1">
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.unit_code['1']"
+                    <div class="flex h-full gap-1">
+                      <input
+                        v-for="(value, index) in unitCodeKeys"
+                        :key="index"
+                        v-model="printStore.queryUnitForm.unit_code[value]"
+                        ref="unitCodeRefs"
                         maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
-                      />
-                      <InputText
-                        name="lot"
-                        v-model="printStore.queryUnitForm.unit_code['2']"
-                        maxlength="1"
-                        class="font-semibold text-center uppercase w-11"
-                        size="large"
-                        autocomplete="off"
+                        @input="onInputUnitCode(index)"
+                        @keydown.backspace="onBackspaceUnitCode(index)"
+                        class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                       />
                     </div>
                   </div>

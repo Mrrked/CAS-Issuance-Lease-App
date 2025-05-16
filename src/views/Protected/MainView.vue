@@ -99,8 +99,8 @@
           "IS_VATABLE": true,
           "VAT_RATE": 12,
           "INVOICE_KEY": {
-            "RECTYP": "VI",
-            "TRNTYP": "V",
+            "RECTYP": "IS",
+            "TRNTYP": "I",
             "COMPLETE_OR_KEY": "01111xxxxxxxx",
             "COMPCD": 1,
             "BRANCH": 1,
@@ -110,9 +110,9 @@
             "PROJCD": "CL3",
             "YY": 2025,
             "MM": 1,
-            "INVOICE_NAME": "SERVICE",
-            "INVOICE_NUMBER": "VI01111xxxxxxxx",
-            "SERIES_RANGE": "VI011111A000001 - VI011119Z999999"
+            "INVOICE_NAME": "BILLING",
+            "INVOICE_NUMBER": "BI01111xxxxxxxx",
+            "SERIES_RANGE": "BI011111A000001 - BI011119Z999999"
           },
           "INDEX": 29,
           "UNIT_COST": 80829,

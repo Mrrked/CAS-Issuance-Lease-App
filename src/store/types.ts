@@ -539,8 +539,8 @@ export interface HistoryOfPayment extends ORRecord, ORRecord_Temporary {
 }
 
 export interface InvoiceKey {
-  RECTYP:   'VI' | 'BI'
-  TRNTYP:   'V' | 'B'
+  RECTYP:   'IS' | 'BI'
+  TRNTYP:   'I' | 'B'
 
   PROJCD:   string
 

@@ -365,7 +365,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const key = bill.ID;
 
       const invoiceDate: number = invoice_date ? utilStore.convertDateObjToNumberYYYYMMDD(invoice_date) : 0
-      const invoiceType: 'BI' | 'VI' = bill.INVOICE_KEY.RECTYP
+      const invoiceType: 'BI' | 'IS' = bill.INVOICE_KEY.RECTYP
 
       const completeOrKey: string = bill.INVOICE_KEY.COMPLETE_OR_KEY
 

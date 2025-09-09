@@ -35,6 +35,7 @@ declare module 'vue' {
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
     InputText: typeof import('primevue/inputtext')['default']
+    LeaseBillTypesTableModal: typeof import('./src/components/Dialog/Printing/LeaseBillTypesTableModal.vue')['default']
     LoadingModal: typeof import('./src/components/Dialog/General/LoadingModal.vue')['default']
     MainScreen: typeof import('./src/components/Reprint/MainScreen.vue')['default']
     NavBar: typeof import('./src/components/Core/NavBar.vue')['default']

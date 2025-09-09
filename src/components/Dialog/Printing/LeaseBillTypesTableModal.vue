@@ -15,7 +15,7 @@
 
 <template>
   <DataTable
-    :value="mainStore.bill_types"
+    :value="mainStore.lease_bill_types"
     dataKey="BTYPE"
 
     v-model:filters="filters"

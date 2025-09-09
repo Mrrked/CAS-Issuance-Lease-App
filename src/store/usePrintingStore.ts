@@ -16,7 +16,7 @@ import { useUtilitiesStore } from './useUtilitiesStore';
 const CheckDetailsModal = defineAsyncComponent(() => import('../components/Dialog/Printing/CheckDetailsModal.vue'));
 const HistoryOfPaymentsTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/HistoryOfPaymentsTableModal.vue'));
 const OfficialReceiptModal = defineAsyncComponent(() => import('../components/Dialog/Printing/OfficialReceiptModal.vue'));
-const BillTypesTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/BillTypesTableModal.vue'));
+const LeaseBillTypesTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/LeaseBillTypesTableModal.vue'));
 const RemarksTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/RemarksTableModal.vue'));
 
 const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
@@ -141,11 +141,9 @@ export const usePrintingStore = defineStore('print', () => {
         if (validateQueryClientForm()) {
           const loading = utilStore.startLoadingModal('Searching Client ...')
 
-          const data = {
-            name: queryClientForm.value.name.toUpperCase(),
-          }
+          const name = queryClientForm.value.name.toUpperCase()
 
-          axios.post('issuance_lease/clients/', data)
+          axios.get(`general/client/${name}`)
           .then((response) => {
             // console.log('RESPONSE ', response);
             clients.value = response.data.data
@@ -219,7 +217,7 @@ export const usePrintingStore = defineStore('print', () => {
   const handleActionSearchClientUnits = (CACCT: string, activateCallback: Function) => {
     const loading = utilStore.startLoadingModal('Searching Client\s Units ...')
 
-    axios.get(`issuance_lease/units/client/${CACCT}`)
+    axios.get(`general/client/${CACCT}/unit`)
     .then((response) => {
       // console.log('RESPONSE ', response);
       units.value = response.data.data
@@ -258,7 +256,7 @@ export const usePrintingStore = defineStore('print', () => {
 
     const loading = utilStore.startLoadingModal('Fetching Unit ...')
 
-    axios.get(`issuance_lease/unit/${pbl}/`)
+    axios.get(`issuance_lease/lease_unit/${pbl}/`)
     .then((response) => {
       selectedUnit.value = response.data.data
       // console.log(selectedUnit.value);
@@ -337,7 +335,7 @@ export const usePrintingStore = defineStore('print', () => {
   const handleActionRefresh = () => {
     const loading = utilStore.startLoadingModal('Refreshing ...')
 
-    axios.get(`issuance_lease/unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
+    axios.get(`issuance_lease/lease_unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
     .then((response) => {
       selectedUnit.value = undefined
       selectedHistoryOfIssuedDocument.value = []
@@ -416,7 +414,7 @@ export const usePrintingStore = defineStore('print', () => {
   }
 
   const handleActionViewBillTypes = () => {
-    dialog.open(BillTypesTableModal, {
+    dialog.open(LeaseBillTypesTableModal, {
       props: {
         header: 'Lease Bill Types',
         style: {
@@ -570,7 +568,7 @@ export const usePrintingStore = defineStore('print', () => {
         .catch(utilStore.handleAxiosError)
         .finally(() => {
           loading.close()
-          axios.get(`issuance_lease/unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
+          axios.get(`issuance_lease/lease_unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
           .then((response) => {
             selectedUnit.value = undefined
             selectedUnit.value = response.data.data

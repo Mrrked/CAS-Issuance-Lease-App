@@ -140,7 +140,7 @@ export interface CompanyRecord {
   DATRES: number;   // DATE RESERVED
 }
 
-export interface MotherBillTypeRecord {
+export interface MotherLeaseBillTypeRecord {
   BTYPE: number;         // BILL TYPE, Zoned(2,0)
   MBTYPE: number;        // MOTHER BILL TYPE, Zoned(2,0)
   MBDESC: string;        // MOTHER BILL TYPE DESCRIPTION, Char(30)
@@ -151,7 +151,7 @@ export interface MotherBillTypeRecord {
   FILL5: string;         // CHAR FILL4, Char(5)
 }
 
-export interface BillTypeRecord {
+export interface LeaseBillTypeRecord {
   BTYPE: number;         // BILL TYPE, Zoned(2,0)
   BDESC: string;         // BILL TYPE DESCRIPTION, Char(30)
   ORDER: number;         // ORDER OF APPLICATION, Zoned(2,0)
@@ -172,7 +172,7 @@ export interface BillTypeRecord {
   FILL5: string;         // CHAR FILL4, Char(5)
 }
 
-export interface BillTypeRecord {
+export interface LeaseBillTypeRecord {
   BTYPE: number;         // BILL TYPE, Zoned(2,0)
   BDESC: string;         // BILL TYPE DESCRIPTION, Char(30)
   ORDER: number;         // ORDER OF APPLICATION, Zoned(2,0)
@@ -357,7 +357,7 @@ export interface OutstandingBill {
   TIMUPD: number;      // TIME UPDATED, Zoned(6,0)
 }
 
-export interface LeaseBill extends OutstandingBill, BillTypeRecord {
+export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   INDEX: number
 
   ID: string

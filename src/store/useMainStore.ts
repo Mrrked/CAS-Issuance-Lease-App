@@ -1,4 +1,4 @@
-import { BillTypeRecord, BusinessDay, CompanyRecord, MotherBillTypeRecord, PaymentType, ProjectRecord } from './types';
+import { BusinessDay, CompanyRecord, LeaseBillTypeRecord, MotherLeaseBillTypeRecord, PaymentType, ProjectRecord } from './types';
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import axios from '../axios'
@@ -13,8 +13,8 @@ export const useMainStore = defineStore('main', () => {
 
   const project_codes = ref<ProjectRecord[]>([])
   const company_codes = ref<CompanyRecord[]>([])
-  const bill_types = ref<BillTypeRecord[]>([])
-  const mother_bill_types = ref<MotherBillTypeRecord[]>([])
+  const lease_bill_types = ref<LeaseBillTypeRecord[]>([])
+  const mother_lease_bill_types = ref<MotherLeaseBillTypeRecord[]>([])
   const first_business_days = ref<BusinessDay[]>([])
 
   const PAYMENT_TYPES: PaymentType[] = [
@@ -72,21 +72,21 @@ export const useMainStore = defineStore('main', () => {
     const loading = utilStore.startLoadingModal('System Loading ...')
 
     Promise.all([
-      axios.get('issuance_lease/core/project_codes/')
+      axios.get('general/project_code/')
         .then((response) => {
           project_codes.value = response.data.data as ProjectRecord[];
         }),
-      axios.get('issuance_lease/core/company_codes/')
+      axios.get('general/company_code/')
         .then((response) => {
           company_codes.value = response.data.data as CompanyRecord[];
         }),
-      axios.get('issuance_lease/core/bill_types/')
+      axios.get('general/lease_bill_type/')
         .then((response) => {
-          bill_types.value = response.data.data as BillTypeRecord[];
+          lease_bill_types.value = response.data.data as LeaseBillTypeRecord[];
         }),
-      axios.get('issuance_lease/core/mother_bill_types/')
+      axios.get('general/mother_lease_bill_type/')
         .then((response) => {
-          mother_bill_types.value = response.data.data as MotherBillTypeRecord[];
+          mother_lease_bill_types.value = response.data.data as MotherLeaseBillTypeRecord[];
         }),
       axios.get('issuance_lease/business_day/' + new Date().getFullYear())
         .then((response) => {
@@ -119,8 +119,8 @@ export const useMainStore = defineStore('main', () => {
 
     project_codes,
     company_codes,
-    bill_types,
-    mother_bill_types,
+    lease_bill_types,
+    mother_lease_bill_types,
     first_business_days,
 
     PAYMENT_TYPES,

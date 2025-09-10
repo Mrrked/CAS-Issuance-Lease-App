@@ -1,27 +1,25 @@
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
-import { ExtendedJWTPayload } from './types';
+import { User } from './types';
+import axios from '../axios';
 import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode';
 import { useDialog } from 'primevue/usedialog';
+import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
 
 const SessionTimeoutModal = defineAsyncComponent(() => import('../components/Dialog/General/SessionTimeoutModal.vue'));
 
 export const useSessionStore = defineStore('session', () => {
 
+  const toast = useToast()
   const dialog = useDialog()
+  const router = useRouter()
 
   const currentDateTime = ref<Date>(new Date())
   const isSessionModalOpen = ref<boolean>(false)
 
-  const authenticatedUser = ref<ExtendedJWTPayload>({
-    username: '',
-    department: '',
-    company_code: [0],
-  })
-
-  const currentTime = ref('');
-  const currentDate = ref('');
+  const authenticatedUser = ref<User | null>(null)
 
   const getCurrentDate = computed(() => {
     const DateOptions: Intl.DateTimeFormatOptions = {
@@ -40,42 +38,35 @@ export const useSessionStore = defineStore('session', () => {
     return currentDateTime.value.toLocaleString("en-US", TimeOptions);
   })
 
-  const updateTime = () => {
+  const fetchAuthenticatedUser = () => {
+    const token = localStorage.getItem('access')
+    if (token) {
+      return axios.get(`session/user_iseries_profile/`)
+        .then((response) => {
+          const user = response.data.data as User;
+          const CAS_PROGRAM_ID = import.meta.env.VITE_CAS_PROGRAM_ID;
 
-    const padZero = (value: number) => {
-      return value < 10 ? '0' + value : value;
-    };
-
-    const now = new Date();
-    const hours = padZero(now.getHours() % 12);
-    const minutes = padZero(now.getMinutes());
-    const period = now.getHours() >= 12 ? 'PM' : 'AM';
-    currentTime.value = `${hours}:${minutes} ${period}`;
-    const month = now.toLocaleString('default', { month: 'long' });
-    const day = padZero(now.getDate());
-    currentDate.value = `${month} ${day}`;
+          if (user && user.programs.some((program) => program.id == CAS_PROGRAM_ID)) {
+            authenticatedUser.value = user
+          } else {
+            toast.add({
+              severity: 'error',
+              summary: 'Unauthorized',
+              detail: 'You are not authorized to access this program. Request access from IT.',
+              life: 3000
+            });
+            localStorage.removeItem('access')
+            localStorage.removeItem('refresh')
+            router.replace({name: 'Login'})
+          }
+        })
+    }
   }
 
   const resetStore = () => {
     localStorage.removeItem('access')
     localStorage.removeItem('refresh')
   }
-
-  onMounted(() => {
-    updateTime();
-    setInterval(updateTime, 1000);
-
-    const token = localStorage.getItem('access')
-    if (token) {
-      const access_token_decoded = jwtDecode(token) as ExtendedJWTPayload;
-
-      authenticatedUser.value = {
-        username: access_token_decoded.username,
-        department: access_token_decoded.department,
-        company_code: access_token_decoded.company_code,
-      }
-    }
-  });
 
   onMounted(() => {
     setInterval(
@@ -127,6 +118,8 @@ export const useSessionStore = defineStore('session', () => {
 
     getCurrentDate,
     getCurrentTime,
+
+    fetchAuthenticatedUser,
 
     resetStore,
   }

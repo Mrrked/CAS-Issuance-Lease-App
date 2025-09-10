@@ -78,14 +78,14 @@
       </template>
     </Drawer>
 
-    <div class="items-center hidden gap-10 px-3 sm:flex ">
-      <div class="flex justify-between gap-2 ">
+    <div class="items-center hidden gap-10 px-3 sm:flex">
+      <div class="flex justify-between gap-2">
         <div class="flex flex-col text-right">
           <div class="font-semibold">
-            {{ sessionStore.authenticatedUser.department }} Department
+            {{ sessionStore.authenticatedUser?.username }}
           </div>
           <div class="text-sm">
-            {{ sessionStore.authenticatedUser.username }}
+            {{ sessionStore.authenticatedUser?.user.full_name }}
           </div>
         </div>
         <div class="border border-black dark:border-white"></div>

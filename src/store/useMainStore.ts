@@ -3,11 +3,13 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import axios from '../axios'
 import { defineStore } from 'pinia'
+import { useSessionStore } from './useSessionStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
 export const useMainStore = defineStore('main', () => {
 
   const utilStore = useUtilitiesStore()
+  const sessionStore = useSessionStore()
 
   const allowReloadExitPage = ref<boolean>(true);
 
@@ -72,6 +74,7 @@ export const useMainStore = defineStore('main', () => {
     const loading = utilStore.startLoadingModal('System Loading ...')
 
     Promise.all([
+      sessionStore.fetchAuthenticatedUser(),
       axios.get('general/project_code/')
         .then((response) => {
           project_codes.value = response.data.data as ProjectRecord[];

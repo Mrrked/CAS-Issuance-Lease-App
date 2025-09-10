@@ -7,8 +7,6 @@ export interface ExtendedAxiosError extends AxiosError {
 
 export interface ExtendedJWTPayload extends JwtPayload {
   username: string
-  department: string
-  company_code: [number]
 }
 
 export interface ExtFile extends File {
@@ -20,13 +18,64 @@ export interface FileAttachment {
   type: string
   size: number
 
-  category: 'User' | 'IT'
+  category: 'User' | 'Admin'
   added_by: number | string
   timestamp: Date | string
 
   file?: ExtFile
   url?: string
 }
+
+// EXTERNAL
+
+export interface ExternalJoinProgram {
+  id: number
+  name: string;
+  description: string;
+  url: string;
+}
+
+export interface ExternalJoinISeriesProfile {
+  id: number;
+  username: string;
+  initials: string;
+}
+
+export interface ExternalISeriesProfile {
+  id: number;
+  username: string;
+  initials: string;
+
+  user: ExternalITPortalUser;
+
+  programs: ExternalJoinProgram[]
+}
+
+export type ExternalITPortalUserStatus = 'Enabled' | 'Disabled' | 'Archived'
+
+export interface ExternalITPortalDepartment {
+  id: number;
+  name: string;
+}
+
+export interface ExternalITPortalUser {
+  id: number;
+  username: string;
+  full_name: string;
+  first_name: string;
+  middle_name: string;
+  last_name: string;
+  nickname: string;
+  department: string;
+  departments: ExternalITPortalDepartment[];
+  email: string;
+  supervisor: ExternalITPortalUser;
+  is_department_head: boolean;
+  status: ExternalITPortalUserStatus;
+  iseries_profiles: ExternalISeriesProfile[]
+}
+
+export interface User extends ExternalISeriesProfile {}
 
 ////////////
 //  MAIN  //

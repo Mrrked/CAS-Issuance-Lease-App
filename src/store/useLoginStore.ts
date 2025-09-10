@@ -1,9 +1,7 @@
 import { defineAsyncComponent, onMounted, ref } from 'vue'
 
-import { ExtendedJWTPayload } from './types';
 import axios from '../axios';
 import { defineStore } from 'pinia'
-import { jwtDecode } from 'jwt-decode';
 import { useConfirm } from "primevue/useconfirm";
 import { useDialog } from 'primevue/usedialog';
 import { useRouter } from 'vue-router';
@@ -36,34 +34,26 @@ export const useLoginStore = defineStore('login', () => {
       const loading = utilStore.startLoadingModal('Logging In ...')
 
       axios.post('session/login/', data)
-      .then((response) => {
+        .then(async(response) => {
+          const tokens = response.data.tokens
+          localStorage.setItem('access', tokens.access)
+          localStorage.setItem('refresh', tokens.refresh)
 
-        const tokens = response.data.tokens
-        const access_token_decoded = jwtDecode(tokens.access) as ExtendedJWTPayload;
-        localStorage.setItem('access', tokens.access)
-        localStorage.setItem('refresh', tokens.refresh)
+          await sessionStore.fetchAuthenticatedUser()
+          router.push({name: 'Issuance for Lease System'});
 
-        sessionStore.authenticatedUser = {
-          username: access_token_decoded.username,
-          department: access_token_decoded.department,
-          company_code: access_token_decoded.company_code,
-        }
-
-        toast.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: response.data.message,
-          life: 3000
-        });
-
-        username.value = ''
-        password.value = ''
-        router.push('/')
-      })
-      .catch(utilStore.handleAxiosError)
-      .finally(() => {
-        loading.close()
-      })
+          resetStore()
+          toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: response.data.message,
+            life: 3000
+          });
+        })
+        .catch(utilStore.handleAxiosError)
+        .finally(() => {
+          loading.close()
+        })
 
     } else {
       alert("Missing User ID or Password");

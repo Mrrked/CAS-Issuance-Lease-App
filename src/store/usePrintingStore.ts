@@ -526,11 +526,11 @@ export const usePrintingStore = defineStore('print', () => {
 
                 RPDATE: stampDate,
                 RPTIME: stampTime,
-                REPRBY: sessionStore.authenticatedUser.username || '',
+                REPRBY: sessionStore.authenticatedUser?.username || '',
 
                 RUNDAT: stampDate,
                 RUNTME: stampTime,
-                RUNBY:  sessionStore.authenticatedUser.username || '',
+                RUNBY:  sessionStore.authenticatedUser?.username || '',
 
                 RECTYP: selected.DETAILS.RECTYP,
                 ORNUM: selected.DETAILS.ORNUM,

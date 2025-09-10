@@ -428,7 +428,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 ORTYPE:       '',
                 DATENT:       0,
                 TIMENT:       0,
-                USRENT:       sessionStore.authenticatedUser.username || '',
+                USRENT:       sessionStore.authenticatedUser?.username || '',
               }
             ]
 
@@ -556,7 +556,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             // FOOTER
             DATSTP:         0,
             TIMSTP:         0,
-            AUTHSG:         sessionStore.authenticatedUser.username || '',
+            AUTHSG:         sessionStore.authenticatedUser?.username || '',
 
             // TRACKING
             STATUS:         '',
@@ -569,7 +569,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
             RUNDAT:         0,
             RUNTME:         0,
-            RUNBY:          sessionStore.authenticatedUser.username || '',
+            RUNBY:          sessionStore.authenticatedUser?.username || '',
           },
           // CIRBRKPF
           ITEM_BREAKDOWNS: [
@@ -630,7 +630,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
             DATOR:          0, //UPDATE ON FINAL
-            CASHCD:         sessionStore.authenticatedUser.username || '',
+            CASHCD:         sessionStore.authenticatedUser?.username || '',
             COLSTF:         '',
             ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
             NOACCT:         0, //UPDATE ON FINAL no of months
@@ -732,7 +732,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               ORTYPE:       '',
               DATENT:       0,
               TIMENT:       0,
-              USRENT:       sessionStore.authenticatedUser.username || '',
+              USRENT:       sessionStore.authenticatedUser?.username || '',
             }
           ]
         }

@@ -1,0 +1,24 @@
+# Stage 1: Build the Vue app using Node.js
+FROM node:18 AS build-stage
+WORKDIR /app
+
+# Copy only necessary files for npm install
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the files excluding .dockerignore
+COPY . ./
+RUN npm run build
+
+# Stage 2: Serve with Nginx
+FROM nginx:stable-alpine
+# Copy the built Vue files from the build stage into Nginx's public folder
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port 9002 for the frontend
+EXPOSE 9002
+
+# Command to run Nginx
+CMD ["nginx", "-g", "daemon off;"]

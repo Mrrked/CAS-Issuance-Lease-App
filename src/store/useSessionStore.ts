@@ -48,6 +48,13 @@ export const useSessionStore = defineStore('session', () => {
 
           if (user && user.programs.some((program) => program.id == CAS_PROGRAM_ID)) {
             authenticatedUser.value = user
+            toast.add({
+              severity: 'success',
+              summary: 'Success',
+              detail: response.data.message,
+              life: 3000
+            });
+            router.push({name: 'Collection and Verification System'});
           } else {
             toast.add({
               severity: 'error',

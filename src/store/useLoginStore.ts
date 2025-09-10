@@ -40,15 +40,7 @@ export const useLoginStore = defineStore('login', () => {
           localStorage.setItem('refresh', tokens.refresh)
 
           await sessionStore.fetchAuthenticatedUser()
-          router.push({name: 'Issuance for Lease System'});
-
           resetStore()
-          toast.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: response.data.message,
-            life: 3000
-          });
         })
         .catch(utilStore.handleAxiosError)
         .finally(() => {

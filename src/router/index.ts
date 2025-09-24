@@ -3,11 +3,11 @@ import { RouteRecordRaw, createRouter, createWebHashHistory } from 'vue-router'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Issuance for Lease System',
+    name: 'Invoice Issuance for Lease',
     component: () => import('../views/Protected/MainView.vue'),
     meta: {
       requiresAuth: true,
-      header: 'Issuance for Lease System'
+      header: 'Invoice Issuance for Lease'
     }
   },
   {

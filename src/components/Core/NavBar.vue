@@ -40,7 +40,7 @@
       </svg>
       <span class="flex flex-col flex-grow" >
         <span class="text-sm font-semibold sm:text-base lg:text-xl">
-          Issuance for Lease
+          Invoice Issuance for Lease
         </span>
         <div class="text-sm font-bold sm:text-xl lg:text-2xl">
           Billing and Service Invoice
@@ -50,7 +50,7 @@
 
     <Button
       icon="pi pi-sync"
-      :label="route.name === 'Issuance for Lease System' ? 'Invoice Issuance' : 'Invoice Reprinting'"
+      :label="route.name === 'Invoice Issuance for Lease' ? 'Invoice Issuance' : 'Invoice Reprinting'"
       @click="isShowMenu = true"
       outlined
       severity="primary"
@@ -64,7 +64,7 @@
             @click="router.replace('/')"
             outlined
             severity="primary"
-            :disabled="route.name === 'Issuance for Lease System'"
+            :disabled="route.name === 'Invoice Issuance for Lease'"
           />
           <Button
             icon="pi pi-file"

@@ -15,8 +15,8 @@
     <div class="grid w-full mx-auto my-auto overflow-hidden grid-cols-1 h-fit sm:w-fit sm:grid-cols-2 rounded-2xl big-shadow max-w-[25rem] md:max-w-[50rem] ">
       <div class="sm:relative hidden md:flex items-center justify-center md:max-w-[25rem]" style="background: linear-gradient(to top right, #330a0d, #521014, #6e151b, #812429, #a52e34, #a52e34);">
         <div class="absolute flex flex-col justify-between w-full h-full p-12">
-          <div class="flex items-end font-medium tracking-wider">
-            <svg class="w-[4rem] h-[4rem]" preserveAspectRatio="xMidYMid meet" viewBox="0 30.492 338.31600000000003 333.23400000000004" xmlns="http://www.w3.org/2000/svg" version="1.0" style="max-height: 500px" width="338.31600000000003" height="333.23400000000004">
+          <div class="flex items-center font-medium tracking-wider">
+            <svg class="w-[4rem] h-[4rem] shrink-0" preserveAspectRatio="xMidYMid meet" viewBox="0 30.492 338.31600000000003 333.23400000000004" xmlns="http://www.w3.org/2000/svg" version="1.0" style="max-height: 500px" width="338.31600000000003" height="333.23400000000004">
               <g stroke="none" :fill="'white'" transform="translate(0.000000,403.000000) scale(0.100000,-0.100000)">
               <path d="M1568 3430 c-248 -61 -450 -265 -592 -598 -38 -89 -91 -259 -102&#10;-329 l-7 -43 266 0 266 0 5 43 c48 399 102 621 179 733 78 114 151 94 222 -61&#10;55 -118 101 -305 127 -512 l11 -93 262 0 262 0 -17 63 c-66 233 -175 438 -309&#10;580 -118 124 -231 190 -382 222 -87 18 -95 18 -191 -5z"/>
               <path d="M365 2364 c-48 -25 -71 -51 -101 -117 -25 -55 -29 -75 -32 -188 -7&#10;-243 60 -379 188 -379 82 0 134 50 166 159 16 52 15 55 -2 68 -27 20 -32 17&#10;-45 -29 -17 -65 -36 -96 -69 -113 -115 -60 -202 81 -187 303 10 146 46 216&#10;119 231 64 14 114 -24 132 -101 7 -29 20 -34 45 -19 12 8 13 16 2 53 -35 119&#10;-130 177 -216 132z"/>
@@ -30,9 +30,10 @@
               <path d="M870 1579 c0 -31 36 -167 71 -266 93 -264 243 -477 416 -593 170&#10;-114 343 -135 522 -65 237 92 451 375 564 743 l25 82 -259 0 c-199 0 -260 -3&#10;-263 -12 -2 -7 -12 -71 -21 -143 -34 -262 -110 -499 -184 -573 -131 -131 -265&#10;153 -327 696 l-17 152 -264 0 c-260 0 -263 0 -263 -21z"/>
               </g>
             </svg>
-            <div class="flex-1 px-2 text-[17px] leading-6 text-center text-white">
-              Computerized Accounting
-              System
+            <div class="flex flex-col items-center justify-center -mb-3">
+              <div class="flex-1 px-2 text-[17px] leading-6 text-center text-white">
+                Computerized Accounting System
+              </div>
             </div>
           </div>
           <div class="flex flex-col gap-6 text-white">
@@ -40,19 +41,10 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
             </svg>
             <h1 class="text-4xl font-bold tracking-tighter">
-              <div>
-                Lease:
-              </div>
-              <div>
-                Billing and Service
-              </div>
-              <div class="flex gap-4 -mr-10">
+              <div class="flex items-end gap-4 -mr-10">
                 <div>
-                  Invoice
+                  Invoice Issuance <br />for Lease
                 </div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
-                </svg>
               </div>
             </h1>
             <div class="text-sm">

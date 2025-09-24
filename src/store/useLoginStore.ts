@@ -48,7 +48,7 @@ export const useLoginStore = defineStore('login', () => {
               detail: response.data.message,
               life: 3000
             });
-            router.push({name: 'Issuance for Lease System'});
+            router.push({name: 'Invoice Issuance for Lease'});
           }
 
           resetStore()

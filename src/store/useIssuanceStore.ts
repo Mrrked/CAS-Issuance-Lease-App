@@ -258,7 +258,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           // VAT EXEMPT
           else if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.VAT_EXEMPT.includes(bill.OLD_BILL_TYPE)) {
-            const WHTAX_VAT_EXEMPT = utilStore.convertNumberToRoundedNumber(bill.BILAMT * WHTAX_RATE)
+            const WHTAX_VAT_EXEMPT = bill.BILL_TYPE !== 5 ? utilStore.convertNumberToRoundedNumber(bill.BILAMT * WHTAX_RATE) : 0
 
             mergedMap[key].AMOUNT += bill.BILAMT
             mergedMap[key].UNIT_COST += bill.BILAMT

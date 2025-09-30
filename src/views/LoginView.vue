@@ -87,7 +87,7 @@
           <form @submit.prevent="handleActionLogin" class="flex flex-col gap-4">
             <div class="flex flex-col gap-1">
               <label for="username" class="font-semibold tracking-wider">
-                Username
+                ISeries Username
               </label>
               <InputText
                 name="username"

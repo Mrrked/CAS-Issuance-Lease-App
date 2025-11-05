@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from './config';
-import { CheckDetails, Client, ClientForm, Config, GenHeader, HistoryOfPayment, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
+import { CheckDetails, Client, ClientForm, Config, GenHeader, HistoryOfPayment, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
 import axios from '../axios';
@@ -479,7 +479,80 @@ export const usePrintingStore = defineStore('print', () => {
                 })
                 .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
 
-            const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(ORIGINAL_ISSUED_DOCUMENTS)
+            const invoicePDFDataS: InvoicePDF[] = ORIGINAL_ISSUED_DOCUMENTS.
+              map((selectedInvoiceRecord) => {
+                const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
+
+                return {
+                  header: {
+                    runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
+                    runUsername: sessionStore.authenticatedUser?.username || 'N/A',
+
+                    companyName: company.CONAME,
+                    companyAddress: company.ADDRESS,
+                    companyInitials: company.COINIT,
+                    companyTelephone: company.TEL_NO,
+                    companyRegisteredTIN: company.TIN,
+
+                    companyLogo: company.IMG_URL,
+                    companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
+                    companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
+
+                    invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
+                    controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+                    dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+
+                    name: selectedInvoiceRecord.DETAILS.CLTNME,
+                    address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
+                    tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+                    clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+                    project: selectedInvoiceRecord.DETAILS.PRJNAM,
+                    unit: selectedInvoiceRecord.PBL_KEY.slice(3),
+                    salesStaff: 'KIM'
+                  },
+                  body: {
+                    billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
+                      .map((item) => {
+                        return {
+                          itemDescription: item.ITEM,
+                          qty: item.QTY.toString(),
+                          unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
+                          vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
+                          amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
+                        }
+                      }),
+                    breakdowns: {
+                      section1: {
+                        vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
+                        vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                        vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
+                        zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
+                        governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+                      },
+                      section2: {
+                        totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
+                        lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                        netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
+                        addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                        addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+                        lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
+                        totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
+                      },
+                    }
+                  },
+                  footer: {
+                    acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+                    dateIssued: "Date Issued : xx/xx/xxxx",
+                    approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
+                  },
+                  authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+                }
+              })
+
+            const PDF_BLOBS = invoicePDFDataS
+              .map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
+
+            const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
             const header = '(ORIGINAL) Selected Documents'
             fileStore.handleActionViewFilePDF(header, `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
@@ -560,7 +633,80 @@ export const usePrintingStore = defineStore('print', () => {
             detail: response.data.message,
             life: 3000
           })
-          const PDF_BLOB = issuanceStore.handleActionGenerateInvoicePDFBlob(REPRINTED_ISSUED_DOCUMENTS)
+          const invoicePDFDataS: InvoicePDF[] = REPRINTED_ISSUED_DOCUMENTS.
+            map((selectedInvoiceRecord) => {
+              const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
+
+              return {
+                header: {
+                  runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
+                  runUsername: sessionStore.authenticatedUser?.username || 'N/A',
+
+                  companyName: company.CONAME,
+                  companyAddress: company.ADDRESS,
+                  companyInitials: company.COINIT,
+                  companyTelephone: company.TEL_NO,
+                  companyRegisteredTIN: company.TIN,
+
+                  companyLogo: company.IMG_URL,
+                  companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
+                  companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
+
+                  invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
+                  controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+                  dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+
+                  name: selectedInvoiceRecord.DETAILS.CLTNME,
+                  address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
+                  tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+                  clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+                  project: selectedInvoiceRecord.DETAILS.PRJNAM,
+                  unit: selectedInvoiceRecord.PBL_KEY.slice(3),
+                  salesStaff: 'KIM'
+                },
+                body: {
+                  billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
+                    .map((item) => {
+                      return {
+                        itemDescription: item.ITEM,
+                        qty: item.QTY.toString(),
+                        unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
+                        vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
+                        amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
+                      }
+                    }),
+                  breakdowns: {
+                    section1: {
+                      vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
+                      vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                      vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
+                      zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
+                      governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+                    },
+                    section2: {
+                      totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
+                      lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                      netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
+                      addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+                      addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+                      lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
+                      totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
+                    },
+                  }
+                },
+                footer: {
+                  acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+                  dateIssued: "Date Issued : xx/xx/xxxx",
+                  approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
+                },
+                authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+              }
+            })
+
+          const PDF_BLOBS = invoicePDFDataS
+            .map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
+
+          const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
           const header = '(REPRINTED) Selected Documents'
           fileStore.handleActionViewFilePDF(header, `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})

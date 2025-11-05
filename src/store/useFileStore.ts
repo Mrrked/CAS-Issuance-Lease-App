@@ -1,4 +1,5 @@
 import { FileAttachment } from './types'
+import { PDFDocument } from 'pdf-lib';
 import { defineAsyncComponent } from 'vue';
 import { defineStore } from 'pinia'
 import { useDialog } from 'primevue/usedialog';
@@ -7,10 +8,28 @@ import { useToast } from 'primevue/usetoast'
 const ViewImageModal = defineAsyncComponent(() => import('../components/Dialog/General/File/ViewImageModal.vue'));
 const ViewPDFModal = defineAsyncComponent(() => import('../components/Dialog/General/File/ViewPDFModal.vue'));
 
+
+
 export const useFileStore = defineStore('file', () => {
 
   const toast = useToast()
   const dialog = useDialog()
+
+  const mergePDFBlobs = async (blobs: Blob[]) => {
+    const mergedPdf = await PDFDocument.create();
+
+    for (const blob of blobs) {
+      const arrayBuffer = await blob.arrayBuffer();
+      const pdf = await PDFDocument.load(arrayBuffer);
+      const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+      copiedPages.forEach((page) => mergedPdf.addPage(page));
+    }
+
+    const mergedPdfBytes: any = await mergedPdf.save();
+    const mergedBlob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+
+    return mergedBlob;
+  }
 
   const handleActionViewFilePDF = (header: string, filename: string, pdfBlob: Blob | null, pdfURL: string | null, printCallback: Function | null, downloadCallback: Function | null) => {
     let url: string | null = null
@@ -111,6 +130,8 @@ export const useFileStore = defineStore('file', () => {
   }
 
   return {
+    mergePDFBlobs,
+
     handleActionViewFilePDF,
     handleActionViewFileImage,
     handleActionViewFile,

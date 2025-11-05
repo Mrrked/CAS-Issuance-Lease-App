@@ -1,6 +1,6 @@
-import cdcLogo from '../assets/cdc.png';
-import ciLogo from '../assets/ci.png';
-import cldiLogo from '../assets/cldi.png';
+import cdcLogo from '../assets/cdc.jpg';
+import ciLogo from '../assets/ci.jpg';
+import cldiLogo from '../assets/cldi.jpg';
 
 export interface COMPANY_DETAILS {
     COMPCD:     number

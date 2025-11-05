@@ -276,6 +276,53 @@ export const useUtilitiesStore = defineStore('utils', () => {
       return '0.00'
   }
 
+  const convert2DecimalNumberAmountToAmountInWords = (num: number): string => {
+    function toWords(n: number): string {
+      const a = [
+        '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
+        'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen',
+        'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'
+      ];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      const convertSegment = (n: number): string => {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? ' ' + a[n % 10] : '');
+        if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convertSegment(n % 100) : '');
+        return '';
+      };
+
+      if (n === 0) return 'Zero';
+
+      const billions = Math.floor(n / 1_000_000_000);
+      const millions = Math.floor((n % 1_000_000_000) / 1_000_000);
+      const thousands = Math.floor((n % 1_000_000) / 1000);
+      const remainder = n % 1000;
+
+      let result = '';
+      if (billions) result += convertSegment(billions) + ' Billion';
+      if (millions) result += (result ? ' ' : '') + convertSegment(millions) + ' Million';
+      if (thousands) result += (result ? ' ' : '') + convertSegment(thousands) + ' Thousand';
+      if (remainder) result += (result ? ' ' : '') + convertSegment(remainder);
+
+      return result;
+    }
+
+    const pesos = Math.floor(num);
+    const centavos = Math.round((num - pesos) * 100);
+
+    const pesoWords = toWords(pesos);
+    const centavoText = centavos.toString().padStart(2, '0');
+
+    if (pesos === 0 && centavos === 0) {
+      return 'Zero Pesos Only';
+    }
+
+    return centavos === 0
+      ? `${pesoWords} Pesos Only`
+      : `${pesoWords} Pesos And ${centavoText}/100 Only`;
+  };
+
   const isInvalidValue = (value: any): boolean => {
     if (value === undefined) return true
     if (value === null) return true
@@ -420,6 +467,7 @@ export const useUtilitiesStore = defineStore('utils', () => {
 
     addLeadingZeroes,
     formatNumberToString2DecimalNumber,
+    convert2DecimalNumberAmountToAmountInWords,
 
     isInvalidValue,
 

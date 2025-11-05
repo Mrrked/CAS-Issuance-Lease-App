@@ -933,6 +933,7 @@ export interface InvoicePDF {
     clientKey: string,
     project: string,
     unit: string,
+    salesStaff: string,
   },
   footer: {
     acn: string

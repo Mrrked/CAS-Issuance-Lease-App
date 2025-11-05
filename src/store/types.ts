@@ -939,18 +939,32 @@ export interface InvoicePDF {
     dateIssued: string,
     approvedSeriesRange: string
   },
-  // body: {
-  //   particulars: string[]
-  //   accounting_entries: {
-  //     accountCode: string,
-  //     distribution: string,
-  //     amount: string,
-  //     type: 'DEBIT' | 'CREDIT'
-  //   }[]
-  // },
-  // forReceiving: {
-  //   voucherAmount: string,
-  //   voucherAmountInWords: string,
-  // }
+  body: {
+    billings: {
+      itemDescription: string,
+      qty: string,
+      unitCost: string,
+      vatAmount: string,
+      amount: string,
+    }[]
+    breakdowns: {
+      section1: {
+        vatableSales: string,
+        vatAmount: string,
+        vatExemptSales: string,
+        zeroRatedSales: string,
+        governmentTax: string,
+      },
+      section2: {
+        totalSales: string,
+        lessVAT: string,
+        netOfVAT: string,
+        addVAT: string,
+        addGovernmentTaxes: string,
+        lessWithholdingTax: string,
+        totalAmountDue: string,
+      },
+    }
+  },
   authorizedSignature: string,
 }

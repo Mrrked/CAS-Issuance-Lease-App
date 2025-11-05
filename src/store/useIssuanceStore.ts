@@ -1638,7 +1638,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
     const generateDoc = (invoicePDFData: InvoicePDF): jsPDF => {
 
-      const VERY_SMALL_TEXT_FONT_SIZE = 4
+      // const VERY_SMALL_TEXT_FONT_SIZE = 4
       const SMALL_TEXT_FONT_SIZE = 6
       const NORMAL_TEXT_FONT_SIZE = 8
       const MEDIUM_TEXT_FONT_SIZE = 11
@@ -1646,7 +1646,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const EXTRA_LARGE_TEXT_FONT_SIZE = 15
       const TWO_EXTRA_LARGE_TEXT_FONT_SIZE = 17
 
-      const VERY_SMALL_LINE_HEIGHT = VERY_SMALL_TEXT_FONT_SIZE * 1.0 / 72
+      // const VERY_SMALL_LINE_HEIGHT = VERY_SMALL_TEXT_FONT_SIZE * 1.0 / 72
       const SMALL_LINE_HEIGHT = SMALL_TEXT_FONT_SIZE * 1.0 / 72
       const NORMAL_LINE_HEIGHT = NORMAL_TEXT_FONT_SIZE * 1.0 / 72
       const MEDIUM_LINE_HEIGHT = MEDIUM_TEXT_FONT_SIZE * 1.0 / 72
@@ -1654,7 +1654,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const EXTRA_LARGE_LINE_HEIGHT = EXTRA_LARGE_TEXT_FONT_SIZE * 1.0 / 72
       const TWO_EXTRA_LARGE_LINE_HEIGHT = TWO_EXTRA_LARGE_TEXT_FONT_SIZE * 1.0 / 72
 
-      let GLOBAL_Y_SAVEPOINT = 0;
+      // let GLOBAL_Y_SAVEPOINT = 0;
 
       const incrementHeight = (num: number = NORMAL_LINE_HEIGHT) => {cursorLineHeight += num}
 
@@ -2200,69 +2200,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                 // CONTENT
                 head: [],
-                body: [
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
-                ],
+                body: invoicePDFData.body.billings,
 
                 // STYLE
                 tableWidth: 'auto',
@@ -2327,27 +2265,28 @@ export const useIssuanceStore = defineStore('issuance', () => {
           {
             type: 'Invoice Information - Breakdown Information',
             action: () => {
+              const HEIGHT = 1.9
 
-              const HEIGHT = 1.7
+              const colStartX = [0.5, 3.95, 4, 8]
 
-              const colStartX = [0.5, 3.75, 4.25, 8]
+              const isBillingInvoice = invoicePDFData.header.invoiceTypeName.toUpperCase() === 'BILLING'
 
               const BREAKDOWN1 = [
-                { label: 'VATable Sales', amount: '999,999,999.99', isShow: true},
-                { label: 'VAT Amount', amount: '999,999,999.99', isShow: true},
-                { label: 'VAT Exempt Sales', amount: '999,999,999.99', isShow: true},
-                { label: 'Zero-Rated Sales', amount: '999,999,999.99', isShow: true},
-                { label: 'Government Taxes', amount: '999,999,999.99', isShow: true},
+                { label: 'Total Sales',           amount: invoicePDFData.body.breakdowns.section1.totalSales,         isShow: !isBillingInvoice},
+                { label: 'Less: VAT',             amount: invoicePDFData.body.breakdowns.section1.lessVAT,            isShow: !isBillingInvoice},
+                { label: 'Amount: Net of VAT',    amount: invoicePDFData.body.breakdowns.section1.netOfVAT,           isShow: !isBillingInvoice},
+                { label: 'Add: VAT',              amount: invoicePDFData.body.breakdowns.section1.addVAT,             isShow: !isBillingInvoice},
+                { label: 'Add: Government Taxes', amount: invoicePDFData.body.breakdowns.section1.addGovernmentTaxes, isShow: isBillingInvoice},
+                { label: 'Less: Witholding Tax',  amount: invoicePDFData.body.breakdowns.section1.lessWithholdingTax, isShow: !isBillingInvoice},
+                { label: 'Total Amount Due',      amount: invoicePDFData.body.breakdowns.section1.totalAmountDue,     isShow: !isBillingInvoice},
               ]
 
               const BREAKDOWN2 = [
-                { label: 'Total Sales', amount: '999,999,999.99', isShow: true},
-                { label: 'Less: VAT', amount: '999,999,999.99', isShow: true},
-                { label: 'Amount: Net of VAT', amount: '999,999,999.99', isShow: true},
-                { label: 'Add: VAT', amount: '999,999,999.99', isShow: true},
-                { label: 'Add: Government Taxes', amount: '999,999,999.99', isShow: true},
-                { label: 'Less: Witholding Tax', amount: '999,999,999.99', isShow: true},
-                { label: 'Total Amount Due', amount: '999,999,999.99', isShow: true},
+                { label: 'VATable Sales',         amount: invoicePDFData.body.breakdowns.section2.vatableSales,       isShow: !isBillingInvoice},
+                { label: 'VAT Amount',            amount: invoicePDFData.body.breakdowns.section2.vatAmount,          isShow: !isBillingInvoice},
+                { label: 'VAT Exempt Sales',      amount: invoicePDFData.body.breakdowns.section2.vatExemptSales,     isShow: !isBillingInvoice},
+                { label: 'Zero-Rated Sales',      amount: invoicePDFData.body.breakdowns.section2.zeroRatedSales,     isShow: !isBillingInvoice},
+                { label: 'Government Taxes',      amount: invoicePDFData.body.breakdowns.section2.governmentTax,      isShow: isBillingInvoice},
               ]
 
               for (let i = 0; i < doc.getNumberOfPages(); i++) {
@@ -2370,31 +2309,142 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                 doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)
 
-                cursorLineHeight = endLineY - PAGE_CONFIG.TABLE_CELL_PADDING - NORMAL_LINE_HEIGHT
+                cursorLineHeight = startLineY + PAGE_CONFIG.TABLE_CELL_PADDING
 
-                BREAKDOWN1.reverse().forEach(item => {
-                  if (item.isShow) {
-                    doc.setFont('helvetica', 'normal')
-                    doc.text(item.label, colStartX[0] + PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight)
+                // doc.line(0, cursorLineHeight, 8.5, cursorLineHeight)
 
-                    doc.setFont('helvetica', 'bold')
-                    doc.text(item.amount, colStartX[1] - PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight, { align: 'right' })
-                    incrementHeight(-EXTRA_LARGE_LINE_HEIGHT)
-                  }
-                })
+                doc.setLineWidth(0.01)
+                doc.setDrawColor(0,0,0)
 
-                cursorLineHeight = endLineY - PAGE_CONFIG.TABLE_CELL_PADDING - NORMAL_LINE_HEIGHT
+                autoTable(doc, {
+                  // POSITION
+                  startY: cursorLineHeight,
+                  // margin: {
+                  //   top: cursorLineHeight,
+                  //   left: colStartX[0] + PAGE_CONFIG.TABLE_CELL_PADDING,
+                  //   right: PAGE_CONFIG.pageSizeX - colStartX[1],
+                  //   bottom: PAGE_CONFIG.pageSizeY - endLineY + PAGE_CONFIG.TABLE_CELL_PADDING
+                  // },
+                  margin: {
+                    top: cursorLineHeight,
+                    left: colStartX[0] + PAGE_CONFIG.TABLE_CELL_PADDING,
+                    right: PAGE_CONFIG.pageSizeX - colStartX[1],
+                    bottom: 0,
+                  },
 
-                BREAKDOWN2.reverse().forEach(item => {
-                  if (item.isShow) {
-                    doc.setFont('helvetica', 'normal')
-                    doc.text(item.label, colStartX[2] + PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight)
 
-                    doc.setFont('helvetica', 'bold')
-                    doc.text(item.amount, colStartX[3] - PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight, { align: 'right' })
-                    incrementHeight(-EXTRA_LARGE_LINE_HEIGHT)
-                  }
-                })
+                  // CONTENT
+                  head: [],
+                  body: [
+                    ...BREAKDOWN1
+                      .map((item) => {
+                        return [item.label, item.amount]
+                      })
+                  ],
+
+                  // STYLE
+                  tableWidth: 'auto',
+                  theme: 'grid',
+                  styles: {
+                    lineWidth: 0.01,
+                    lineColor: [0, 0, 0],
+                    textColor: [0, 0, 0],
+                    fontStyle: 'bold',
+                    fontSize: NORMAL_TEXT_FONT_SIZE + 1,
+                    cellPadding: {
+                      top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      right: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                    },
+                  },
+                  headStyles: {
+                    fillColor: false,
+                  },
+                  columnStyles: {
+                    0: { cellWidth: ((colStartX[1] - colStartX[0]) /2) - PAGE_CONFIG.TABLE_CELL_PADDING },
+                    1: { cellWidth: ((colStartX[1] - colStartX[0]) /2) - PAGE_CONFIG.TABLE_CELL_PADDING },
+                  },
+
+                  // HOOKS
+                  didParseCell: (data) => {
+                    // You can still bold body cells if needed
+                    if (data.section === 'body') {
+                      data.cell.styles.halign = 'right'
+                    //   if (data.column.index === 0) {
+                    //   } else if (data.column.index === 1) {
+                    //     data.cell.styles.halign = 'center'
+                    //   } else {
+                    //     data.cell.styles.halign = 'right'
+                    //   }
+                    }
+                  },
+                });
+
+                autoTable(doc, {
+                  // POSITION
+                  startY: cursorLineHeight,
+                  // margin: {
+                  //   top: cursorLineHeight,
+                  //   left: colStartX[0] + PAGE_CONFIG.TABLE_CELL_PADDING,
+                  //   right: PAGE_CONFIG.pageSizeX - colStartX[1],
+                  //   bottom: PAGE_CONFIG.pageSizeY - endLineY + PAGE_CONFIG.TABLE_CELL_PADDING
+                  // },
+                  margin: {
+                    top: cursorLineHeight,
+                    left: colStartX[2] + PAGE_CONFIG.TABLE_CELL_PADDING,
+                    right: PAGE_CONFIG.pageSizeX - colStartX[1],
+                    bottom: 0,
+                  },
+
+
+                  // CONTENT
+                  head: [],
+                  body: [
+                    ...BREAKDOWN2
+                      .map((item) => {
+                        return [item.label, item.amount]
+                      })
+                  ],
+
+                  // STYLE
+                  tableWidth: 'auto',
+                  theme: 'grid',
+                  styles: {
+                    lineWidth: 0.01,
+                    lineColor: [0, 0, 0],
+                    textColor: [0, 0, 0],
+                    fontStyle: 'bold',
+                    fontSize: NORMAL_TEXT_FONT_SIZE + 1,
+                    cellPadding: {
+                      top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      right: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                    },
+                  },
+                  headStyles: {
+                    fillColor: false,
+                  },
+                  columnStyles: {
+                    0: { cellWidth: ((colStartX[3] - colStartX[2]) /2) - PAGE_CONFIG.TABLE_CELL_PADDING },
+                    1: { cellWidth: ((colStartX[3] - colStartX[2]) /2) - PAGE_CONFIG.TABLE_CELL_PADDING },
+                  },
+
+                  // HOOKS
+                  didParseCell: (data) => {
+                    // You can still bold body cells if needed
+                    if (data.section === 'body') {
+                      data.cell.styles.halign = 'right'
+                    //   if (data.column.index === 0) {
+                    //   } else if (data.column.index === 1) {
+                    //     data.cell.styles.halign = 'center'
+                    //   } else {
+                    //     data.cell.styles.halign = 'right'
+                    //   }
+                    }
+                  },
+                });
               }
             }
           }
@@ -3005,6 +3055,36 @@ export const useIssuanceStore = defineStore('issuance', () => {
         clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
         project: selectedInvoiceRecord.DETAILS.PRJNAM,
         unit: selectedInvoiceRecord.PBL_KEY.slice(3),
+      },
+      body: {
+        billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
+          .map((item) => {
+            return {
+              itemDescription: item.ITEM,
+              qty: item.QTY.toString(),
+              unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
+              vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
+              amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
+            }
+          }),
+        breakdowns: {
+          section1: {
+            vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
+            vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
+            zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
+            governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+          },
+          section2: {
+            totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
+            lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
+            addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+            lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
+            totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
+          },
+        }
       },
       footer: {
         acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",

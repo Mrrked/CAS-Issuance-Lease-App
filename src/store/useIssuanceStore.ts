@@ -3332,7 +3332,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   onMounted(() => {
-    handleActionSearch(2)
+    // handleActionSearch(2)
 
     const SAMPLE_BILLING_INVOICE: InvoiceRecord = {
       "PBL_KEY": "CL3 L  U001  ",

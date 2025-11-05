@@ -1,9 +1,11 @@
-import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
-import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceRecord, LeaseBill } from './types';
+import { COMPANIES, COMPANY_DETAILS } from './config';
+import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
+import jsPDF, { jsPDFOptions } from 'jspdf';
 
+import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
-import jsPDF from 'jspdf';
+import { onMounted } from 'vue';
 import { useFileStore } from './useFileStore';
 import { useMainStore } from './useMainStore';
 import { usePerBatchRunStore } from './usePerBatchRunStore';
@@ -1631,6 +1633,991 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return generateDoc(INVOICE_RECORDS).output('blob')
   }
 
+  const generateInvoicePDFBlob = (invoicePDFData: InvoicePDF):Blob => {
+    console.log('GENERATE PDF BLOB FOR VOUCHER', invoicePDFData)
+
+    const generateDoc = (invoicePDFData: InvoicePDF): jsPDF => {
+
+      const VERY_SMALL_TEXT_FONT_SIZE = 4
+      const SMALL_TEXT_FONT_SIZE = 6
+      const NORMAL_TEXT_FONT_SIZE = 8
+      const MEDIUM_TEXT_FONT_SIZE = 11
+      const LARGE_TEXT_FONT_SIZE = 13
+      const EXTRA_LARGE_TEXT_FONT_SIZE = 15
+      const TWO_EXTRA_LARGE_TEXT_FONT_SIZE = 17
+
+      const VERY_SMALL_LINE_HEIGHT = VERY_SMALL_TEXT_FONT_SIZE * 1.0 / 72
+      const SMALL_LINE_HEIGHT = SMALL_TEXT_FONT_SIZE * 1.0 / 72
+      const NORMAL_LINE_HEIGHT = NORMAL_TEXT_FONT_SIZE * 1.0 / 72
+      const MEDIUM_LINE_HEIGHT = MEDIUM_TEXT_FONT_SIZE * 1.0 / 72
+      const LARGE_LINE_HEIGHT = LARGE_TEXT_FONT_SIZE * 1.0 / 72
+      const EXTRA_LARGE_LINE_HEIGHT = EXTRA_LARGE_TEXT_FONT_SIZE * 1.0 / 72
+      const TWO_EXTRA_LARGE_LINE_HEIGHT = TWO_EXTRA_LARGE_TEXT_FONT_SIZE * 1.0 / 72
+
+      let GLOBAL_Y_SAVEPOINT = 0;
+
+      const incrementHeight = (num: number = NORMAL_LINE_HEIGHT) => {cursorLineHeight += num}
+
+      // DONE
+      const addEmptyCheckbox = (x: number, y: number, lineWidth: number = 0.01) => {
+        doc.setLineWidth(lineWidth)
+        doc.setFillColor(225, 225, 225);
+        doc.roundedRect(x, y, 0.16, 0.16, 0.045, 0.045, 'FD')
+      }
+
+      // DONE
+      const addCheckmark = (doc: jsPDF, x: number, y: number, size: number = 0.13) => {
+        const lineWidth = 0.005;
+        const offset = size * 0.15;
+
+        doc.setLineWidth(lineWidth);
+
+        // Left leg
+        doc.line(x + offset, y + size * 0.5, x + size * 0.4, y + size * 0.8);
+
+        // Right leg
+        doc.line(x + size * 0.4, y + size * 0.8, x + size * 0.85, y + size * 0.2);
+      }
+
+      // DONE
+      const addMultiLineText = (
+        currentContent: string,
+        currentContentAllowableWidth: number,
+        fontSize: number,
+        fontStyle: string,
+        lineHeight: number,
+        addEndLineHeight: number,
+        x: number,
+        y: number,
+        align: 'left' | 'center' | 'right' = 'left',
+      ) => {
+        doc.setFontSize(fontSize)
+        doc.setFont("helvetica", fontStyle)
+
+        const currentContentTextLines: string[] = doc.splitTextToSize(currentContent, currentContentAllowableWidth);
+        // const currentContentTextLineLength = currentContentTextLines.length
+
+        let accumulateY = y
+
+        currentContentTextLines.forEach(text => {
+          doc.text(text, x, accumulateY, {align: align})
+          accumulateY += lineHeight
+        });
+
+        cursorLineHeight = accumulateY + addEndLineHeight
+      }
+
+      // DONE
+      const handleCreateNewPage = () => {
+        doc.addPage(PAGE_LAYOUT.format, PAGE_LAYOUT.orientation)
+      }
+
+      // DONE
+      const handleAddPageBorder = () => {
+        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.startLineY) // TOP
+        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.endLineY,     PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // BOTTOM
+        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.startLineX, PAGE_CONFIG.endLineY)   // LEFT
+        doc.line(PAGE_CONFIG.endLineX,    PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // RIGHT
+      }
+
+      // DONE
+      const handleAddSectionBorder = () => {
+        // HEADER
+        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerStartLineY) // TOP
+        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // BOTTOM
+        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerStartLineX, PAGE_CONFIG.headerEndLineY)   // LEFT
+        doc.line(PAGE_CONFIG.headerEndLineX,    PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // RIGHT
+
+        // BODY
+        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.endLineX,         PAGE_CONFIG.headerEndLineY)   // TOP
+        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.endLineX,         PAGE_CONFIG.footerStartLineY) // BOTTOM
+        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerStartLineY) // LEFT
+        doc.line(PAGE_CONFIG.endLineX,          PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // RIGHT
+
+        // FOOTER
+        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // TOP
+        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // BOTTOM
+        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerEndLineY)   // LEFT
+        doc.line(PAGE_CONFIG.footerEndLineX,    PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // RIGHT
+      }
+
+      // DONE
+      const handleAddHeader = (pageNumber: number, total: number) => {
+        cursorLineHeight = PAGE_CONFIG.headerStartLineY + SMALL_LINE_HEIGHT
+
+        const TEXT = [
+          // GROUP 1
+          "CGC ACCOUNTING SYSTEM VERSION 2.0",
+          "Run Date & Time: " + invoicePDFData.header.runDateAndTime,
+          "User ID: " + invoicePDFData.header.runUsername.toUpperCase(),
+          "Page " + pageNumber + " of " + total,
+
+          invoicePDFData.header.companyName.toUpperCase(),
+          invoicePDFData.header.companyAddress.toUpperCase(),
+          "TEL. NO. " + invoicePDFData.header.companyTelephone.toUpperCase(),
+          "VAT REG. TIN. " + invoicePDFData.header.companyRegisteredTIN.toUpperCase(),
+
+          // GROUP 2
+          invoicePDFData.header.invoiceTypeName.toUpperCase(),
+          'INVOICE',
+          invoicePDFData.header.invoiceTypeName.toUpperCase() + ' INVOICE NO. ' + invoicePDFData.header.controlNumber,
+          'Date :',
+          invoicePDFData.header.dateValue,
+
+          // GROUP 3
+          invoicePDFData.header.invoiceTypeName.toUpperCase() === 'BILLING' ?
+            'BILL TO' :
+            'SOLD TO',
+          invoicePDFData.header.name,
+          'CLIENT KEY',
+          invoicePDFData.header.clientKey,
+          'ADDRESS',
+          invoicePDFData.header.address,
+          'PROJECT',
+          invoicePDFData.header.project,
+          'TIN',
+          invoicePDFData.header.tin,
+          'UNIT',
+          invoicePDFData.header.unit,
+        ]
+
+        const HEADER_COL_START = [ 0.5, 1.375, 5.1, 8 ]
+
+        // doc.line(HEADER_COL_START[2],  PAGE_CONFIG.headerStartLineY, HEADER_COL_START[2], PAGE_CONFIG.headerEndLineY)
+
+        ///// GROUP 1
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+
+        doc.text(TEXT[0], PAGE_CONFIG.startLineX, cursorLineHeight)
+        incrementHeight(SMALL_LINE_HEIGHT)
+
+        cursorLineHeight = PAGE_CONFIG.headerStartLineY + SMALL_LINE_HEIGHT
+
+        doc.text(TEXT[1], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {align: 'right'})
+        incrementHeight(SMALL_LINE_HEIGHT)
+
+        doc.text(TEXT[2], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {align: 'right'})
+        incrementHeight(SMALL_LINE_HEIGHT)
+
+        doc.text(TEXT[3], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {align: 'right'})
+        incrementHeight(SMALL_LINE_HEIGHT)
+
+        ///// GROUP 2
+
+        const checkpointY = cursorLineHeight + MEDIUM_LINE_HEIGHT
+
+        if (invoicePDFData.header.companyLogo){
+          doc.addImage(invoicePDFData.header.companyLogo, "PNG", HEADER_COL_START[0], cursorLineHeight - SMALL_LINE_HEIGHT, invoicePDFData.header.companyLogoWidth, invoicePDFData.header.companyLogoHeight, undefined, "FAST");
+        }
+
+        cursorLineHeight = checkpointY - (NORMAL_LINE_HEIGHT / 2)
+
+        addMultiLineText(
+          TEXT[4],
+          HEADER_COL_START[2] - HEADER_COL_START[1],
+          MEDIUM_TEXT_FONT_SIZE,
+          "bold",
+          MEDIUM_LINE_HEIGHT,
+          0.015,
+          HEADER_COL_START[1],
+          cursorLineHeight,
+        )
+
+        addMultiLineText(
+          TEXT[5],
+          HEADER_COL_START[2] - HEADER_COL_START[1] - 1,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0.015,
+          HEADER_COL_START[1],
+          cursorLineHeight,
+        )
+
+        addMultiLineText(
+          TEXT[6],
+          HEADER_COL_START[2] - HEADER_COL_START[1],
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0.015,
+          HEADER_COL_START[1],
+          cursorLineHeight,
+        )
+
+        addMultiLineText(
+          TEXT[7],
+          HEADER_COL_START[2] - HEADER_COL_START[1],
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0.015,
+          HEADER_COL_START[1],
+          cursorLineHeight,
+        )
+
+        cursorLineHeight = checkpointY + SMALL_LINE_HEIGHT
+
+        doc.setFont("helvetica", "bold")
+
+        doc.setFontSize(MEDIUM_TEXT_FONT_SIZE)
+        doc.text(TEXT[8], HEADER_COL_START[2] + 1.175, cursorLineHeight)
+
+        doc.setFontSize(TWO_EXTRA_LARGE_TEXT_FONT_SIZE)
+        doc.text(TEXT[9], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {'align': 'right'})
+        incrementHeight(TWO_EXTRA_LARGE_LINE_HEIGHT)
+
+        // TWO COLUMNED
+
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(MEDIUM_TEXT_FONT_SIZE)
+
+        doc.text(TEXT[10], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {'align': 'right'})
+        incrementHeight(EXTRA_LARGE_LINE_HEIGHT)
+
+        doc.text(TEXT[11], HEADER_COL_START[2] + 1.175, cursorLineHeight)
+        doc.text(TEXT[12], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {'align': 'right'})
+        incrementHeight(LARGE_LINE_HEIGHT)
+
+        // GROUP 3
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+
+        const colXStart = [ 0.5, 1.5, 5, 6, 8 ]
+
+        cursorLineHeight = cursorLineHeight + NORMAL_LINE_HEIGHT
+
+        let baseCursorLineHeight = cursorLineHeight
+
+        doc.setFont("helvetica", "bold")
+        doc.text(TEXT[13], colXStart[0], baseCursorLineHeight)
+        doc.text(':', colXStart[1] - 0.15, baseCursorLineHeight)
+        doc.text(TEXT[15], colXStart[2], baseCursorLineHeight)
+        doc.text(':', colXStart[3] - 0.15, baseCursorLineHeight)
+
+        addMultiLineText(
+          TEXT[14],
+          colXStart[2] - colXStart[1] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[1],
+          baseCursorLineHeight,
+        )
+        addMultiLineText(
+          TEXT[16],
+          colXStart[4] - colXStart[3] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[3],
+          baseCursorLineHeight,
+        )
+
+        baseCursorLineHeight = baseCursorLineHeight + (NORMAL_LINE_HEIGHT * 2)
+
+        doc.setFont("helvetica", "bold")
+        doc.text(TEXT[17], colXStart[0], baseCursorLineHeight)
+        doc.text(':', colXStart[1] - 0.15, baseCursorLineHeight)
+        doc.text(TEXT[19], colXStart[2], baseCursorLineHeight)
+        doc.text(':', colXStart[3] - 0.15, baseCursorLineHeight)
+
+        addMultiLineText(
+          TEXT[18],
+          colXStart[2] - colXStart[1] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[1],
+          baseCursorLineHeight,
+        )
+        addMultiLineText(
+          TEXT[20],
+          colXStart[4] - colXStart[3] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[3],
+          baseCursorLineHeight,
+        )
+        // doc.text(TEXT[18], colXStart[1], cursorLineHeight)
+        // doc.text(TEXT[20], colXStart[3], cursorLineHeight)
+
+        baseCursorLineHeight = baseCursorLineHeight + (NORMAL_LINE_HEIGHT * 2)
+
+        doc.setFont("helvetica", "bold")
+        doc.text(TEXT[21], colXStart[0], baseCursorLineHeight)
+        doc.text(':', colXStart[1] - 0.15, baseCursorLineHeight)
+        doc.text(TEXT[23], colXStart[2], baseCursorLineHeight)
+        doc.text(':', colXStart[3] - 0.15, baseCursorLineHeight)
+
+        addMultiLineText(
+          TEXT[22],
+          colXStart[2] - colXStart[1] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[1],
+          baseCursorLineHeight,
+        )
+        addMultiLineText(
+          TEXT[24],
+          colXStart[4] - colXStart[3] - PAGE_CONFIG.TABLE_CELL_PADDING,
+          NORMAL_TEXT_FONT_SIZE,
+          "normal",
+          NORMAL_LINE_HEIGHT,
+          0,
+          colXStart[3],
+          baseCursorLineHeight,
+        )
+      }
+
+      // DONE
+      const handleAddFooter = () => {
+        cursorLineHeight = PAGE_CONFIG.footerStartLineY + SMALL_LINE_HEIGHT
+
+        const TEXT = [
+          invoicePDFData.footer.acn,
+          invoicePDFData.footer.dateIssued,
+          "Approved Series Range : " + invoicePDFData.footer.approvedSeriesRange,
+        ]
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+
+        doc.text(TEXT[0], PAGE_CONFIG.footerStartLineX, cursorLineHeight)
+        incrementHeight(MEDIUM_LINE_HEIGHT)
+
+        doc.text(TEXT[1], PAGE_CONFIG.footerStartLineX, cursorLineHeight)
+        incrementHeight(MEDIUM_LINE_HEIGHT)
+
+        doc.text(TEXT[2], PAGE_CONFIG.footerStartLineX, cursorLineHeight)
+      }
+
+      // DONE
+      const handleAddPageNumber = (pageNumber: number, total: number) => {
+        cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
+
+        const part1 = 'Page ';
+        const part2 = `${pageNumber}`;
+        const part3 = ' of ';
+        const part4 = `${total}`;
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE);
+
+        // Measure widths
+        doc.setFont("helvetica", "normal");
+        const width1 = doc.getTextWidth(part1);
+        const width3 = doc.getTextWidth(part3);
+
+        doc.setFont("helvetica", "bold");
+        const width2 = doc.getTextWidth(part2);
+        const width4 = doc.getTextWidth(part4);
+
+        const totalWidth = width1 + width2 + width3 + width4;
+
+        const startX = PAGE_CONFIG.endLineX - totalWidth;
+        let cursorX = startX;
+
+        // Draw "Page "
+        doc.setFont("helvetica", "normal");
+        doc.text(part1, cursorX, cursorLineHeight);
+        cursorX += width1;
+
+        // Draw bold page number
+        doc.setFont("helvetica", "bold");
+        doc.text(part2, cursorX, cursorLineHeight);
+        cursorX += width2;
+
+        // Draw " of "
+        doc.setFont("helvetica", "normal");
+        doc.text(part3, cursorX, cursorLineHeight);
+        cursorX += width3;
+
+        // Draw bold total
+        doc.setFont("helvetica", "bold");
+        doc.text(part4, cursorX, cursorLineHeight);
+      }
+
+      // DONE
+      const handleAddSystemDocumentNotice = () => {
+        cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
+
+        const TEXT = [
+          "This is a system generated document. No signature required.",
+        ]
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.setFont("helvetica", "italic")
+        doc.text(TEXT[0], PAGE_CONFIG.middleLineX, cursorLineHeight, { align: 'center'})
+      }
+
+      // DONE
+      const handleAddPrintCount = (printCount: number) => {
+        cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "normal")
+        doc.text(`No of printing made :`, PAGE_CONFIG.startLineX, cursorLineHeight)
+
+        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+        doc.setFont("helvetica", "bold")
+        doc.text(`${printCount}`, PAGE_CONFIG.startLineX + 1.2, cursorLineHeight)
+        incrementHeight(SMALL_LINE_HEIGHT)
+      }
+
+      // DONE
+      const handleAddMainBodyBorder = (isFirstPage: boolean) => {
+        const sectionStartLineY = PAGE_CONFIG.bodyStartLineY
+        const sectionEndLineY = PAGE_CONFIG.bodyEndLineY
+
+        const SECTION_HEIGHT = sectionEndLineY - sectionStartLineY
+
+        doc.rect(
+          PAGE_CONFIG.bodyStartLineX,
+          sectionStartLineY,
+          PAGE_CONFIG.contentWidth,
+          SECTION_HEIGHT
+        )
+
+        if (isFirstPage) {
+          doc.line(0, PAGE_CONFIG.firstPageBodyEndLineY, PAGE_CONFIG.pageSizeY, PAGE_CONFIG.firstPageBodyEndLineY)
+        }
+      }
+
+      // DONE
+      const handleAddMainBodyLayout = (isFirstPage: boolean) => {
+        const TABLE_HEADER_HEIGHT = 0.1 + (PAGE_CONFIG.TABLE_CELL_PADDING * 2)
+        // const HALF_TABLE_CELL_PADDING = PAGE_CONFIG.TABLE_CELL_PADDING / 2
+
+        const firstSectionStartLineY = PAGE_CONFIG.bodyStartLineY
+        const firstSectionEndLineY = isFirstPage ?
+          PAGE_CONFIG.firstPageBodyEndLineY - PAGE_CONFIG.SECTION_GAP :
+          PAGE_CONFIG.bodyEndLineY - PAGE_CONFIG.SECTION_GAP
+        const firstSectionHeight = firstSectionEndLineY - firstSectionStartLineY
+        const firstSectionColumnStartX = [ 0.5, 4.05, 4.55, 5.70, 6.85, 8 ]
+        const firstSectionColumnNames = [
+          'Item / Description',
+          'Qty',
+          'Unit Cost',
+          'VAT Amount',
+          'Amount',
+        ]
+
+        // FIRST SECTION HEADER
+        doc.setLineWidth(0.01)
+        doc.setDrawColor(0,0,0)
+        doc.rect(
+          PAGE_CONFIG.bodyStartLineX,
+          firstSectionStartLineY,
+          PAGE_CONFIG.contentWidth,
+          TABLE_HEADER_HEIGHT
+        )
+
+        // FIRST SECTION BODY
+        doc.rect(
+          PAGE_CONFIG.bodyStartLineX,
+          firstSectionStartLineY + TABLE_HEADER_HEIGHT,
+          PAGE_CONFIG.contentWidth,
+          firstSectionHeight - TABLE_HEADER_HEIGHT
+        )
+
+        // FIRST SECTION COLUMNS
+        firstSectionColumnNames.forEach((columnName, index) => {
+          const startX = firstSectionColumnStartX[index]
+          const endX = firstSectionColumnStartX[index + 1]
+          const middleX = startX + ((endX - startX) / 2)
+          const middleY = firstSectionStartLineY + (TABLE_HEADER_HEIGHT / 2) + (SMALL_LINE_HEIGHT / 2)
+
+          doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)
+          doc.setFont("helvetica", "bold")
+
+          if (index === 0) {
+            doc.text(columnName, startX + PAGE_CONFIG.TABLE_CELL_PADDING, middleY, { align: 'left' })
+          } else if (index === 1) {
+            doc.text(columnName, middleX, middleY, { align: 'center' })
+          } else {
+            doc.text(columnName, endX - PAGE_CONFIG.TABLE_CELL_PADDING, middleY, { align: 'right' })
+          }
+
+          if (index + 1 !== firstSectionColumnNames.length)
+            doc.line(endX, firstSectionStartLineY, endX, firstSectionStartLineY + TABLE_HEADER_HEIGHT)
+            // doc.line(endX, firstSectionStartLineY, endX, firstSectionEndLineY)
+        })
+      }
+
+      //
+      const handleAddMainBodyContent = () => {
+        interface Section {
+          type: string,
+          action: Function
+        }
+        const TABLE_HEADER_HEIGHT = 0.1 + (PAGE_CONFIG.TABLE_CELL_PADDING * 2)
+        // const HALF_TABLE_CELL_PADDING = PAGE_CONFIG.TABLE_CELL_PADDING / 2
+
+        const CONTENTS: Section[] = [
+          {
+            type: 'Invoice Information - Billings',
+            action: () => {
+              doc.setPage(1)
+
+              const sectionStartLineY = PAGE_CONFIG.bodyStartLineY + TABLE_HEADER_HEIGHT
+              // let sectionEndLineY = PAGE_CONFIG.firstPageBodyEndLineY - PAGE_CONFIG.SECTION_GAP
+              // const sectionHeigt = PAGE_CONFIG.headerEndLineY - cursorLineHeight
+
+              // doc.line(0, sectionStartLineY, PAGE_CONFIG.pageSizeX, sectionStartLineY)
+              // doc.line(0, sectionEndLineY, PAGE_CONFIG.pageSizeX, sectionEndLineY)
+
+              // const sectionColumnStartX = [ 0.5, 4.05, 4.55, 5.70, 6.85, 8 ]
+              // const sectionColumnNames = [
+              //   'Item / Description',
+              //   'Qty',
+              //   'Unit Cost',
+              //   'VAT Amount',
+              //   'Amount',
+              // ]
+
+              doc.setLineWidth(0.01)
+              doc.setDrawColor(0,0,0)
+
+              autoTable(doc, {
+                // POSITION
+                startY: sectionStartLineY,
+                margin: {
+                  top: sectionStartLineY,
+                  left: PAGE_CONFIG.marginLeft,
+                  right: PAGE_CONFIG.marginLeft,
+                  bottom: PAGE_CONFIG.pageSizeY - PAGE_CONFIG.firstPageBodyEndLineY + 1.7
+                },
+
+                // CONTENT
+                head: [],
+                body: [
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                  ['ELECTRICITY CHARGE ( November 2025 ) Vat Exempt', 1, '999,999,999.00', '999,999,999.00', '999,999,999.00'],
+                ],
+
+                // STYLE
+                tableWidth: 'auto',
+                theme: 'plain',
+                styles: {
+                  lineWidth: 0.00,
+                  lineColor: [0, 0, 0],
+                  textColor: [0, 0, 0],
+                  fontStyle: 'normal',
+                  fontSize: NORMAL_TEXT_FONT_SIZE + 1,
+                  cellPadding: {
+                    top: PAGE_CONFIG.TABLE_CELL_PADDING,
+                    right: PAGE_CONFIG.TABLE_CELL_PADDING,
+                    bottom: 0,
+                    left: PAGE_CONFIG.TABLE_CELL_PADDING,
+                  },
+                },
+                headStyles: {
+                  fillColor: false,
+                },
+                columnStyles: {
+                  0: { cellWidth: 3.55 },
+                  1: { cellWidth: 0.5 },
+                  2: { cellWidth: 1.15 },
+                  3: { cellWidth: 1.15 },
+                  4: { cellWidth: 1.15 },
+                },
+
+                // HOOKS
+                didParseCell: (data) => {
+                  // You can still bold body cells if needed
+                  if (data.section === 'body') {
+                    if (data.column.index === 0) {
+                      data.cell.styles.halign = 'left'
+                    } else if (data.column.index === 1) {
+                      data.cell.styles.halign = 'center'
+                    } else {
+                      data.cell.styles.halign = 'right'
+                    }
+                  }
+                },
+                // Hook called every time a new page is added
+                willDrawPage: (data) => {
+                  if(doc.getCurrentPageInfo().pageNumber !== 1) {
+                    data.table.settings.margin = {
+                      top: sectionStartLineY,
+                      left: PAGE_CONFIG.marginLeft,
+                      right: PAGE_CONFIG.marginLeft,
+                      bottom: PAGE_CONFIG.pageSizeY - PAGE_CONFIG.bodyEndLineY + 1.7
+                    }
+                  }
+                },
+              });
+
+              const tableLastCursorLineHeight = (doc as any).lastAutoTable.finalY;
+              // doc.line(PAGE_CONFIG.startLineX, tableLastCursorLineHeight, PAGE_CONFIG.endLineX, tableLastCursorLineHeight)
+              console.log('TABLE ENDS AT Y = ', tableLastCursorLineHeight, tableLastCursorLineHeight - cursorLineHeight);
+
+              cursorLineHeight = tableLastCursorLineHeight
+            }
+          },
+          {
+            type: 'Invoice Information - Breakdown Information',
+            action: () => {
+
+              const HEIGHT = 1.7
+
+              const colStartX = [0.5, 3.75, 4.25, 8]
+
+              const BREAKDOWN1 = [
+                { label: 'VATable Sales', amount: '999,999,999.99', isShow: true},
+                { label: 'VAT Amount', amount: '999,999,999.99', isShow: true},
+                { label: 'VAT Exempt Sales', amount: '999,999,999.99', isShow: true},
+                { label: 'Zero-Rated Sales', amount: '999,999,999.99', isShow: true},
+                { label: 'Government Taxes', amount: '999,999,999.99', isShow: true},
+              ]
+
+              const BREAKDOWN2 = [
+                { label: 'Total Sales', amount: '999,999,999.99', isShow: true},
+                { label: 'Less: VAT', amount: '999,999,999.99', isShow: true},
+                { label: 'Amount: Net of VAT', amount: '999,999,999.99', isShow: true},
+                { label: 'Add: VAT', amount: '999,999,999.99', isShow: true},
+                { label: 'Add: Government Taxes', amount: '999,999,999.99', isShow: true},
+                { label: 'Less: Witholding Tax', amount: '999,999,999.99', isShow: true},
+                { label: 'Total Amount Due', amount: '999,999,999.99', isShow: true},
+              ]
+
+              for (let i = 0; i < doc.getNumberOfPages(); i++) {
+                doc.setPage(i + 1)
+
+                let startLineY = 0
+                let endLineY = 0
+
+                if (i === 0) {
+                  startLineY = PAGE_CONFIG.firstPageBodyEndLineY - HEIGHT
+                  endLineY = PAGE_CONFIG.firstPageBodyEndLineY
+                } else {
+                  startLineY = PAGE_CONFIG.bodyEndLineY - HEIGHT
+                  endLineY = PAGE_CONFIG.bodyEndLineY
+                }
+
+                doc.setLineWidth(0.01)
+                doc.setDrawColor(0,0,0)
+                // doc.line(0, startLineY, 8.5, startLineY)
+
+                doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)
+
+                cursorLineHeight = endLineY - PAGE_CONFIG.TABLE_CELL_PADDING - NORMAL_LINE_HEIGHT
+
+                BREAKDOWN1.reverse().forEach(item => {
+                  if (item.isShow) {
+                    doc.setFont('helvetica', 'normal')
+                    doc.text(item.label, colStartX[0] + PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight)
+
+                    doc.setFont('helvetica', 'bold')
+                    doc.text(item.amount, colStartX[1] - PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight, { align: 'right' })
+                    incrementHeight(-EXTRA_LARGE_LINE_HEIGHT)
+                  }
+                })
+
+                cursorLineHeight = endLineY - PAGE_CONFIG.TABLE_CELL_PADDING - NORMAL_LINE_HEIGHT
+
+                BREAKDOWN2.reverse().forEach(item => {
+                  if (item.isShow) {
+                    doc.setFont('helvetica', 'normal')
+                    doc.text(item.label, colStartX[2] + PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight)
+
+                    doc.setFont('helvetica', 'bold')
+                    doc.text(item.amount, colStartX[3] - PAGE_CONFIG.TABLE_CELL_PADDING, cursorLineHeight, { align: 'right' })
+                    incrementHeight(-EXTRA_LARGE_LINE_HEIGHT)
+                  }
+                })
+              }
+            }
+          }
+        ]
+
+        CONTENTS.forEach(content => {
+          content.action()
+        });
+      }
+
+      const handleAddSection_Signatory = () => {
+        doc.setPage(1)
+
+        let sectionStartLineY = PAGE_CONFIG.firstPageBodyEndLineY + PAGE_CONFIG.SECTION_GAP
+        let sectionEndLineY = PAGE_CONFIG.bodyEndLineY - PAGE_CONFIG.SECTION_GAP
+
+        // doc.line(0, sectionStartLineY, 8.5, sectionStartLineY)
+        // doc.line(0, sectionEndLineY, 8.5, sectionEndLineY)
+
+        // const SECTION_WIDTH = PAGE_CONFIG.contentWidth
+        const THIS_SECTION_WIDTH = PAGE_CONFIG.contentWidth
+        // const SECTION_HEIGHT = sectionEndLineY - sectionStartLineY
+        // const SECTION_PADDING = PAGE_CONFIG.TABLE_CELL_PADDING
+
+        const sectionStartLineX = PAGE_CONFIG.bodyStartLineX
+        const sectionEndLineX = sectionStartLineX + THIS_SECTION_WIDTH
+
+        // doc.line(sectionStartLineX, 0, sectionStartLineX, 13)
+        // doc.line(sectionEndLineX, 0, sectionEndLineX, 13)
+
+        const TEXT = [
+          invoicePDFData.authorizedSignature.toUpperCase(),
+          "Authorized Signature"
+        ]
+
+        const newStartLineX = sectionEndLineX - 2.5 + 0.25
+        const newMiddleLineX = sectionEndLineX - 1.25
+        const newEndLineX = sectionEndLineX - 0.25
+
+        cursorLineHeight = sectionEndLineY - EXTRA_LARGE_LINE_HEIGHT
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)
+        doc.setFont('helvetica', 'bold')
+        doc.text(TEXT[0], newMiddleLineX, cursorLineHeight - 0.05, { align: 'center' })
+
+        doc.line(newStartLineX, cursorLineHeight, newEndLineX, cursorLineHeight)
+
+        doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+        doc.setFont('helvetica', 'bold')
+        doc.text(TEXT[1], newMiddleLineX, cursorLineHeight + NORMAL_LINE_HEIGHT, { align: 'center' })
+
+        return [sectionStartLineY, sectionEndLineY]
+      }
+
+      const PAGE_LAYOUT: jsPDFOptions = {
+        orientation:  'portrait',
+        unit:         "in",
+        format:       [8.5, 11.0],
+      }
+
+      const PAGE_CONFIG = {
+        pageSizeX: 8.5,
+        pageSizeY: 11,
+
+        marginLeft: 0.5,
+        marginTop: 0.5,
+
+        HEADER_HEIGHT: 1.9,
+        FOOTER_HEIGHT: 0.4,
+
+        SECTION_GAP: SMALL_LINE_HEIGHT,
+        TABLE_CELL_PADDING: 0.1,
+
+        INDENT: 0.38,
+        TAB: 0.5,
+
+        overflow: {
+          isOnePage: true,
+          lastMainBodyPageNumber: 0,
+          newBodyEndLineY: 0,
+        },
+
+        get contentWidth() {
+          return this.pageSizeX - (this.marginLeft * 2);
+        },
+        get contentHeight() {
+          return this.pageSizeY - (this.marginTop * 2);
+        },
+
+        // ROOT
+        get startLineX() {
+          return this.marginLeft;
+        },
+        get middleLineX() {
+          return this.startLineX + (this.contentWidth / 2);
+        },
+        get endLineX() {
+          return this.pageSizeX - this.marginLeft;
+        },
+        get startLineY() {
+          return this.marginTop;
+        },
+        get middleLineY() {
+          return this.startLineY + (this.contentHeight / 2);
+        },
+        get endLineY() {
+          return this.startLineY + this.contentHeight;
+        },
+        get tablePaddedStartLineX() {
+          return this.startLineX + this.TABLE_CELL_PADDING;
+        },
+        get tablePaddedEndLineX() {
+          return this.endLineX - this.TABLE_CELL_PADDING;
+        },
+
+        // HEADER
+        get headerStartLineX() {
+          return this.startLineX;
+        },
+        get headerEndLineX() {
+          return this.endLineX;
+        },
+        get headerStartLineY() {
+          return this.marginTop;
+        },
+        get headerEndLineY() {
+          return this.marginTop + this.HEADER_HEIGHT;
+        },
+
+        // FOOTER
+        get footerStartLineX() {
+          return this.startLineX;
+        },
+        get footerEndLineX() {
+          return this.endLineX;
+        },
+        get footerStartLineY() {
+          return this.endLineY - this.FOOTER_HEIGHT;
+        },
+        get footerEndLineY() {
+          return this.endLineY;
+        },
+
+        // BODY
+        get bodyStartLineX() {
+          return this.startLineX;
+        },
+        get bodyEndLineX() {
+          return this.endLineX;
+        },
+        get bodyStartLineY() {
+          return this.headerEndLineY;
+        },
+        get bodyMiddleLineY() {
+          return this.bodyStartLineY + (( this.bodyEndLineY - this.bodyStartLineY) / 2);
+        },
+        get bodyEndLineY() {
+          return this.footerStartLineY;
+        },
+
+        //BODY - FIRST PAGE
+        get firstPageBodyMiddleLineY() {
+          return this.bodyStartLineY + (( this.firstPageBodyEndLineY - this.bodyStartLineY) / 2);
+        },
+        get firstPageBodyEndLineY() {
+          return this.bodyEndLineY - (1 + (SMALL_LINE_HEIGHT * 2))
+        },
+        setOverrideLastPageBodyEndLineY(value: number) {
+          this.overflow.isOnePage = false;
+          this.overflow.lastMainBodyPageNumber = doc.getNumberOfPages();
+          this.overflow.newBodyEndLineY = value;
+          console.log(this.overflow.isOnePage, this.overflow.lastMainBodyPageNumber, this.overflow.newBodyEndLineY);
+        },
+      }
+
+      // INITIAL SETTINGS
+      const doc = new jsPDF(PAGE_LAYOUT);
+
+      doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+      doc.setFont("helvetica", "normal");
+      doc.setLineWidth(0.01);
+      doc.setLineHeightFactor(1.0);
+      doc.setDrawColor(0,0,0)
+
+      // MAIN
+
+      handleCreateNewPage()
+
+      var cursorLineHeight = PAGE_CONFIG.headerEndLineY
+
+      handleAddMainBodyContent()
+      handleAddSection_Signatory()
+
+      // OTHERS
+      const numberOfPages = doc.getNumberOfPages()
+      for (let pageNumber = 1; pageNumber <= numberOfPages; pageNumber++) {
+
+        // MOVE TO PAGE
+        doc.setPage(pageNumber)
+        // console.log(`${pageNumber} / ${numberOfPages}`, doc.getCurrentPageInfo());
+
+        // PRINT ON ALL PAGES
+        // handleAddPageBorder() // TEMPORARY
+        // handleAddSectionBorder() // TEMPORARY
+        // handleAddMainBodyBorder(pageNumber === 1) // TEMPORARY
+
+        handleAddHeader(pageNumber, numberOfPages)
+        handleAddMainBodyLayout(pageNumber === 1)
+        handleAddFooter()
+        handleAddSystemDocumentNotice()
+        // handleAddPageNumber(pageNumber, numberOfPages)
+
+
+        // PRINT ON LAST PAGE
+        // handleAddPrintCount(1)
+      }
+
+      return doc
+    }
+
+    return generateDoc(invoicePDFData).output('blob')
+  }
+
   const handleActionGenerateSummaryInvoicesPDFBlob = async (groupedInvoices: INVOICE_PER_COMPANY_AND_PROJECT[]) => {
     // console.log('GENERATE PDF BLOB FOR SUMMARY OF INVOICES', groupedInvoices)
 
@@ -1961,30 +2948,86 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return generateDoc(groupedInvoices).output('blob')
   }
 
-  const handleActionGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
+  // const handleActionGenerateDraftInvoice = async (SELECTED_INVOICE_RECORD: InvoiceRecord, callback: Function) => {
+  //   await new Promise(resolve => setTimeout(resolve, 1000));
+
+  //   const currentDate = new Date()
+  //   const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
+  //   const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+
+  //   const PDF_BLOB = handleActionGenerateInvoicePDFBlob([{
+  //     ...SELECTED_INVOICE_RECORD,
+  //     DETAILS: {
+  //       ...SELECTED_INVOICE_RECORD.DETAILS,
+
+  //       DATSTP: stampDate,
+  //       TIMSTP: stampTime,
+
+  //       RUNDAT: stampDate,
+  //       RUNTME: stampTime,
+  //     }
+  //   }])
+
+  //   callback()
+
+  //   const header = 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
+  //   fileStore.handleActionViewFilePDF(header, `(DRAFT) Invoice.pdf`, PDF_BLOB, null, () => {}, () => {})
+  // }
+
+  const handleActionGenerateDraftInvoice = async (selectedInvoiceRecord: InvoiceRecord, callback: Function) => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const currentDate = new Date()
-    const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
-    const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+    const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
+    // const prefix = createVoucherForm.voucher_v_type + createVoucherForm.voucher_company_code.toString().padStart(2, '0')
 
-    const PDF_BLOB = handleActionGenerateInvoicePDFBlob([{
-      ...SELECTED_INVOICE_RECORD,
-      DETAILS: {
-        ...SELECTED_INVOICE_RECORD.DETAILS,
+    const invoicePDFData: InvoicePDF = {
+      header: {
+        runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
+        runUsername: sessionStore.authenticatedUser?.username || 'N/A',
 
-        DATSTP: stampDate,
-        TIMSTP: stampTime,
+        companyName: company.CONAME,
+        companyAddress: company.ADDRESS,
+        companyInitials: company.COINIT,
+        companyTelephone: company.TEL_NO,
+        companyRegisteredTIN: company.TIN,
 
-        RUNDAT: stampDate,
-        RUNTME: stampTime,
-      }
-    }])
+        companyLogo: company.IMG_URL,
+        companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
+        companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
+
+        invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
+        controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+        dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+
+        name: selectedInvoiceRecord.DETAILS.CLTNME,
+        address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
+        tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+        clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+        project: selectedInvoiceRecord.DETAILS.PRJNAM,
+        unit: selectedInvoiceRecord.PBL_KEY.slice(3),
+      },
+      footer: {
+        acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+        dateIssued: "Date Issued : xx/xx/xxxx",
+        approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
+      },
+      authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+    }
+
+    const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
 
     callback()
 
-    const header = 'Preview Draft Invoice - ' + SELECTED_INVOICE_RECORD.PBL_KEY
-    fileStore.handleActionViewFilePDF(header, `(DRAFT) Invoice.pdf`, PDF_BLOB, null, () => {}, () => {})
+    const name = selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME + ' - ' + selectedInvoiceRecord.INVOICE_KEY.INVOICE_NUMBER
+
+    fileStore.handleActionViewFilePDF(
+      name + ' (Preview)',
+      `${name}.pdf`,
+      PDF_BLOB,
+      null,
+      () => {},
+      () => {}
+    )
   }
 
   const handleActionGenerateDraftInvoices = async (SELECTED_INVOICE_RECORDS: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
@@ -2155,6 +3198,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
       closeLoading()
     })
   }
+
+  onMounted(() => {
+    handleActionSearch(2)
+  })
 
   return {
     BILL_TYPES_WITH_PENALTY_TYPE,

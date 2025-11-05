@@ -73,6 +73,14 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return `${year}/${month}/${day}`;
   }
 
+  const formatDateNumberToStringMMDDYYYY = (number: number):string => {
+    const dateStr = number.toString();
+    const year = dateStr.slice(0, 4);
+    const month = dateStr.slice(4, 6);
+    const day = dateStr.slice(6, 8);
+    return `${month}/${day}/${year}`;
+  }
+
   const formatBytesToFileSize = (bytes: number) => {
     const k = 1024;
     const dm = 3;
@@ -86,7 +94,7 @@ export const useUtilitiesStore = defineStore('utils', () => {
     const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
 
     return `${formattedSize} ${sizes[i]}`;
-  };
+  }
 
   const convertDateObjToNumberYYYYMMDD = (date: Date):number => {
     try {
@@ -116,6 +124,25 @@ export const useUtilitiesStore = defineStore('utils', () => {
     }
   }
 
+  const convertDateObjToStringMMDDYY24H = (date: string): string => {
+    try {
+      if (!date) return '';
+
+      const d = new Date(date);
+
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yy = d.getFullYear().toString().slice(-2);
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+
+      return `${mm}/${dd}/${yy} ${hh}:${min}`;
+    } catch {
+      return '';
+    }
+  }
+
   const convertDateObjToStringMMDDYYYY24H = (date: string):string => {
     try {
       if (!date) {
@@ -129,6 +156,46 @@ export const useUtilitiesStore = defineStore('utils', () => {
         minute: "numeric",  // '10'
         // second: "numeric",  // '47'
         hour12: false       // 24-hour clock without AM/PM
+      };
+      return new Date(date).toLocaleString("en-US", options);
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const convertDateObjToStringMMDDYYYY24HSS = (date: string): string => {
+    try {
+      if (!date) return '';
+
+      const d = new Date(date);
+
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const yyyy = d.getFullYear();
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+
+      return `${mm}/${dd}/${yyyy} ${hh}:${min}:${ss}`;
+    } catch {
+      return '';
+    }
+  }
+
+  const convertDateObjToStringMMDDYY12H = (date: string):string => {
+    try {
+      if (!date) {
+        return ''
+      }
+      const options: Intl.DateTimeFormatOptions = {
+        month: "numeric",   // '12'
+        day: "numeric",     // '14'
+        year: "2-digit",    // '2024'
+        hour: "numeric",    // '2'
+        minute: "numeric",  // '10'
+        // second: "numeric",  // '47'
+        hour12: true       // 24-hour clock without AM/PM
       };
       return new Date(date).toLocaleString("en-US", options);
     } catch (error) {
@@ -336,8 +403,12 @@ export const useUtilitiesStore = defineStore('utils', () => {
     formatTimeNumberToString24H,
 
     formatDateNumberToStringMONTHDDYYYY,
+    convertDateObjToStringMMDDYY24H,
     convertDateObjToStringMMDDYYYY24H,
+    convertDateObjToStringMMDDYYYY24HSS,
+    convertDateObjToStringMMDDYY12H,
     formatDateNumberToStringYYYYMMDD,
+    formatDateNumberToStringMMDDYYYY,
 
     formatBytesToFileSize,
 

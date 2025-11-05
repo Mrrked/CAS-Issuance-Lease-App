@@ -1,4 +1,4 @@
-import { COMPANIES, COMPANY_DETAILS } from '../components/Dialog/General/data';
+import { COMPANIES, COMPANY_DETAILS } from './config';
 import { CheckDetails, Client, ClientForm, Config, GenHeader, HistoryOfPayment, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 

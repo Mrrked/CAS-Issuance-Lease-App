@@ -899,3 +899,58 @@ export interface FAILED_INVOICE_RECORDS {
   FAILED_INVOICES: FAILED_INVOICE_RECORD[],
   FAILED_INVOICES_LENGTH: number,
 }
+
+
+// PRINT OUT
+
+export interface Signatories {
+  name: string
+  timestamp: string
+}
+
+export interface InvoicePDF {
+  header: {
+    runDateAndTime: string,
+    runUsername: string,
+
+    companyName: string,
+    companyAddress: string,
+    companyInitials: string,
+    companyTelephone: string,
+    companyRegisteredTIN: string,
+
+    companyLogo: string,
+    companyLogoWidth: number,
+    companyLogoHeight: number,
+
+    invoiceTypeName: string,
+    controlNumber: string,
+    dateValue: string,
+
+    name: string,
+    address: string,
+    tin: string,
+    clientKey: string,
+    project: string,
+    unit: string,
+  },
+  footer: {
+    acn: string
+    dateIssued: string,
+    approvedSeriesRange: string
+  },
+  // body: {
+  //   particulars: string[]
+  //   accounting_entries: {
+  //     accountCode: string,
+  //     distribution: string,
+  //     amount: string,
+  //     type: 'DEBIT' | 'CREDIT'
+  //   }[]
+  // },
+  // forReceiving: {
+  //   voucherAmount: string,
+  //   voucherAmountInWords: string,
+  // }
+  authorizedSignature: string,
+}

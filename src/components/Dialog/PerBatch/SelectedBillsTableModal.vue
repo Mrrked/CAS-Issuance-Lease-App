@@ -67,6 +67,7 @@
     <Column header="Project / Block / Lot"
       field="PBL_KEY"
       filterField="PBL_KEY"
+      sortable
     >
       <template #filter="{ filterModel, filterCallback }">
         <InputText

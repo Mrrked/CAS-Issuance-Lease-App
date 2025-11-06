@@ -4,11 +4,8 @@
   import { useIssuanceStore } from '../../store/useIssuanceStore';
   import { useMainStore } from '../../store/useMainStore';
   import { onMounted } from 'vue'
-  import { InvoiceRecord } from '../../store/types';
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
-  import { useFileStore } from '../../store/useFileStore';
 
-  const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const issuanceStore = useIssuanceStore()

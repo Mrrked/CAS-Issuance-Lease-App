@@ -1865,8 +1865,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         doc.setFont("helvetica", "bold")
 
-        doc.setFontSize(MEDIUM_TEXT_FONT_SIZE)
-        doc.text(TEXT[8], HEADER_COL_START[2] + 1.175, cursorLineHeight)
+        doc.setFontSize(MEDIUM_TEXT_FONT_SIZE + 2)
+        doc.text(TEXT[8], PAGE_CONFIG.headerEndLineX - 1.05, cursorLineHeight, {'align': 'right'})
 
         doc.setFontSize(TWO_EXTRA_LARGE_TEXT_FONT_SIZE)
         doc.text(TEXT[9], PAGE_CONFIG.headerEndLineX, cursorLineHeight, {'align': 'right'})
@@ -3330,7 +3330,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   onMounted(() => {
-    // handleActionSearch(2)
+    handleActionSearch(2)
 
     // const SAMPLE_BILLING_INVOICE: InvoiceRecord = {
     //   "PBL_KEY": "CL3 L  U001  ",

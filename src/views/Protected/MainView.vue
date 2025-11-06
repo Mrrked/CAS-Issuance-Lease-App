@@ -26,7 +26,6 @@
       <TabList>
         <Tab value="0">Run Per Bill Type</Tab>
         <Tab value="1">Run Per Batch</Tab>
-        <Tab value="2">Test Billing Invoice</Tab>
       </TabList>
       <TabPanels>
         <TabPanel value="0" class="flex flex-col items-center justify-start">

@@ -3032,7 +3032,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
     const invoicePDFData: InvoicePDF = {
       header: {
         runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
-        runUsername: sessionStore.authenticatedUser?.username || 'N/A',
+        // runUsername: sessionStore.authenticatedUser?.username || 'N/A',
+        runUsername: 'COLL_JANE',
 
         companyName: company.CONAME,
         companyAddress: company.ADDRESS,
@@ -3091,7 +3092,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         dateIssued: "Date Issued : xx/xx/xxxx",
         approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
       },
-      authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+      // authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+      authorizedSignature: 'JANE DELA CRUZ'
     }
 
     const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
@@ -5262,10 +5264,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
     //   },
     //   "CORF4PF": []
     // }
-    handleActionGenerateDraftInvoice(
-      SAMPLE_BILLING_INVOICE,
-      () => {}
-    )
+    // handleActionGenerateDraftInvoice(
+    //   SAMPLE_BILLING_INVOICE,
+    //   () => {}
+    // )
     // handleActionGenerateDraftInvoices(
     //   [
     //     SAMPLE_BILLING_INVOICE,

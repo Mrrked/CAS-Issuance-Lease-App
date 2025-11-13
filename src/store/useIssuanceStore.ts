@@ -2294,8 +2294,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
           {
             type: 'Invoice Information - Breakdown Information',
             action: () => {
-              //TODO
-              // const HEIGHT = isBillingInvoice ? 1.9 : 1.65
               const HEIGHT = isBillingInvoice ? 2.1 : 1.65
 
               const colStartX = [0.5, 3.95, 4, 8]
@@ -2308,7 +2306,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 { label: 'Government Taxes',      amount: invoicePDFData.body.breakdowns.section1.governmentTax,      isShow: isBillingInvoice},
               ]
 
-              //TODO
               const BREAKDOWN2 = [
                 { label: 'Total Sales',           amount: invoicePDFData.body.breakdowns.section2.totalSales,         isShow: true},
                 { label: 'Less: Government Taxes',amount: invoicePDFData.body.breakdowns.section2.addGovernmentTaxes, isShow: isBillingInvoice},

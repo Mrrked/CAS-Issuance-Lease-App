@@ -770,25 +770,25 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const incrementHeight = (num: number = NORMAL_LINE_HEIGHT) => {cursorLineHeight += num}
 
       // DONE
-      const addEmptyCheckbox = (x: number, y: number, lineWidth: number = 0.01) => {
-        doc.setLineWidth(lineWidth)
-        doc.setFillColor(225, 225, 225);
-        doc.roundedRect(x, y, 0.16, 0.16, 0.045, 0.045, 'FD')
-      }
+      // const addEmptyCheckbox = (x: number, y: number, lineWidth: number = 0.01) => {
+      //   doc.setLineWidth(lineWidth)
+      //   doc.setFillColor(225, 225, 225);
+      //   doc.roundedRect(x, y, 0.16, 0.16, 0.045, 0.045, 'FD')
+      // }
 
       // DONE
-      const addCheckmark = (doc: jsPDF, x: number, y: number, size: number = 0.13) => {
-        const lineWidth = 0.005;
-        const offset = size * 0.15;
+      // const addCheckmark = (doc: jsPDF, x: number, y: number, size: number = 0.13) => {
+      //   const lineWidth = 0.005;
+      //   const offset = size * 0.15;
 
-        doc.setLineWidth(lineWidth);
+      //   doc.setLineWidth(lineWidth);
 
-        // Left leg
-        doc.line(x + offset, y + size * 0.5, x + size * 0.4, y + size * 0.8);
+      //   // Left leg
+      //   doc.line(x + offset, y + size * 0.5, x + size * 0.4, y + size * 0.8);
 
-        // Right leg
-        doc.line(x + size * 0.4, y + size * 0.8, x + size * 0.85, y + size * 0.2);
-      }
+      //   // Right leg
+      //   doc.line(x + size * 0.4, y + size * 0.8, x + size * 0.85, y + size * 0.2);
+      // }
 
       // DONE
       const addMultiLineText = (
@@ -819,38 +819,38 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
 
       // DONE
-      const handleCreateNewPage = () => {
-        doc.addPage(PAGE_LAYOUT.format, PAGE_LAYOUT.orientation)
-      }
+      // const handleCreateNewPage = () => {
+      //   doc.addPage(PAGE_LAYOUT.format, PAGE_LAYOUT.orientation)
+      // }
 
       // DONE
-      const handleAddPageBorder = () => {
-        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.startLineY) // TOP
-        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.endLineY,     PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // BOTTOM
-        doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.startLineX, PAGE_CONFIG.endLineY)   // LEFT
-        doc.line(PAGE_CONFIG.endLineX,    PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // RIGHT
-      }
+      // const handleAddPageBorder = () => {
+      //   doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.startLineY) // TOP
+      //   doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.endLineY,     PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // BOTTOM
+      //   doc.line(PAGE_CONFIG.startLineX,  PAGE_CONFIG.startLineY,   PAGE_CONFIG.startLineX, PAGE_CONFIG.endLineY)   // LEFT
+      //   doc.line(PAGE_CONFIG.endLineX,    PAGE_CONFIG.startLineY,   PAGE_CONFIG.endLineX,   PAGE_CONFIG.endLineY)   // RIGHT
+      // }
 
       // DONE
-      const handleAddSectionBorder = () => {
-        // HEADER
-        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerStartLineY) // TOP
-        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // BOTTOM
-        doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerStartLineX, PAGE_CONFIG.headerEndLineY)   // LEFT
-        doc.line(PAGE_CONFIG.headerEndLineX,    PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // RIGHT
+      // const handleAddSectionBorder = () => {
+      //   // HEADER
+      //   doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerStartLineY) // TOP
+      //   doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // BOTTOM
+      //   doc.line(PAGE_CONFIG.headerStartLineX,  PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerStartLineX, PAGE_CONFIG.headerEndLineY)   // LEFT
+      //   doc.line(PAGE_CONFIG.headerEndLineX,    PAGE_CONFIG.headerStartLineY,   PAGE_CONFIG.headerEndLineX,   PAGE_CONFIG.headerEndLineY)   // RIGHT
 
-        // BODY
-        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.endLineX,         PAGE_CONFIG.headerEndLineY)   // TOP
-        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.endLineX,         PAGE_CONFIG.footerStartLineY) // BOTTOM
-        doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerStartLineY) // LEFT
-        doc.line(PAGE_CONFIG.endLineX,          PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // RIGHT
+      //   // BODY
+      //   doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.endLineX,         PAGE_CONFIG.headerEndLineY)   // TOP
+      //   doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.endLineX,         PAGE_CONFIG.footerStartLineY) // BOTTOM
+      //   doc.line(PAGE_CONFIG.startLineX,        PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerStartLineY) // LEFT
+      //   doc.line(PAGE_CONFIG.endLineX,          PAGE_CONFIG.headerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // RIGHT
 
-        // FOOTER
-        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // TOP
-        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // BOTTOM
-        doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerEndLineY)   // LEFT
-        doc.line(PAGE_CONFIG.footerEndLineX,    PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // RIGHT
-      }
+      //   // FOOTER
+      //   doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerStartLineY) // TOP
+      //   doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerEndLineY,     PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // BOTTOM
+      //   doc.line(PAGE_CONFIG.footerStartLineX,  PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerStartLineX, PAGE_CONFIG.footerEndLineY)   // LEFT
+      //   doc.line(PAGE_CONFIG.footerEndLineX,    PAGE_CONFIG.footerStartLineY,   PAGE_CONFIG.footerEndLineX,   PAGE_CONFIG.footerEndLineY)   // RIGHT
+      // }
 
       // DONE
       const handleAddHeader = (pageNumber: number, total: number) => {
@@ -1140,49 +1140,49 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
 
       // DONE
-      const handleAddPageNumber = (pageNumber: number, total: number) => {
-        cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
+      // const handleAddPageNumber = (pageNumber: number, total: number) => {
+      //   cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
 
-        const part1 = 'Page ';
-        const part2 = `${pageNumber}`;
-        const part3 = ' of ';
-        const part4 = `${total}`;
+      //   const part1 = 'Page ';
+      //   const part2 = `${pageNumber}`;
+      //   const part3 = ' of ';
+      //   const part4 = `${total}`;
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE);
+      //   doc.setFontSize(SMALL_TEXT_FONT_SIZE);
 
-        // Measure widths
-        doc.setFont("helvetica", "normal");
-        const width1 = doc.getTextWidth(part1);
-        const width3 = doc.getTextWidth(part3);
+      //   // Measure widths
+      //   doc.setFont("helvetica", "normal");
+      //   const width1 = doc.getTextWidth(part1);
+      //   const width3 = doc.getTextWidth(part3);
 
-        doc.setFont("helvetica", "bold");
-        const width2 = doc.getTextWidth(part2);
-        const width4 = doc.getTextWidth(part4);
+      //   doc.setFont("helvetica", "bold");
+      //   const width2 = doc.getTextWidth(part2);
+      //   const width4 = doc.getTextWidth(part4);
 
-        const totalWidth = width1 + width2 + width3 + width4;
+      //   const totalWidth = width1 + width2 + width3 + width4;
 
-        const startX = PAGE_CONFIG.endLineX - totalWidth;
-        let cursorX = startX;
+      //   const startX = PAGE_CONFIG.endLineX - totalWidth;
+      //   let cursorX = startX;
 
-        // Draw "Page "
-        doc.setFont("helvetica", "normal");
-        doc.text(part1, cursorX, cursorLineHeight);
-        cursorX += width1;
+      //   // Draw "Page "
+      //   doc.setFont("helvetica", "normal");
+      //   doc.text(part1, cursorX, cursorLineHeight);
+      //   cursorX += width1;
 
-        // Draw bold page number
-        doc.setFont("helvetica", "bold");
-        doc.text(part2, cursorX, cursorLineHeight);
-        cursorX += width2;
+      //   // Draw bold page number
+      //   doc.setFont("helvetica", "bold");
+      //   doc.text(part2, cursorX, cursorLineHeight);
+      //   cursorX += width2;
 
-        // Draw " of "
-        doc.setFont("helvetica", "normal");
-        doc.text(part3, cursorX, cursorLineHeight);
-        cursorX += width3;
+      //   // Draw " of "
+      //   doc.setFont("helvetica", "normal");
+      //   doc.text(part3, cursorX, cursorLineHeight);
+      //   cursorX += width3;
 
-        // Draw bold total
-        doc.setFont("helvetica", "bold");
-        doc.text(part4, cursorX, cursorLineHeight);
-      }
+      //   // Draw bold total
+      //   doc.setFont("helvetica", "bold");
+      //   doc.text(part4, cursorX, cursorLineHeight);
+      // }
 
       // DONE
       const handleAddSystemDocumentNotice = () => {
@@ -1199,37 +1199,37 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
 
       // DONE
-      const handleAddPrintCount = (printCount: number) => {
-        cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
+      // const handleAddPrintCount = (printCount: number) => {
+      //   cursorLineHeight = PAGE_CONFIG.footerEndLineY + MEDIUM_LINE_HEIGHT
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "normal")
-        doc.text(`No of printing made :`, PAGE_CONFIG.startLineX, cursorLineHeight)
+      //   doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "normal")
+      //   doc.text(`No of printing made :`, PAGE_CONFIG.startLineX, cursorLineHeight)
 
-        doc.setFontSize(SMALL_TEXT_FONT_SIZE)
-        doc.setFont("helvetica", "bold")
-        doc.text(`${printCount}`, PAGE_CONFIG.startLineX + 1.2, cursorLineHeight)
-        incrementHeight(SMALL_LINE_HEIGHT)
-      }
+      //   doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+      //   doc.setFont("helvetica", "bold")
+      //   doc.text(`${printCount}`, PAGE_CONFIG.startLineX + 1.2, cursorLineHeight)
+      //   incrementHeight(SMALL_LINE_HEIGHT)
+      // }
 
       // DONE
-      const handleAddMainBodyBorder = (isFirstPage: boolean) => {
-        const sectionStartLineY = PAGE_CONFIG.bodyStartLineY
-        const sectionEndLineY = PAGE_CONFIG.bodyEndLineY
+      // const handleAddMainBodyBorder = (isFirstPage: boolean) => {
+      //   const sectionStartLineY = PAGE_CONFIG.bodyStartLineY
+      //   const sectionEndLineY = PAGE_CONFIG.bodyEndLineY
 
-        const SECTION_HEIGHT = sectionEndLineY - sectionStartLineY
+      //   const SECTION_HEIGHT = sectionEndLineY - sectionStartLineY
 
-        doc.rect(
-          PAGE_CONFIG.bodyStartLineX,
-          sectionStartLineY,
-          PAGE_CONFIG.contentWidth,
-          SECTION_HEIGHT
-        )
+      //   doc.rect(
+      //     PAGE_CONFIG.bodyStartLineX,
+      //     sectionStartLineY,
+      //     PAGE_CONFIG.contentWidth,
+      //     SECTION_HEIGHT
+      //   )
 
-        if (isFirstPage) {
-          doc.line(0, PAGE_CONFIG.firstPageBodyEndLineY, PAGE_CONFIG.pageSizeY, PAGE_CONFIG.firstPageBodyEndLineY)
-        }
-      }
+      //   if (isFirstPage) {
+      //     doc.line(0, PAGE_CONFIG.firstPageBodyEndLineY, PAGE_CONFIG.pageSizeY, PAGE_CONFIG.firstPageBodyEndLineY)
+      //   }
+      // }
 
       // DONE
       const handleAddMainBodyLayout = (isFirstPage: boolean) => {

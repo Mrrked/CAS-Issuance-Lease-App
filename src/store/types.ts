@@ -81,14 +81,8 @@ export interface User extends ExternalISeriesProfile {}
 //  MAIN  //
 ////////////
 
-export type Type = 'By Project | Block | Lot' | 'By Client\'s Name' | null
+export type InquiryType = 'Unit' | 'Client Name'
 export type PerBillTypeOption = 'Rental and CUSA' | 'Electricity and Generator Set' | 'Water'
-
-export interface Config {
-  isMainScreen: boolean
-  selectedOption:  Type
-  options: Type[]
-}
 
 export interface PerBillTypeRunForm {
   invoiceDate: Date
@@ -96,8 +90,12 @@ export interface PerBillTypeRunForm {
   billType:    'A' | 'B' | 'C' | ''
 
   PBL: {
-    pcs_code: string
-    phase: string
+    pcs_code: {
+      1: string
+    }
+    phase: {
+      1: string
+    }
     block: {
       1: string
       2: string
@@ -121,8 +119,12 @@ export interface PerBatchRunForm {
 
 export interface UnitForm {
   project_code: ProjectRecord | null
-  pcs_code: string
-  phase: string
+  pcs_code: {
+    1: string
+  }
+  phase: {
+    1: string
+  }
   block: {
     1: string
     2: string

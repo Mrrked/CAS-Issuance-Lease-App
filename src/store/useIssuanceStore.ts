@@ -2331,8 +2331,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
             month: form.invoiceDate.getMonth() + 1,
             billType: form.billType,
             PROJCD: form.projectCode?.PROJCD,
-            PCSCOD: form.PBL?.pcs_code || ' ',
-            PHASE: form.PBL?.phase || ' ',
+            PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+            PHASE: form.PBL?.phase['1'] || ' ',
             BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
             LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
             UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
@@ -2401,8 +2401,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
           projectCode: null,
           billType: '',
           PBL: {
-            pcs_code: '',
-            phase: '',
+            pcs_code: {
+              1: '',
+            },
+            phase: {
+              1: '',
+            },
             block: {
               1: '',
               2: ''

@@ -4,10 +4,6 @@
   import { usePrintingStore } from '../../store/usePrintingStore';
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
 
-  defineProps<{
-    activateCallback: Function
-  }>()
-
   const printStore = usePrintingStore()
   const utilStore = useUtilitiesStore()
 
@@ -134,7 +130,7 @@
       <template #body="{ data }">
         <div class="flex gap-2">
           <Button
-            @click="printStore.handleActionSearchClientUnits(data.CACCT, activateCallback)"
+            @click="printStore.handleActionSearchClientUnits(data.CACCT)"
             label="Search Units"
             icon="pi pi-search"
             iconPos="right"

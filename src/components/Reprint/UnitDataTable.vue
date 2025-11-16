@@ -3,10 +3,6 @@
   import { FilterMatchMode } from '@primevue/core/api';
   import { usePrintingStore } from '../../store/usePrintingStore';
 
-  defineProps<{
-    activateCallback: Function
-  }>()
-
   const printStore = usePrintingStore()
 
   const filters = ref({
@@ -118,7 +114,7 @@
         <template #body="{ data }">
           <div class="flex gap-2">
             <Button
-              @click="printStore.handleActionSelectUnit(data, activateCallback)"
+              @click="printStore.handleActionSelectUnit(data)"
               label="Select Unit"
               icon="pi pi-arrow-right"
               iconPos="right"

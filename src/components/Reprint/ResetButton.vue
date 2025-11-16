@@ -2,10 +2,6 @@
   import { useConfirm } from "primevue/useconfirm";
   import { usePrintingStore } from "../../store/usePrintingStore";
 
-  const props = defineProps<{
-    activateCallback: Function
-  }>()
-
   const confirm = useConfirm();
   const printStore = usePrintingStore();
 
@@ -24,7 +20,7 @@
         label: 'Confirm'
       },
       accept: () => {
-        printStore.handleActionReset(props.activateCallback)
+        printStore.handleActionReset()
       },
       reject: () => {
       }

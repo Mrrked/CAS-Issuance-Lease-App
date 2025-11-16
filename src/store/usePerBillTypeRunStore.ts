@@ -39,8 +39,12 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
     projectCode: null,
     billType: '',
     PBL: {
-      pcs_code: '',
-      phase: '',
+      pcs_code: {
+        1: '',
+      },
+      phase: {
+        1: '',
+      },
       block: {
         1: '',
         2: ''
@@ -350,8 +354,12 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
     (newBillType) => {
       if (newBillType !== 'A') {
         perBillTypeRunForm.value.PBL = {
-          pcs_code: '',
-          phase: '',
+          pcs_code: {
+            1: '',
+          },
+          phase: {
+            1: '',
+          },
           block: {
             1: '',
             2: ''

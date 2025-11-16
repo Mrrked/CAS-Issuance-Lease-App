@@ -1,5 +1,5 @@
 import { COMPANIES, COMPANY_DETAILS } from './config';
-import { CheckDetails, Client, ClientForm, Config, GenHeader, HistoryOfPayment, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
+import { CheckDetails, Client, ClientForm, GenHeader, HistoryOfPayment, InquiryType, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
 import axios from '../axios';
@@ -47,31 +47,44 @@ export const usePrintingStore = defineStore('print', () => {
   const sessionStore = useSessionStore()
   const issuanceStore = useIssuanceStore()
 
+  const INQUIRY_TYPES = ref([
+    {
+      value: 'Unit',
+      label: "By Project | Block | Lot"
+    },
+    {
+      value: 'Client Name',
+      label: "By Client's Name",
+    }
+  ])
+
+  const DOCUMENT_STATUSES = [
+    { value: 'D', name: 'DELETED'},
+    { value: 'C', name: 'CANCELLED'}
+  ]
+
+  const PRINT_STATUSES = [
+    { value: 'P', name: 'PRINTED'},
+    { value: 'R', name: 'REPRINTED'}
+  ]
+
+  const stepperPage = ref<number>(1)
+  const selectedInquiryType = ref<InquiryType | null>('Unit')
+
   const clients = ref<Client[]>([]);
   const units = ref<Unit[]>([]);
 
   const selectedUnit = ref<ClientUnit>()
   const selectedHistoryOfIssuedDocument = ref<InvoiceRecord[]>([])
 
-  const DOCUMENT_STATUSES = [
-    { value: 'D', name: 'DELETED'},
-    { value: 'C', name: 'CANCELLED'}
-  ]
-  const PRINT_STATUSES = [
-    { value: 'P', name: 'PRINTED'},
-    { value: 'R', name: 'REPRINTED'}
-  ]
-
-  const config = ref<Config>({
-    isMainScreen: false,
-    selectedOption: 'By Project | Block | Lot',
-    options: ['By Project | Block | Lot', 'By Client\'s Name'],
-  })
-
   const queryUnitForm = ref<UnitForm>({
     project_code: null,
-    pcs_code: '',
-    phase: '',
+    pcs_code: {
+      1: '',
+    },
+    phase: {
+      1: '',
+    },
     block: {
       1: '',
       2: '',
@@ -100,12 +113,17 @@ export const usePrintingStore = defineStore('print', () => {
     return units.value
   })
 
-  const showStepper = computed(() => {
-    return config.value.selectedOption !== null &&
-      config.value.selectedOption === 'By Client\'s Name' && !config.value.isMainScreen
+  const isMainScreen = computed(() => {
+    return stepperPage.value === 4
   })
 
-  const handleActionSearch = (activateCallback: Function) => {
+  const showStepper = computed(() => {
+    return selectedInquiryType.value !== null &&
+      selectedInquiryType.value === 'Client Name' &&
+      !isMainScreen.value
+  })
+
+  const handleActionSearch = () => {
     const validateQueryUnitForm = () => {
       return (
         queryUnitForm.value.block ||
@@ -121,11 +139,11 @@ export const usePrintingStore = defineStore('print', () => {
       return (queryClientForm.value.name)
     }
 
-    switch (config.value.selectedOption) {
+    switch (selectedInquiryType.value) {
       // BY PBL
-      case 'By Project | Block | Lot':
+      case 'Unit':
         if (validateQueryUnitForm()) {
-          handleActionOpenUnit(activateCallback)
+          handleActionOpenUnit()
         } else {
           toast.add({
             severity: 'warn',
@@ -137,7 +155,7 @@ export const usePrintingStore = defineStore('print', () => {
         break;
 
       // BY CLIENTS NAME
-      case 'By Client\'s Name':
+      case 'Client Name':
         if (validateQueryClientForm()) {
           const loading = utilStore.startLoadingModal('Searching Client ...')
 
@@ -147,7 +165,7 @@ export const usePrintingStore = defineStore('print', () => {
           .then((response) => {
             // console.log('RESPONSE ', response);
             clients.value = response.data.data
-            activateCallback('2')
+            stepperPage.value = 2
           })
           .catch(utilStore.handleAxiosError)
           .finally(() => {
@@ -165,27 +183,25 @@ export const usePrintingStore = defineStore('print', () => {
     }
   }
 
-  const handleActionReturnInquiryForm = (activateCallback: Function) => {
-    activateCallback('1')
+  const handleActionReturnInquiryForm = () => {
+    stepperPage.value = 1
     clients.value = []
     units.value = []
   }
 
-  const handleActionReturnClientSelection = (activateCallback: Function) => {
-    activateCallback('2')
+  const handleActionReturnClientSelection = () => {
+    stepperPage.value = 2
     units.value = []
   }
 
-  const handleActionReturnUnitSelection = (activateCallback: Function) => {
-    config.value.isMainScreen = false
-    activateCallback('3')
+  const handleActionReturnUnitSelection = () => {
+    stepperPage.value = 3
   }
 
-  const handleActionReset = (activateCallback: Function) => {
-    config.value.isMainScreen = false
-
+  const handleActionReset = () => {
     units.value = []
     clients.value = []
+    selectedUnit.value = undefined
 
     queryClientForm.value = {
       name: '',
@@ -193,8 +209,12 @@ export const usePrintingStore = defineStore('print', () => {
 
     queryUnitForm.value = {
       project_code: null,
-      pcs_code: '',
-      phase: '',
+      pcs_code: {
+        1: ''
+      },
+      phase: {
+        1: ''
+      },
       block: {
         1: '',
         2: '',
@@ -211,17 +231,17 @@ export const usePrintingStore = defineStore('print', () => {
       },
     }
 
-    activateCallback('1')
+    stepperPage.value = 1
   }
 
-  const handleActionSearchClientUnits = (CACCT: string, activateCallback: Function) => {
+  const handleActionSearchClientUnits = (CACCT: string) => {
     const loading = utilStore.startLoadingModal('Searching Client\s Units ...')
 
     axios.get(`general/client/${CACCT}/unit`)
     .then((response) => {
       // console.log('RESPONSE ', response);
       units.value = response.data.data
-      activateCallback('3')
+      stepperPage.value = 3
     })
     .catch(utilStore.handleAxiosError)
     .finally(() => {
@@ -229,9 +249,9 @@ export const usePrintingStore = defineStore('print', () => {
     })
   }
 
-  const handleActionSelectUnit = (data: Unit, activateCallback: Function) => {
+  const handleActionSelectUnit = (data: Unit) => {
     if (data) {
-      handleActionOpenUnit(activateCallback, data)
+      handleActionOpenUnit(data)
     } else {
       toast.add({
         severity: 'warn',
@@ -242,16 +262,23 @@ export const usePrintingStore = defineStore('print', () => {
     }
   }
 
-  const handleActionOpenUnit = (activateCallback: Function, unit?: Unit) => {
-    let pos = '';
-    let pbl = ''
+  const getPBL = computed((): string => {
+    if (selectedInquiryType.value === 'Unit') {
+      return `${queryUnitForm.value.project_code?.PROJCD || '   '}${queryUnitForm.value.pcs_code['1'] || ' '}${queryUnitForm.value.phase['1'] || ' '}${queryUnitForm.value.block['1'] || ' '}${queryUnitForm.value.block['2'] || ' '}${queryUnitForm.value.lot['1'] || ' '}${queryUnitForm.value.lot['2'] || ' '}${queryUnitForm.value.lot['3'] || ' '}${queryUnitForm.value.lot['4'] || ' '}${queryUnitForm.value.unit_code['1'] || ' '}${queryUnitForm.value.unit_code['2'] || ' '}`.toUpperCase()
+    } else if (selectedInquiryType.value === 'Client Name') {
+      return `${selectedUnit.value?.PROJCD || '   '}${selectedUnit.value?.PCSCOD || ' '}${selectedUnit.value?.PHASE || ' '}${selectedUnit.value?.BLOCK || '  '}${selectedUnit.value?.LOT || '    '}${selectedUnit.value?.UNITCD || '  '}`
+    }
+    return ''
+  })
 
-    if (config.value.selectedOption === 'By Project | Block | Lot') {
-      pos = '2'
-      pbl = `${queryUnitForm.value.project_code?.PROJCD || '   '}${queryUnitForm.value.pcs_code || ' '}${queryUnitForm.value.phase || ' '}${queryUnitForm.value.block['1'] || ' '}${queryUnitForm.value.block['2'] || ' '}${queryUnitForm.value.lot['1'] || ' '}${queryUnitForm.value.lot['2'] || ' '}${queryUnitForm.value.lot['3'] || ' '}${queryUnitForm.value.lot['4'] || ' '}${queryUnitForm.value.unit_code['1'] || ' '}${queryUnitForm.value.unit_code['2'] || ' '}`.toUpperCase()
+  const handleActionOpenUnit = (unit?: Unit) => {
+    let pos: number = 1;
+    let pbl: string = getPBL.value
+
+    if (selectedInquiryType.value === 'Unit') {
+      pos = 2
     } else if(unit) {
-      pos = '4'
-      pbl = `${unit.PROJCD || '   '}${unit.PCSCOD || ' '}${unit.PHASE || ' '}${unit.BLOCK || '  '}${unit.LOT || '    '}${unit.UNITCD || '  '}`
+      pos = 4
     }
 
     const loading = utilStore.startLoadingModal('Fetching Unit ...')
@@ -260,8 +287,7 @@ export const usePrintingStore = defineStore('print', () => {
     .then((response) => {
       selectedUnit.value = response.data.data
       // console.log(selectedUnit.value);
-      activateCallback(pos)
-      config.value.isMainScreen = true
+      stepperPage.value = pos
     })
     .catch(utilStore.handleAxiosError)
     .finally(() => {
@@ -735,10 +761,12 @@ export const usePrintingStore = defineStore('print', () => {
   })
 
   return {
+    INQUIRY_TYPES,
     DOCUMENT_STATUSES,
     PRINT_STATUSES,
 
-    config,
+    stepperPage,
+    selectedInquiryType,
 
     clients,
     units,
@@ -746,10 +774,13 @@ export const usePrintingStore = defineStore('print', () => {
     clients_data,
     units_data,
 
+    isMainScreen,
     showStepper,
 
     queryUnitForm,
     queryClientForm,
+
+    getPBL,
 
     handleActionSearch,
 

@@ -4,31 +4,27 @@
 
   const ScreenYLease = defineAsyncComponent(() => import('./ScreenYLease.vue'));
 
-  defineProps<{
-    activateCallback: Function
-  }>()
-
   const printStore = usePrintingStore()
 </script>
 
 <template>
   <!-- HEADER -->
-  <ScreenYLease :activateCallback="activateCallback" />
+  <ScreenYLease />
   <!-- ACTION -->
-  <div v-if="printStore.config.selectedOption === 'By Project | Block | Lot'"
+  <div v-if="printStore.selectedInquiryType === 'Unit'"
     class="flex justify-start w-full gap-3"
   >
-    <Button @click="printStore.handleActionReturnInquiryForm(activateCallback)"
+    <Button @click="printStore.handleActionReturnInquiryForm()"
       raised
       type="button"
       label="BACK"
       icon="pi pi-arrow-left"
     />
   </div>
-  <div v-else-if="printStore.config.selectedOption === 'By Client\'s Name'"
+  <div v-else-if="printStore.selectedInquiryType === 'Client Name'"
     class="flex justify-start w-full gap-3"
   >
-    <Button @click="printStore.handleActionReturnUnitSelection(activateCallback)"
+    <Button @click="printStore.handleActionReturnUnitSelection()"
       raised
       type="button"
       label="BACK"

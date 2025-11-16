@@ -5,10 +5,6 @@
   const ResetButton = defineAsyncComponent(() => import('./ResetButton.vue'));
   const HistoryOfIssuedDocumentsDataTable = defineAsyncComponent(() => import('./HistoryOfIssuedDocumentsDataTable.vue'));
 
-  defineProps<{
-    activateCallback: Function
-  }>()
-
   const printStore = usePrintingStore();
 
   const {
@@ -26,22 +22,22 @@
   <div class="grid w-full grid-cols-8 gap-3">
     <div class="flex items-start justify-start col-span-2 gap-3">
       <Button
-        v-if="printStore.config.selectedOption === 'By Project | Block | Lot'"
-        @click="printStore.handleActionReturnInquiryForm(activateCallback)"
+        v-if="printStore.selectedInquiryType === 'Unit'"
+        @click="printStore.handleActionReturnInquiryForm()"
         raised
         type="button"
         label="BACK"
         icon="pi pi-arrow-left"
       />
       <Button
-        v-if="printStore.config.selectedOption === 'By Client\'s Name'"
-        @click="printStore.handleActionReturnUnitSelection(activateCallback)"
+        v-if="printStore.selectedInquiryType === 'Client Name'"
+        @click="printStore.handleActionReturnUnitSelection()"
         raised
         type="button"
         label="BACK"
         icon="pi pi-arrow-left"
       />
-      <ResetButton v-if="printStore.config.selectedOption === 'By Client\'s Name'" :activateCallback="activateCallback"/>
+      <ResetButton v-if="printStore.selectedInquiryType === 'Client Name'"/>
       <Button
         @click="handleActionRefresh"
         raised

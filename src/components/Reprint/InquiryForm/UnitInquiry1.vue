@@ -12,9 +12,15 @@
     nextRefs?: Ref<(HTMLInputElement | null)[]>,
     prevRefs?: Ref<(HTMLInputElement | null)[]>
   ) {
-    const onInput = (formSection: Record<T, string>, index: number) => {
-      const current = formSection[keys[index]]
-      if (current.length === 1) {
+    const onKeydown = (e: KeyboardEvent, formSection: Record<T, string>, index: number) => {
+      const key = e.key
+
+      // Only allow single character keys (letters/numbers)
+      if (key.length === 1) {
+
+        // Overwrite the value BEFORE Vue updates the model
+        formSection[keys[index]] = key.toUpperCase()
+
         nextTick(() => {
           if (index < keys.length - 1) {
             refs.value[index + 1]?.focus()
@@ -22,6 +28,9 @@
             nextRefs?.value[0]?.focus()
           }
         })
+
+        // Prevent the browser from appending characters
+        e.preventDefault()
       }
     }
 
@@ -29,17 +38,15 @@
       const current = formSection[keys[index]]
       nextTick(() => {
         if (current === '' && index > 0) {
-          // Move back within same group
           refs.value[index - 1]?.focus()
         } else if (current === '' && index === 0 && prevRefs) {
-          // Move to previous group's last input
           const last = prevRefs.value.length - 1
           prevRefs.value[last]?.focus()
         }
       })
     }
 
-    return { onInput, onBackspace }
+    return { onKeydown, onBackspace }
   }
 
   // === Refs and keys per group ===
@@ -60,35 +67,35 @@
 
 
   // === Input navigation setup ===
-  const { onInput: onInputPcs, onBackspace: onBackspacePcs } = useInputNavigation(
+  const { onKeydown: onKeydownPcs, onBackspace: onBackspacePcs } = useInputNavigation(
     pcsCodeKeys,
     pcsCodeRefs,
     phaseRefs,   // next
     undefined    // no previous
   )
 
-  const { onInput: onInputPhase, onBackspace: onBackspacePhase } = useInputNavigation(
+  const { onKeydown: onKeydownPhase, onBackspace: onBackspacePhase } = useInputNavigation(
     phaseKeys,
     phaseRefs,
     blockRefs,   // next
     pcsCodeRefs  // prev 👈
   )
 
-  const { onInput: onInputBlock, onBackspace: onBackspaceBlock } = useInputNavigation(
+  const { onKeydown: onKeydownBlock, onBackspace: onBackspaceBlock } = useInputNavigation(
     blockKeys,
     blockRefs,
     lotRefs,     // next
     phaseRefs    // prev 👈
   )
 
-  const { onInput: onInputLot, onBackspace: onBackspaceLot } = useInputNavigation(
+  const { onKeydown: onKeydownLot, onBackspace: onBackspaceLot } = useInputNavigation(
     lotKeys,
     lotRefs,
     unitCodeRefs,// next
     blockRefs    // prev 👈
   )
 
-  const { onInput: onInputUnitCode, onBackspace: onBackspaceUnitCode } = useInputNavigation(
+  const { onKeydown: onKeydownUnitCode, onBackspace: onBackspaceUnitCode } = useInputNavigation(
     unitCodeKeys,
     unitCodeRefs,
     undefined,   // no next
@@ -129,7 +136,7 @@
                 v-model="printStore.queryUnitForm.pcs_code[value]"
                 ref="pcsCodeRefs"
                 maxlength="1"
-                @input="onInputPcs(printStore.queryUnitForm.pcs_code, index)"
+                @keydown="onKeydownPcs($event, printStore.queryUnitForm.pcs_code, index)"
                 @keydown.backspace="onBackspacePcs(printStore.queryUnitForm.pcs_code, index)"
                 class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
                 autofocus
@@ -145,7 +152,7 @@
                 v-model="printStore.queryUnitForm.phase[value]"
                 ref="phaseRefs"
                 maxlength="1"
-                @input="onInputPhase(printStore.queryUnitForm.phase, index)"
+                @keydown="onKeydownPhase($event, printStore.queryUnitForm.phase, index)"
                 @keydown.backspace="onBackspacePhase(printStore.queryUnitForm.phase, index)"
                 class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
               />
@@ -160,7 +167,7 @@
                 v-model="printStore.queryUnitForm.block[value]"
                 ref="blockRefs"
                 maxlength="1"
-                @input="onInputBlock(printStore.queryUnitForm.block, index)"
+                @keydown="onKeydownBlock($event, printStore.queryUnitForm.block, index)"
                 @keydown.backspace="onBackspaceBlock(printStore.queryUnitForm.block, index)"
                 class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
               />
@@ -183,7 +190,7 @@
                 v-model="printStore.queryUnitForm.lot[value]"
                 ref="lotRefs"
                 maxlength="1"
-                @input="onInputLot(printStore.queryUnitForm.lot, index)"
+                @keydown="onKeydownLot($event, printStore.queryUnitForm.lot, index)"
                 @keydown.backspace="onBackspaceLot(printStore.queryUnitForm.lot, index)"
                 class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
               />
@@ -206,7 +213,7 @@
                 v-model="printStore.queryUnitForm.unit_code[value]"
                 ref="unitCodeRefs"
                 maxlength="1"
-                @input="onInputUnitCode(printStore.queryUnitForm.unit_code, index)"
+                @keydown="onKeydownUnitCode($event, printStore.queryUnitForm.unit_code, index)"
                 @keydown.backspace="onBackspaceUnitCode(printStore.queryUnitForm.unit_code, index)"
                 class="text-xl font-semibold text-center uppercase border rounded outline-none border-neutral-500 dark:bg-black dark:border-neutral-700 w-11 focus:dark:border-primary focus:border-primary hover:dark:border-primary hover:border-primary"
               />

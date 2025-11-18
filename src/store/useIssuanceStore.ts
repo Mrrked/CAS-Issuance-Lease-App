@@ -1395,15 +1395,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 },
               });
 
+              // const lastTable = (doc as any).lastAutoTable;
+              // const lastRow = lastTable.body[lastTable.body.length - 1];
+              // const lastCell = lastRow.cells[Object.keys(lastRow.cells)[0]]; // or a specific column key
+              // const lastContentY = lastCell.y + lastCell.height;
 
-              const lastTable = (doc as any).lastAutoTable;
-              const lastRow = lastTable.body[lastTable.body.length - 1];
-              const lastCell = lastRow.cells[Object.keys(lastRow.cells)[0]]; // or a specific column key
-              const lastContentY = lastCell.y + lastCell.height;
-
-              doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-              doc.setFont('helvetica', 'bold')
-              doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
+              // doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+              // doc.setFont('helvetica', 'bold')
+              // doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
 
 
               const tableLastCursorLineHeight = (doc as any).lastAutoTable.finalY;
@@ -2166,10 +2165,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
         controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
         dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
 
-        name: selectedInvoiceRecord.DETAILS.CLTNME,
-        address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-        tin: selectedInvoiceRecord.DETAILS.CLTTIN,
-        clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+        // name: selectedInvoiceRecord.DETAILS.CLTNME,
+        // address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
+        // tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+        // clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+        name: "JUAN DELA CRUZ JR.",
+        address: "UNIT 398 FLOOR 2, BUILDING A, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
+        tin: "123-456-789-00000",
+        clientKey: "CL310074L00",
         project: selectedInvoiceRecord.DETAILS.PRJNAM,
         unit: selectedInvoiceRecord.PBL_KEY.slice(3),
         salesStaff: 'KIM'
@@ -2499,8 +2502,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "COMPCD": 1,
       "TELNO": "8893-6060",
       "REGTIN": "000-527-103-00000",
-      "CLTNME": "AT GROUP SERVICES LIMITED - PHILIPPINE BRANCH",
-      "RADDR1": "LU001 CITYNET CENTRAL, SULTAN STREET, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
+      "CLTNME": "APPLE, PINEAPPLE AND PEN GROUP",
+      "RADDR1": "UNIT 398 FLOOR 2, BUILDING A, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
       "RADDR2": "",
       "CLTTIN": "010-410-346-00000 ",
       "CLTKEY": "CL310074L00",
@@ -2508,7 +2511,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "PBLKEY": "CL3 L  U001  ",
       "DATSTP": 20241203,
       "TIMSTP": 104542,
-      "AUTHSG": "IT_MARK",
+      "AUTHSG": "CDJANE",
       "STATUS": "",
       "PRSTAT": "",
 
@@ -2519,7 +2522,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       "RUNDAT": 20241203,
       "RUNTME": 104542,
-      "RUNBY": "IT_MARK"
+      "RUNBY": "CDJANE"
     },
     "ITEM_BREAKDOWNS": [
       {
@@ -2527,7 +2530,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         "ORNUM": "01111xxxxxxxx",
         "ITEMNO": 1,
         "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) (VAT-Exempt)",
+        "ITEM": "WATER CHARGES (January 2025) (VAT-Exempt)",
         "QTY": 1,
         "UNTCST": 13465.83,
         "VATAMT": 0,
@@ -2548,7 +2551,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         "ORNUM": "01111xxxxxxxx",
         "ITEMNO": 1,
         "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) (Gov't Taxes)",
+        "ITEM": "WATER CHARGES (January 2025) (Gov't Taxes)",
         "QTY": 1,
         "UNTCST": 343.38,
         "VATAMT": 0,
@@ -2586,7 +2589,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "ORCOD": "",
       "ORNUM": 0,
       "DATOR": 0,
-      "CASHCD": "IT_MARK",
+      "CASHCD": "CDJANE",
       "COLSTF": "",
       "ORAMT": 86487.03,
       "NOACCT": 0,
@@ -2811,7 +2814,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "PBLKEY": "CL3 L  U001  ",
       "DATSTP": 20241203,
       "TIMSTP": 104542,
-      "AUTHSG": "IT_MARK",
+      "AUTHSG": "CDJANE",
       "STATUS": "",
       "PRSTAT": "",
 
@@ -2822,7 +2825,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       "RUNDAT": 20241203,
       "RUNTME": 104542,
-      "RUNBY": "IT_MARK"
+      "RUNBY": "CDJANE"
     },
     "ITEM_BREAKDOWNS": [
       {
@@ -4212,7 +4215,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "ORCOD": "",
       "ORNUM": 0,
       "DATOR": 0,
-      "CASHCD": "IT_MARK",
+      "CASHCD": "CDJANE",
       "COLSTF": "",
       "ORAMT": 86487.03,
       "NOACCT": 0,
@@ -4290,13 +4293,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
     console.log(SAMPLE_BILLING_INVOICE);
     console.log(SAMPLE_SERVICE_INVOICE);
 
-    // handleActionGenerateDraftInvoice(
-    //   SAMPLE_BILLING_INVOICE,
-    //   () => {}
-    // )
+    handleActionGenerateDraftInvoice(
+      SAMPLE_BILLING_INVOICE,
+      () => {}
+    )
     // handleActionGenerateDraftInvoices(
     //   [
-    //     // SAMPLE_BILLING_INVOICE,
+    //     SAMPLE_BILLING_INVOICE,
     //     SAMPLE_SERVICE_INVOICE
     //   ],
     //   new Date(),

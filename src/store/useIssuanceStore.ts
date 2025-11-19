@@ -1395,14 +1395,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 },
               });
 
-              // const lastTable = (doc as any).lastAutoTable;
-              // const lastRow = lastTable.body[lastTable.body.length - 1];
-              // const lastCell = lastRow.cells[Object.keys(lastRow.cells)[0]]; // or a specific column key
-              // const lastContentY = lastCell.y + lastCell.height;
+              const lastTable = (doc as any).lastAutoTable;
+              const lastRow = lastTable.body[lastTable.body.length - 1];
+              const lastCell = lastRow.cells[Object.keys(lastRow.cells)[0]]; // or a specific column key
+              const lastContentY = lastCell.y + lastCell.height;
 
-              // doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
-              // doc.setFont('helvetica', 'bold')
-              // doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
+              doc.setFontSize(NORMAL_TEXT_FONT_SIZE)
+              doc.setFont('helvetica', 'bold')
+              doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
 
 
               const tableLastCursorLineHeight = (doc as any).lastAutoTable.finalY;

@@ -11,6 +11,7 @@ declare module 'vue' {
     CheckDetailsModal: typeof import('./src/components/Dialog/Printing/CheckDetailsModal.vue')['default']
     ClientDataTable: typeof import('./src/components/Reprint/ClientDataTable.vue')['default']
     ClientInquiry1: typeof import('./src/components/Reprint/InquiryForm/ClientInquiry1.vue')['default']
+    Column: typeof import('primevue/column')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
     DatePicker: typeof import('primevue/datepicker')['default']
     Divider: typeof import('primevue/divider')['default']

@@ -1435,7 +1435,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 { label: 'Add: VAT',              amount: invoicePDFData.body.breakdowns.section2.addVAT,             isShow: true},
                 { label: 'Add: Government Taxes', amount: invoicePDFData.body.breakdowns.section2.addGovernmentTaxes, isShow: isBillingInvoice},
                 { label: 'Less: Witholding Tax',  amount: invoicePDFData.body.breakdowns.section2.lessWithholdingTax, isShow: true},
-                { label: 'Total Amount Due',      amount: invoicePDFData.body.breakdowns.section2.totalAmountDue,     isShow: true},
+                { label: 'TOTAL AMOUNT DUE',      amount: invoicePDFData.body.breakdowns.section2.totalAmountDue,     isShow: true},
               ]
 
               for (let i = 0; i < doc.getNumberOfPages(); i++) {
@@ -1485,7 +1485,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                   body: BREAKDOWN1
                     .filter(item => item.isShow)
                     .map((item) => {
-                      return [item.label, item.amount]
+                      return [item.label.trim(), item.amount.trim()]
                     }),
 
                   // STYLE
@@ -1497,9 +1497,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
                     textColor: [0, 0, 0],
                     fontStyle: 'bold',
                     fontSize: NORMAL_TEXT_FONT_SIZE + 1,
+                    halign: 'right',
                     cellPadding: {
                       top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
-                      right: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      right: PAGE_CONFIG.TABLE_CELL_PADDING,
                       bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
                       left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
                     },
@@ -1514,15 +1515,20 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                   // HOOKS
                   didParseCell: (data) => {
-                    // You can still bold body cells if needed
-                    if (data.section === 'body') {
-                      data.cell.styles.halign = 'right'
-                    //   if (data.column.index === 0) {
-                    //   } else if (data.column.index === 1) {
-                    //     data.cell.styles.halign = 'center'
-                    //   } else {
-                    //     data.cell.styles.halign = 'right'
-                    //   }
+                    if (data.cell.text.includes('Zero-Rated Sales')) {
+                      data.cell.styles.cellPadding = {
+                        top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                        right: PAGE_CONFIG.TABLE_CELL_PADDING / 1.5,
+                        bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                        left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      }
+                    } else if(data.cell.text.includes('VAT')) {
+                      data.cell.styles.cellPadding = {
+                        top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                        right: PAGE_CONFIG.TABLE_CELL_PADDING / 1.25,
+                        bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                        left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      }
                     }
                   },
                 });
@@ -1549,7 +1555,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                   body: BREAKDOWN2
                     .filter(item => item.isShow)
                     .map((item) => {
-                      return [item.label, item.amount]
+                      return [item.label.trim(), item.amount.trim()]
                     }),
 
                   // STYLE
@@ -1561,9 +1567,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
                     textColor: [0, 0, 0],
                     fontStyle: 'bold',
                     fontSize: NORMAL_TEXT_FONT_SIZE + 1,
+                    halign: 'right',
                     cellPadding: {
                       top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
-                      right: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                      right: PAGE_CONFIG.TABLE_CELL_PADDING,
                       bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
                       left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
                     },
@@ -1578,15 +1585,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                   // HOOKS
                   didParseCell: (data) => {
-                    // You can still bold body cells if needed
                     if (data.section === 'body') {
-                      data.cell.styles.halign = 'right'
-                    //   if (data.column.index === 0) {
-                    //   } else if (data.column.index === 1) {
-                    //     data.cell.styles.halign = 'center'
-                    //   } else {
-                    //     data.cell.styles.halign = 'right'
-                    //   }
+                      if (data.cell.text.includes('TOTAL AMOUNT DUE')) {
+                        data.cell.styles.cellPadding = {
+                          top: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                          right: PAGE_CONFIG.TABLE_CELL_PADDING / 1.5,
+                          bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                          left: PAGE_CONFIG.TABLE_CELL_PADDING / 2,
+                        }
+                      }
                     }
                   },
                 });

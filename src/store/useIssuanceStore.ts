@@ -2216,7 +2216,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       },
       footer: {
         acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-        dateIssued: "Date Issued : xx/xx/xxxx",
+        dateIssued: "Date Issued : MM/DD/YYYY",
         approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
       },
       // authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
@@ -2310,7 +2310,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           },
           footer: {
             acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-            dateIssued: "Date Issued : xx/xx/xxxx",
+            dateIssued: "Date Issued : MM/DD/YYYY",
             approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
           },
           authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'

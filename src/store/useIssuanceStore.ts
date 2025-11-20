@@ -880,10 +880,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
             'BILL TO' :
             'SOLD TO',
           invoicePDFData.header.name,
-          'ADDRESS',
-          invoicePDFData.header.address,
           'TIN',
           invoicePDFData.header.tin,
+          'ADDRESS',
+          invoicePDFData.header.address,
 
           'CLIENT KEY',
           invoicePDFData.header.clientKey,
@@ -2169,7 +2169,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
 
         invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
-        controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+        // controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+        controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + '011111A000006',
         dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
 
         // name: selectedInvoiceRecord.DETAILS.CLTNME,
@@ -2482,7 +2483,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     "INVOICE_KEY": {
       "RECTYP": "BI",
       "TRNTYP": "B",
-      "COMPLETE_OR_KEY": "01111xxxxxxxx",
+      "COMPLETE_OR_KEY": "0111101000005",
       "COMPCD": 1,
       "BRANCH": 1,
       "DEPTCD": 11,
@@ -2493,7 +2494,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "MM": 1,
       "INVOICE_NAME": "BILLING",
       "INVOICE_NUMBER": "BI01111xxxxxxxx",
-      "SERIES_RANGE": "BI0111101000001 - BI0111199999999  "
+      "SERIES_RANGE": "BI0111101000001 - BI0111199999999"
     },
     "FOOTER": {
       "ACNUM": "Acknowledgement Certificate No. : AC_RDO_mmyyyy_xxxxxx",

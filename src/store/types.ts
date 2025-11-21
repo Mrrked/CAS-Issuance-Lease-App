@@ -1007,4 +1007,9 @@ export interface InvoicePDF {
     }
   },
   authorizedSignature: string,
+  reprinting: {
+    isReprint: boolean,
+    reprintBy: string,
+    reprintDateTime: string,
+  }
 }

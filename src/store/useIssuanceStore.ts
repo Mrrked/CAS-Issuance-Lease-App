@@ -815,7 +815,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
         dateIssued: selectedInvoiceRecord.DETAILS.ACDAT,
         approvedSeriesRange: selectedInvoiceRecord.DETAILS.STRRNG,
       },
-      authorizedSignature: selectedInvoiceRecord.DETAILS.AUTHSG || 'N/A'
+      authorizedSignature: selectedInvoiceRecord.DETAILS.AUTHSG || 'N/A',
+      reprinting: {
+        isReprint: selectedInvoiceRecord.DETAILS.PRSTAT === 'R',
+        reprintBy: selectedInvoiceRecord.DETAILS.REPRBY,
+        reprintDateTime: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.RPDATE)
+          + ' ' + utilStore.formatTimeNumberToString24H(selectedInvoiceRecord.DETAILS.RPTIME),
+      }
     }
   }
 
@@ -1271,6 +1277,32 @@ export const useIssuanceStore = defineStore('issuance', () => {
         doc.setFont("helvetica", "normal")
         doc.setFont("helvetica", "italic")
         doc.text(TEXT[0], PAGE_CONFIG.middleLineX, cursorLineHeight, { align: 'center'})
+      }
+
+      const handleAddReprintDetails = () => {
+        if (invoicePDFData.reprinting.isReprint) {
+          const TEXT = [
+            "REPRINT",
+            "Reprinted By : " + invoicePDFData.reprinting.reprintBy,
+            "Reprint Date & Time : " + invoicePDFData.reprinting.reprintDateTime,
+          ]
+
+          cursorLineHeight = 1.45
+
+          doc.setFontSize(TWO_EXTRA_LARGE_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "bold")
+          doc.text(TEXT[0], PAGE_CONFIG.headerEndLineX, cursorLineHeight, { align: 'right'})
+
+          cursorLineHeight = PAGE_CONFIG.footerEndLineY - (MEDIUM_LINE_HEIGHT * 1)
+
+          doc.setFontSize(SMALL_TEXT_FONT_SIZE)
+          doc.setFont("helvetica", "normal")
+
+          doc.text(TEXT[1], PAGE_CONFIG.footerEndLineX, cursorLineHeight, { align: 'right'})
+          incrementHeight(MEDIUM_LINE_HEIGHT)
+
+          doc.text(TEXT[2], PAGE_CONFIG.footerEndLineX, cursorLineHeight, { align: 'right'})
+        }
       }
 
       // DONE
@@ -1874,6 +1906,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         handleAddMainBodyLayout(pageNumber === 1)
         handleAddFooter()
         handleAddSystemDocumentNotice()
+        handleAddReprintDetails()
         // handleAddPageNumber(pageNumber, numberOfPages)
 
 
@@ -2517,12 +2550,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "ACDAT" : "Date Issued : MM/DD/YYYY",
       "STRRNG": "BI0111101000001 - BI0111199999999",
       "STATUS": "",
-      "PRSTAT": "",
 
-      "PRCNT": 0,
-      "RPDATE": 0,
-      "RPTIME": 0,
-      "REPRBY": "",
+      "PRSTAT": "R",
+      "PRCNT" : 2,
+      "RPDATE": 20251120,
+      "RPTIME": 102030,
+      "REPRBY": "CDLYN",
 
       "UPDDTE": 20241203,
       "UPDTME": 104542,
@@ -2820,11 +2853,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "ACDAT": "Date Issued : MM/DD/YYYY",
       "STRRNG": "",
       "STATUS": "",
-      "PRSTAT": "",
-      "PRCNT": 0,
-      "RPDATE": 0,
-      "RPTIME": 0,
-      "REPRBY": "",
+      "PRSTAT": "R",
+      "PRCNT" : 2,
+      "RPDATE": 20251120,
+      "RPTIME": 102030,
+      "REPRBY": "CDLYN",
       "UPDDTE": 0,
       "UPDTME": 0,
       "UPDBY": "CDJANE"

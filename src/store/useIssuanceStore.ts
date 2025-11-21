@@ -2346,11 +2346,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
             LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
             UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
           };
-          console.log(data, perBillTypeRunStore.perBillTypeRunForm.projectCode);
 
           axios.post(`issuance_lease/per_bill_type/`, data)
           .then((response) => {
-            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            // console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBillTypeRunStore.billings = response.data.data as LeaseBill[];
             perBillTypeRunStore.handleActionViewMainDialog()
           })
@@ -2378,7 +2377,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
-            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            // console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBatchRunStore.billings = response.data.data as LeaseBill[];
             perBatchRunStore.handleActionViewMainDialog()
           })
@@ -2950,8 +2949,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
   onMounted(() => {
     // handleActionSearch(2)
     if (IS_TEST === 'TRUE') {
-      console.log(SAMPLE_BILLING_INVOICE);
-      console.log(SAMPLE_SERVICE_INVOICE);
+      // console.log(SAMPLE_BILLING_INVOICE);
+      // console.log(SAMPLE_SERVICE_INVOICE);
       // handleActionGenerateDraftInvoice(
       //   SAMPLE_BILLING_INVOICE,
       //   () => {}

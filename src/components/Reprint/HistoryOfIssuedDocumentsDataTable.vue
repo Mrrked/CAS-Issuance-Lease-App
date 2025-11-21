@@ -205,39 +205,6 @@
       </template>
     </Column>
 
-    <Column header="Run By"
-      field="DETAILS.RUNBY"
-      filterField="DETAILS.RUNBY"
-      sortable
-    >
-      <template #filter="{ filterModel, filterCallback }">
-        <InputText
-          v-model="filterModel.value"
-          type="text"
-          size="small"
-          @input="filterCallback()"
-          :placeholder="'Search'"
-          class="w-20"
-        />
-      </template>
-    </Column>
-
-    <Column header="Run Timestamp"
-      field="EXTRA.TIMESTAMP_PRINT"
-      filterField="EXTRA.TIMESTAMP_PRINT"
-      sortable
-    >
-      <template #filter="{ filterModel, filterCallback }">
-        <InputText
-          v-model="filterModel.value"
-          type="text"
-          size="small"
-          @input="filterCallback()"
-          :placeholder="'Search'"
-        />
-      </template>
-    </Column>
-
     <Column header="Status"
       field="DETAILS.STATUS"
       filterField="DETAILS.STATUS"

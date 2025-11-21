@@ -4,19 +4,22 @@
   import DataTable, { DataTableRowSelectEvent } from 'primevue/datatable';
   import { useUtilitiesStore } from '../../../store/useUtilitiesStore';
   import { InvoiceRecord } from '../../../store/types';
+  import { useIssuanceStore } from '../../../store/useIssuanceStore';
 
   interface DialogRef  {
     data: {
-      table_data: InvoiceRecord[],
-      view: Function
+      invoice_date: Date
+      table_data: InvoiceRecord[]
       submit: Function
       cancel: Function
-    },
+    }
   }
 
   const utilStore = useUtilitiesStore()
 
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
+
+  const issuanceStore = useIssuanceStore();
 
   const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -30,7 +33,7 @@
 
   const onRowSelect = (event: DataTableRowSelectEvent) => {
     if (dialogRef) {
-      dialogRef.value.data.view(event.data)
+      issuanceStore.handleActionPreviewDraftInvoice(event.data)
     }
     event.originalEvent.preventDefault();
     return;
@@ -46,7 +49,7 @@
     @rowSelect="onRowSelect"
 
     v-model:filters="filters"
-    :filterDisplay="undefined"
+    filterDisplay="row"
     :globalFilterFields="['PBL_KEY', 'TCLTNO', 'DETAILS.CLTNME', 'TOTAL_BREAKDOWN.TOTSAL', 'TOTAL_BREAKDOWN.PRDTAX', 'TOTAL_BREAKDOWN.AMTDUE']"
 
     scrollable
@@ -54,8 +57,8 @@
     resizableColumns
 
     stripedRows
-    :rows="15"
-    :rowsPerPageOptions="[15, 30, 50]"
+    :rows="10"
+    :rowsPerPageOptions="[10, 20, 30, 50]"
 
     paginator
     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
@@ -76,6 +79,7 @@
           size="small"
           @input="filterCallback()"
           :placeholder="'Search by PBL'"
+          class="w-32"
         />
       </template>
       <template #body="{ data }">
@@ -85,7 +89,7 @@
       </template>
     </Column>
 
-    <Column header="Temporary Client Number"
+    <Column header="Temporary Client #"
       field="TCLTNO"
       filterField="TCLTNO"
     >
@@ -95,7 +99,8 @@
           type="text"
           size="small"
           @input="filterCallback()"
-          :placeholder="'Search by Temporary Client Number'"
+          :placeholder="'Search by TCLTNO'"
+          class="w-36"
         />
       </template>
       <template #body="{ data }">
@@ -114,6 +119,7 @@
           size="small"
           @input="filterCallback()"
           :placeholder="'Search by Client Name'"
+          class="w-60"
         />
       </template>
       <template #body="{ data }">
@@ -132,6 +138,7 @@
           size="small"
           @input="filterCallback()"
           :placeholder="'Search by Total Sales'"
+          class="w-28"
         />
       </template>
       <template #body="{ data }">
@@ -150,6 +157,7 @@
           size="small"
           @input="filterCallback()"
           :placeholder="'Search by Withholding Tax'"
+          class="w-28"
         />
       </template>
       <template #body="{ data }">
@@ -168,6 +176,7 @@
           size="small"
           @input="filterCallback()"
           :placeholder="'Search by Total Amount Due'"
+          class="w-28"
         />
       </template>
       <template #body="{ data }">

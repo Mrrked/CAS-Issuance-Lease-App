@@ -1,4 +1,3 @@
-import { COMPANIES, COMPANY_DETAILS } from './config';
 import { CRMKPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
 import jsPDF, { jsPDFOptions } from 'jspdf';
 
@@ -6,6 +5,7 @@ import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import { onMounted } from 'vue';
+import { useCompanyHeaderStore } from './useCompanyHeaderStore';
 import { useFileStore } from './useFileStore';
 import { useMainStore } from './useMainStore';
 import { usePerBatchRunStore } from './usePerBatchRunStore';
@@ -13,6 +13,8 @@ import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+
+const IS_TEST = import.meta.env.VITE_IS_TEST || 'FALSE';
 
 export const useIssuanceStore = defineStore('issuance', () => {
 
@@ -22,6 +24,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
+  const companyHeaderStore = useCompanyHeaderStore()
 
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
@@ -89,12 +92,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
       bill.SALTYP === 'NVAT' ? 'N' : ''
 
       let type = BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
-          '(Zero-Rated)' :
+        '(Zero-Rated)' :
         BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
           '(VAT-Exempt)' :
           '(VATable)'
 
-      return `${bill_desc} ( ${month} ${year} ) ${type}`
+      return `${bill_desc} (${month} ${year}) ${type}`
 
     } else {
       let type = ''
@@ -106,7 +109,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         type = '(Zero-Rated)'
       }
 
-      return `${bill_desc} ( ${month} ${year} ) ${type}`
+      return `${bill_desc} (${month} ${year}) ${type}`
     }
 
   }
@@ -359,9 +362,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return [...Object.values(mergedMap)] as LeaseBill[]
   }
 
-  const processInvoiceRecords = (billings: LeaseBill[], invoice_date: Date): InvoiceRecord[] => {
+  const convertBillingsToInvoiceRecords = (billings: LeaseBill[], invoice_date: Date): InvoiceRecord[] => {
     const mergedMap: { [key: string]: InvoiceRecord } = {};
-
 
     billings.forEach((bill) => {
       const key = bill.ID;
@@ -430,7 +432,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 ORTYPE:       '',
                 DATENT:       0,
                 TIMENT:       0,
-                USRENT:       sessionStore.authenticatedUser?.username || '',
+                USRENT:       sessionStore.authenticatedUser?.username.toUpperCase() || '',
               }
             ]
 
@@ -504,7 +506,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // NEW INVOICE GROUP
       else {
         const selectedProject = mainStore.project_codes.find((code) => code.PROJCD === bill.PROJCD)
-        const selectedCompany = COMPANIES.find((c) => c.COMPCD === bill.COMPCD) as COMPANY_DETAILS || COMPANIES[0]
+        const selectedCompanyHeader = companyHeaderStore.getCompanyHeaderDetail(bill.COMPCD, bill.INVOICE_KEY.DEPTCD)
 
         const [CLIENT_ADDRESS_1, CLIENT_ADDRESS_2] = getSplitClientAddress(bill.CLIENT_ADDRESS)
         const [ remarks1, remarks2, remarks3, remarks4 ] = getInvoiceRemarks(bill)
@@ -516,19 +518,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           BILLINGS:         [ bill ],
 
-          HEADER: {
-            COMPANY_NAME:   selectedCompany.CONAME,
-            ADDRESS:        selectedCompany.ADDRESS,
-            LOGO_URL:       selectedCompany.IMG_URL,
-            LOGO_SIZE_INCH: selectedCompany.IMG_SIZE_INCH
-          },
-
           INVOICE_KEY:      bill.INVOICE_KEY,
-
-          FOOTER: {
-            ACNUM:          bill.ACNUM,
-            ACDAT:          bill.ACDAT,
-          },
 
           // CIRCLTPF
           DETAILS: {
@@ -543,8 +533,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
             // COMPANY INFO
             COMPCD:         bill.COMPCD || 0,
-            TELNO:          selectedCompany.TEL_NO,
-            REGTIN:         selectedCompany.TIN,
+            CONAME:         selectedCompanyHeader?.CONAME || '',
+            COINIT:         selectedCompanyHeader?.COINIT || '',
+            TELNO:          selectedCompanyHeader?.TEL_NO || '',
+            REGTIN:         selectedCompanyHeader?.TIN || '',
+            CADDR1:         selectedCompanyHeader?.ADDRESS1 || '',
+            CADDR2:         selectedCompanyHeader?.ADDRESS2 || '',
 
             // CLIENT INFO
             CLTNME:         bill.CLIENT_NAME || '',
@@ -554,11 +548,20 @@ export const useIssuanceStore = defineStore('issuance', () => {
             CLTKEY:         bill.CLIENT_KEY  || '',
             PRJNAM:         selectedProject?.PTITLE || '',
             PBLKEY:         bill.PBL_KEY     || '',
+            STAFF1:         bill.STAFF1 || '',
+            STAFF2:         bill.STAFF2 || '',
+
+            // HEADER
+            SYSNME:         'CGC ACCOUNTING SYSTEM VERSION 2.0',
+            RUNDAT:         0,
+            RUNTME:         0,
+            RUNBY:          sessionStore.authenticatedUser?.username.toUpperCase() || '',
 
             // FOOTER
-            DATSTP:         0,
-            TIMSTP:         0,
-            AUTHSG:         sessionStore.authenticatedUser?.username || '',
+            AUTHSG:         sessionStore.authenticatedUser?.user.full_name.toUpperCase() || '',
+            ACNUM:          bill.ACNUM,
+            ACDAT:          bill.ACDAT,
+            STRRNG:         bill.INVOICE_KEY.SERIES_RANGE,
 
             // TRACKING
             STATUS:         '',
@@ -569,9 +572,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RPTIME:         0,
             REPRBY:         '',
 
-            RUNDAT:         0,
-            RUNTME:         0,
-            RUNBY:          sessionStore.authenticatedUser?.username || '',
+            UPDDTE:        0,
+            UPDTME:        0,
+            UPDBY:          sessionStore.authenticatedUser?.username.toUpperCase() || '',
           },
           // CIRBRKPF
           ITEM_BREAKDOWNS: [
@@ -632,7 +635,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             ORCOD:          bill.INVOICE_KEY.ORCOD,
             ORNUM:          bill.INVOICE_KEY.ORNUM,
             DATOR:          0, //UPDATE ON FINAL
-            CASHCD:         sessionStore.authenticatedUser?.username || '',
+            CASHCD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
             COLSTF:         '',
             ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
             NOACCT:         0, //UPDATE ON FINAL no of months
@@ -734,7 +737,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               ORTYPE:       '',
               DATENT:       0,
               TIMENT:       0,
-              USRENT:       sessionStore.authenticatedUser?.username || '',
+              USRENT:       sessionStore.authenticatedUser?.username.toUpperCase() || '',
             }
           ]
         }
@@ -744,8 +747,80 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return [...Object.values(mergedMap)] as InvoiceRecord[]
   }
 
+  const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
+    const company_logo = companyHeaderStore.getCompanyLogoByCompanyCode(selectedInvoiceRecord.DETAILS.COMPCD)
+
+    return {
+      header: {
+        systemName: selectedInvoiceRecord.DETAILS.SYSNME,
+
+        runDateAndTime: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.RUNDAT)
+          + ' ' + utilStore.formatTimeNumberToString24H(selectedInvoiceRecord.DETAILS.RUNTME),
+        runUsername: selectedInvoiceRecord.DETAILS.RUNBY || 'N/A',
+
+        companyName: selectedInvoiceRecord.DETAILS.CONAME,
+        companyAddress: selectedInvoiceRecord.DETAILS.CADDR1 + '\n' + selectedInvoiceRecord.DETAILS.CADDR2,
+        companyInitials: selectedInvoiceRecord.DETAILS.COINIT,
+        companyTelephone: selectedInvoiceRecord.DETAILS.TELNO,
+        companyRegisteredTIN: selectedInvoiceRecord.DETAILS.REGTIN,
+
+        companyLogo: company_logo.IMG_URL,
+        companyLogoWidth: company_logo.IMG_SIZE_INCH.WIDTH,
+        companyLogoHeight: company_logo.IMG_SIZE_INCH.HEIGHT,
+
+        invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
+        controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
+        dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+
+        name: selectedInvoiceRecord.DETAILS.CLTNME,
+        address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
+        tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+        clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
+        project: selectedInvoiceRecord.DETAILS.PRJNAM,
+        unit: selectedInvoiceRecord.PBL_KEY.slice(3),
+        salesStaff: selectedInvoiceRecord.DETAILS.STAFF1 + ( selectedInvoiceRecord.DETAILS.STAFF2 ? '/' + selectedInvoiceRecord.DETAILS.STAFF2 : '' ),
+      },
+      body: {
+        billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
+          .map((item) => {
+            return {
+              itemDescription: item.ITEM,
+              qty: item.QTY.toString(),
+              unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
+              vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
+              amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
+            }
+          }),
+        breakdowns: {
+          section1: {
+            vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
+            vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
+            zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
+            governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+          },
+          section2: {
+            totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
+            lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
+            addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
+            addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
+            lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
+            totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
+          },
+        }
+      },
+      footer: {
+        acknowledgementCertificateNumber: selectedInvoiceRecord.DETAILS.ACNUM,
+        dateIssued: selectedInvoiceRecord.DETAILS.ACDAT,
+        approvedSeriesRange: selectedInvoiceRecord.DETAILS.STRRNG,
+      },
+      authorizedSignature: selectedInvoiceRecord.DETAILS.AUTHSG || 'N/A'
+    }
+  }
+
   const generateInvoicePDFBlob = (invoicePDFData: InvoicePDF):Blob => {
-    console.log('GENERATE PDF BLOB FOR INVOICE', invoicePDFData)
+    // console.log('GENERATE PDF BLOB FOR INVOICE', invoicePDFData)
 
     const generateDoc = (invoicePDFData: InvoicePDF): jsPDF => {
 
@@ -858,7 +933,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         const TEXT = [
           // GROUP 1
-          "CGC ACCOUNTING SYSTEM VERSION 2.0",
+          invoicePDFData.header.systemName.toUpperCase(),
           "Run Date & Time: " + invoicePDFData.header.runDateAndTime,
           "User ID: " + invoicePDFData.header.runUsername.toUpperCase(),
           "Page " + pageNumber + " of " + total,
@@ -1122,7 +1197,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         cursorLineHeight = PAGE_CONFIG.footerStartLineY + SMALL_LINE_HEIGHT
 
         const TEXT = [
-          invoicePDFData.footer.acn,
+          invoicePDFData.footer.acknowledgementCertificateNumber,
           invoicePDFData.footer.dateIssued,
           "Approved Series Range : " + invoicePDFData.footer.approvedSeriesRange,
         ]
@@ -1407,7 +1482,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
               const tableLastCursorLineHeight = (doc as any).lastAutoTable.finalY;
               // doc.line(PAGE_CONFIG.startLineX, tableLastCursorLineHeight, PAGE_CONFIG.endLineX, tableLastCursorLineHeight)
-              console.log('TABLE ENDS AT Y = ', tableLastCursorLineHeight, tableLastCursorLineHeight - cursorLineHeight);
+              // console.log('TABLE ENDS AT Y = ', tableLastCursorLineHeight, tableLastCursorLineHeight - cursorLineHeight);
 
               cursorLineHeight = tableLastCursorLineHeight
             }
@@ -1763,12 +1838,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
         },
         get firstPageBodyEndLineY() {
           return this.bodyEndLineY - (1 + (SMALL_LINE_HEIGHT * 2))
-        },
-        setOverrideLastPageBodyEndLineY(value: number) {
-          this.overflow.isOnePage = false;
-          this.overflow.lastMainBodyPageNumber = doc.getNumberOfPages();
-          this.overflow.newBodyEndLineY = value;
-          console.log(this.overflow.isOnePage, this.overflow.lastMainBodyPageNumber, this.overflow.newBodyEndLineY);
         },
       }
 
@@ -2148,193 +2217,122 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return generateDoc(groupedInvoices).output('blob')
   }
 
-  const handleActionGenerateDraftInvoice = async (selectedInvoiceRecord: InvoiceRecord, callback: Function) => {
+  const handleActionPreviewDraftInvoice = async (selectedInvoiceRecords: InvoiceRecord | InvoiceRecord[], invoiceDate?: Date) => {
+    const isMultiple = Array.isArray(selectedInvoiceRecords)
+
+    const loading = utilStore.startLoadingModal(isMultiple ? 'Loading Draft Invoices...' : 'Loading Draft Invoice...')
+
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
-    const invoicePDFData: InvoicePDF = {
-      header: {
-        runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
-        // runUsername: sessionStore.authenticatedUser?.username || 'N/A',
-        runUsername: 'COLL_JANE',
+    if (isMultiple && invoiceDate) {
+      const invoicePDFDataS: InvoicePDF[] = selectedInvoiceRecords.map((selectedInvoiceRecord) => convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecord))
+      const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) => generateInvoicePDFBlob(invoicePDFData))
+      const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
-        companyName: company.CONAME,
-        companyAddress: company.ADDRESS,
-        companyInitials: company.COINIT,
-        companyTelephone: company.TEL_NO,
-        companyRegisteredTIN: company.TIN,
+      const header = 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`
+      const name = 'Multiple Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`
 
-        companyLogo: company.IMG_URL,
-        companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
-        companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
+      fileStore.handleActionViewFilePDF(
+        header,
+        `${name}.pdf`,
+        PDF_BLOB,
+        null,
+        () => {},
+        () => {}
+      )
+    } else if (!isMultiple) {
+      const invoicePDFData = convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecords)
+      const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
 
-        invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
-        // controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
-        controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + '011111A000006',
-        dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+      const name = selectedInvoiceRecords.INVOICE_KEY.INVOICE_NAME + ' INVOICE (DRAFT) - ' + selectedInvoiceRecords.INVOICE_KEY.INVOICE_NUMBER
 
-        // name: selectedInvoiceRecord.DETAILS.CLTNME,
-        // address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-        // tin: selectedInvoiceRecord.DETAILS.CLTTIN,
-        // clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
-        name: "JUAN DELA CRUZ JR.",
-        address: "UNIT 398 FLOOR 2, BUILDING A, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
-        tin: "123-456-789-00000",
-        clientKey: "CL310074L00",
-        project: selectedInvoiceRecord.DETAILS.PRJNAM,
-        unit: selectedInvoiceRecord.PBL_KEY.slice(3),
-        salesStaff: 'KIM'
-      },
-      body: {
-        billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
-          .map((item) => {
-            return {
-              itemDescription: item.ITEM,
-              qty: item.QTY.toString(),
-              unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
-              vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
-              amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
-            }
-          }),
-        breakdowns: {
-          section1: {
-            vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
-            vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-            vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
-            zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
-            governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-          },
-          section2: {
-            totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
-            lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-            netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
-            addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-            addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-            lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
-            totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
-          },
-        }
-      },
-      footer: {
-        acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-        dateIssued: "Date Issued : MM/DD/YYYY",
-        approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
-      },
-      // authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
-      authorizedSignature: 'JANE DELA CRUZ'
+      fileStore.handleActionViewFilePDF(
+        name + ' (Preview)',
+        `${name}.pdf`,
+        PDF_BLOB,
+        null,
+        () => {},
+        () => {}
+      )
     }
 
-    const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
+    loading.close()
+  }
 
-    callback()
+  const handleActionPreviewIssuedInvoice = async (issuedInvoiceRecords: InvoiceRecord[], year: number, month: number) => {
+    const loading = utilStore.startLoadingModal(`Loading ${issuedInvoiceRecords.length} Invoices...`)
 
-    const name = selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME + ' INVOICE (DRAFT) - ' + selectedInvoiceRecord.INVOICE_KEY.INVOICE_NUMBER
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const invoicePDFDataS: InvoicePDF[] = issuedInvoiceRecords.map((issuedInvoiceRecord) => convertInvoiceRecordsToInvoicePDFs(issuedInvoiceRecord))
+    const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) => generateInvoicePDFBlob(invoicePDFData))
+    const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
+
+    const header = 'Issued Invoices - ' + `${month}/${year}`
+    const name = `Issued Invoices ${year}-${month}`
 
     fileStore.handleActionViewFilePDF(
-      name + ' (Preview)',
+      header,
       `${name}.pdf`,
       PDF_BLOB,
       null,
       () => {},
       () => {}
     )
-  }
+    fileStore.handleActionDownloadFileBlob(PDF_BLOB, `${name}.pdf`)
 
-  const handleActionGenerateDraftInvoices = async (selectedInvoiceRecords: InvoiceRecord[], invoiceDate: Date, callback: Function) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const data = {
-      year: invoiceDate.getFullYear(),
-      month: invoiceDate.getMonth() + 1,
-    }
-
-    const invoicePDFDataS: InvoicePDF[] = selectedInvoiceRecords.
-      map((selectedInvoiceRecord) => {
-        const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
-
-        return {
-          header: {
-            runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
-            runUsername: sessionStore.authenticatedUser?.username || 'N/A',
-
-            companyName: company.CONAME,
-            companyAddress: company.ADDRESS,
-            companyInitials: company.COINIT,
-            companyTelephone: company.TEL_NO,
-            companyRegisteredTIN: company.TIN,
-
-            companyLogo: company.IMG_URL,
-            companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
-            companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
-
-            invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
-            controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
-            dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
-
-            name: selectedInvoiceRecord.DETAILS.CLTNME,
-            address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-            tin: selectedInvoiceRecord.DETAILS.CLTTIN,
-            clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
-            project: selectedInvoiceRecord.DETAILS.PRJNAM,
-            unit: selectedInvoiceRecord.PBL_KEY.slice(3),
-            salesStaff: 'KIM'
-          },
-          body: {
-            billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
-              .map((item) => {
-                return {
-                  itemDescription: item.ITEM,
-                  qty: item.QTY.toString(),
-                  unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
-                  vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
-                  amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
-                }
-              }),
-            breakdowns: {
-              section1: {
-                vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
-                vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
-                zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
-                governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-              },
-              section2: {
-                totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
-                lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
-                addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-                lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
-                totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
-              },
-            }
-          },
-          footer: {
-            acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-            dateIssued: "Date Issued : MM/DD/YYYY",
-            approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
-          },
-          authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
-        }
-      })
-
-    const PDF_BLOBS = invoicePDFDataS
-      .map((invoicePDFData) => generateInvoicePDFBlob(invoicePDFData))
-
-    const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
-
-    callback()
-
-    const header = 'Preview Draft Invoices ' + `(${invoiceDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })})`
-    fileStore.handleActionViewFilePDF(header, `MULTIPLE INVOICE (DRAFT) - ${data.year}-${data.month}.pdf`, PDF_BLOB, null, () => {}, () => {})
+    loading.close()
   }
 
   const handleActionSearch = (tab: number ) => {
+    const validateQueryUnitForm = () => {
+      const validate1 = perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD
+      const validate2 = (
+        perBillTypeRunStore.perBillTypeRunForm.PBL.pcs_code['1']  ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.phase['1']     ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.block['1']     ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.block['2']     ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['1']       ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['2']       ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['3']       ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['4']       ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['1'] ||
+        perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['2']
+      )
+      if (!validate1) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Invalid Project',
+          detail: 'Unable to recognize the selected project. Please check.',
+          life: 3000
+        });
+        return false
+      }
+      if (!validate2) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Missing Unit Identifiers',
+          detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+          life: 3000
+        });
+        return false
+      }
+
+      return validate1 && validate2
+    }
 
     switch (tab) {
       // Per Bill Type / PBL
       case 1:
-        if (perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString() && perBillTypeRunStore.perBillTypeRunForm.billType && perBillTypeRunStore.perBillTypeRunForm.projectCode) {
+        if (
+          perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString() &&
+          perBillTypeRunStore.perBillTypeRunForm.billType &&
+          perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD
+        ) {
+          if (perBillTypeRunStore.perBillTypeRunForm.billType === 'A' && !validateQueryUnitForm()) {
+            return
+          }
+
           const loading = utilStore.startLoadingModal('Fetching ...')
           const form = perBillTypeRunStore.perBillTypeRunForm
           const data = {
@@ -2348,10 +2346,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
             LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
             UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
           };
+          console.log(data, perBillTypeRunStore.perBillTypeRunForm.projectCode);
 
           axios.post(`issuance_lease/per_bill_type/`, data)
           .then((response) => {
-            // console.log('FETCHED OPEN BILLINGS', response.data.data);
+            console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBillTypeRunStore.billings = response.data.data as LeaseBill[];
             perBillTypeRunStore.handleActionViewMainDialog()
           })
@@ -2379,7 +2378,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
           .then((response) => {
-            // console.log('FETCHED OPEN BILLINGS', response.data.data);
+            console.log('FETCHED OPEN BILLINGS', response.data.data);
             perBatchRunStore.billings = response.data.data as LeaseBill[];
             perBatchRunStore.handleActionViewMainDialog()
           })
@@ -2446,7 +2445,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
   }
 
-  const handleActionIssueFinalInvoices = (
+  const handleActionPOSTNewIssueInvoices = (
     data: {
       type: string
       invoices: InvoiceRecord[]
@@ -2471,15 +2470,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
     "TCLTNO": 2405014,
     "CLIENT_KEY_RAW": "CL3174L0",
     "BILLINGS": [],
-    "HEADER": {
-      "COMPANY_NAME": "CITYLAND DEVELOPMENT CORPORATION",
-      "ADDRESS": "2/F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V. DELA COSTA ST BEL-AIR 1209 CITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
-      "LOGO_URL": "/src/assets/cdc.jpg",
-      "LOGO_SIZE_INCH": {
-        "WIDTH": 0.8,
-        "HEIGHT": 0.8
-      }
-    },
     "INVOICE_KEY": {
       "RECTYP": "BI",
       "TRNTYP": "B",
@@ -2494,11 +2484,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "MM": 1,
       "INVOICE_NAME": "BILLING",
       "INVOICE_NUMBER": "BI01111xxxxxxxx",
-      "SERIES_RANGE": "BI0111101000001 - BI0111199999999"
-    },
-    "FOOTER": {
-      "ACNUM": "Acknowledgement Certificate No. : AC_RDO_mmyyyy_xxxxxx",
-      "ACDAT": "Date Issued : xxxx/xx/xx"
+      "SERIES_RANGE": "BI0111101000001 - BI0111199999999",
     },
     "DETAILS": {
       "RECTYP": "BI",
@@ -2508,8 +2494,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "SLSTYP": "",
       "DATVAL": 20250101,
       "COMPCD": 1,
-      "TELNO": "8893-6060",
+      "CONAME": "CITYLAND DEVELOPMENT CORPORATION",
+      "COINIT": "CDC",
+      "TELNO" : "8893-6060",
       "REGTIN": "000-527-103-00000",
+      "CADDR1": "2/F CITYLAND CONDOMINIUM 10 TOWER I,",
+      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
       "CLTNME": "APPLE, PINEAPPLE AND PEN GROUP",
       "RADDR1": "UNIT 398 FLOOR 2, BUILDING A, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
       "RADDR2": "",
@@ -2517,9 +2507,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "CLTKEY": "CL310074L00",
       "PRJNAM": "CITYNET CENTRAL",
       "PBLKEY": "CL3 L  U001  ",
-      "DATSTP": 20241203,
-      "TIMSTP": 104542,
-      "AUTHSG": "CDJANE",
+      "STAFF1": "KIM",
+      "STAFF2": "",
+      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
+      "RUNDAT": 20241203,
+      "RUNTME": 104542,
+      "RUNBY": "CDJANE",
+      "AUTHSG": "JANE DELA CRUZ",
+      "ACNUM" : "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
+      "ACDAT" : "Date Issued : MM/DD/YYYY",
+      "STRRNG": "BI0111101000001 - BI0111199999999",
       "STATUS": "",
       "PRSTAT": "",
 
@@ -2528,9 +2525,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "RPTIME": 0,
       "REPRBY": "",
 
-      "RUNDAT": 20241203,
-      "RUNTME": 104542,
-      "RUNBY": "CDJANE"
+      "UPDDTE": 20241203,
+      "UPDTME": 104542,
+      "UPDBY": "CDJANE",
     },
     "ITEM_BREAKDOWNS": [
       {
@@ -2671,61 +2668,63 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const SAMPLE_SERVICE_INVOICE: InvoiceRecord = {
-    "PBL_KEY": "CL3 L  U001  ",
-    "TCLTNO": 2405014,
-    "CLIENT_KEY_RAW": "CL3174L0",
+    "PBL_KEY": "C10 L  MP06  ",
+    "TCLTNO": 2509035,
+    "CLIENT_KEY_RAW": "C101817L0",
     "BILLINGS": [
       {
-        "ID": "CL3 L  U001  2405014",
-        "PBL_KEY": "CL3 L  U001  ",
-        "CLIENT_NAME": "AT GROUP SERVICES LIMITED - PHILIPPINE BRANCH",
-        "CLIENT_ADDRESS": "LU001 CITYNET CENTRAL, SULTAN STREET, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
-        "CLIENT_TIN": "010-410-346-00000 ",
-        "CLIENT_KEY": "CL310074L00",
-        "CLIENT_KEY_RAW": "CL3174L0",
-        "CLIENT_PROJECT_CODE": "CL3",
-        "CLIENT_UNIT": " L  U001  ",
+        "ID": "C10 L  MP06  2509035",
+        "PBL_KEY": "C10 L  MP06  ",
+        "CLIENT_NAME": "JENNYLYN R. OJANO-SABADO",
+        "CLIENT_ADDRESS": "UNIT 2412 CITYLAND CONDOMINIUM 10 TOWER 1, 156 H.V. DELA COSTA STREET, SALCEDO VILLAGE, MAKATI CITY",
+        "CLIENT_TIN": "249-088-374-00000 ",
+        "CLIENT_KEY": "C1010817L00",
+        "CLIENT_KEY_RAW": "C101817L0",
+        "CLIENT_PROJECT_CODE": "C10",
+        "CLIENT_UNIT": " L  MP06  ",
         "CLIENT_PIBIG": "V",
         "COMPCD": 1,
         "BRANCH": 1,
-        "ACNUM": "Acknowledgement Certificate No. : AC_RDO_mmyyyy_xxxxxx",
-        "ACDAT": "Date Issued : xxxx/xx/xx",
-        "WHTAX_RATE": 5,
-        "YYYYMM": "2025/01",
+        "STAFF1": "NQE",
+        "STAFF2": "",
+        "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
+        "ACDAT": "Date Issued : MM/DD/YYYY",
+        "WHTAX_RATE": 0,
+        "YYYYMM": "2025/11",
         "BILL_TYPE": 1,
         "MBTYPE": 0,
         "OLD_BILL_TYPE": 1,
         "OLD_BILL_TYPE_DESC": "RENTAL",
         "SALTYP": "VAT",
-        "PROJCD": "CL3",
+        "PROJCD": "C10",
         "PCSCOD": " ",
         "PHASE": "L",
         "BLOCK": "  ",
-        "LOT": "U001",
+        "LOT": "MP06",
         "UNITCD": "  ",
-        "TCLTNO": 2405014,
+        "TCLTNO": 2509035,
         "CLTNUM": 0,
         "PDSCOD": "L",
         "PDSNUM": 0,
         "YY": 2025,
-        "MM": 1,
+        "MM": 11,
         "PAYTYP": "Y",
         "BTYPE": 1,
-        "BILAMT": 90528.48,
-        "BALAMT": 90528.48,
+        "BILAMT": 700,
+        "BALAMT": 700,
         "AMTPD": 0,
         "PRPTAX": 0,
-        "DATDUE": 20250113,
-        "PERIOD": "01/13/25 - 02/12/25 ",
-        "FRBILL": 20250113,
-        "TOBILL": 20250212,
+        "DATDUE": 20251124,
+        "PERIOD": "11/24/25 - 12/23/25 ",
+        "FRBILL": 20251124,
+        "TOBILL": 20251223,
         "BALCOD": " ",
         "UPDCOD": " ",
         "RECCOD": " ",
         "VERTAG": " ",
-        "USRUPD": "IRCHIN",
-        "DATUPD": 20240507,
-        "TIMUPD": 145238,
+        "USRUPD": "IRVANE",
+        "DATUPD": 20250917,
+        "TIMUPD": 141714,
         "BDESC": "RENTAL",
         "ORDER": 15,
         "PENRAT": 2,
@@ -2748,1473 +2747,125 @@ export const useIssuanceStore = defineStore('issuance', () => {
         "INVOICE_KEY": {
           "RECTYP": "IS",
           "TRNTYP": "I",
-          "COMPLETE_OR_KEY": "01111xxxxxxxx",
+          "COMPLETE_OR_KEY": "011111A000048",
           "COMPCD": 1,
           "BRANCH": 1,
           "DEPTCD": 11,
           "ORCOD": "",
           "ORNUM": 0,
-          "PROJCD": "CL3",
+          "PROJCD": "C10",
           "YY": 2025,
-          "MM": 1,
-          "INVOICE_NAME": "BILLING",
-          "INVOICE_NUMBER": "BI01111xxxxxxxx",
-          "SERIES_RANGE": "BI011111A000001 - BI011119Z999999"
+          "MM": 11,
+          "INVOICE_NAME": "SERVICE",
+          "INVOICE_NUMBER": "IS011111A000048",
+          "SERIES_RANGE": "IS011111A000001 - IS011119Z999999"
         },
-        "INDEX": 29,
-        "UNIT_COST": 80829,
-        "AMOUNT": 90528.48,
-        "VAT_SALES": 80829,
+        "INDEX": 44,
+        "UNIT_COST": 625,
+        "AMOUNT": 700,
+        "VAT_SALES": 625,
         "VAT_EXEMPT": 0,
         "ZERO_RATE": 0,
-        "TOTAL_SALE": 80829,
+        "TOTAL_SALE": 625,
         "GOVT_TAX": 0,
-        "VAT": 9699.48,
-        "WITHHOLDING_TAX": 4041.45,
-        "TOTAL_AMOUNT": 86487.03
+        "VAT": 75,
+        "WITHHOLDING_TAX": 0,
+        "TOTAL_AMOUNT": 700
       }
     ],
-    "HEADER": {
-      "COMPANY_NAME": "CITYLAND DEVELOPMENT CORPORATION",
-      "ADDRESS": "2/F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V. DELA COSTA ST BEL-AIR 1209 CITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
-      "LOGO_URL": "/src/assets/cdc.jpg",
-      "LOGO_SIZE_INCH": {
-        "WIDTH": 0.8,
-        "HEIGHT": 0.8
-      }
-    },
     "INVOICE_KEY": {
       "RECTYP": "IS",
       "TRNTYP": "I",
-      "COMPLETE_OR_KEY": "01111xxxxxxxx",
+      "COMPLETE_OR_KEY": "011111A000048",
       "COMPCD": 1,
       "BRANCH": 1,
       "DEPTCD": 11,
       "ORCOD": "",
       "ORNUM": 0,
-      "PROJCD": "CL3",
+      "PROJCD": "C10",
       "YY": 2025,
-      "MM": 1,
+      "MM": 11,
       "INVOICE_NAME": "SERVICE",
-      "INVOICE_NUMBER": "IS01111xxxxxxxx",
-      "SERIES_RANGE": "IS0111101000001 - IS0111199999999  "
-    },
-    "FOOTER": {
-      "ACNUM": "Acknowledgement Certificate No. : AC_RDO_mmyyyy_xxxxxx",
-      "ACDAT": "Date Issued : xxxx/xx/xx"
+      "INVOICE_NUMBER": "IS011111A000048",
+      "SERIES_RANGE": "IS011111A000001 - IS011119Z999999"
     },
     "DETAILS": {
-      "RECTYP": "BI",
-      "ORNUM": "01111xxxxxxxx",
+      "RECTYP": "IS",
+      "ORNUM": "011111A000048",
       "PAYTYP": "Y",
       "PIBIG": "V",
       "SLSTYP": "",
-      "DATVAL": 20250101,
+      "DATVAL": 20251120,
       "COMPCD": 1,
+      "CONAME": "CITYLAND DEVELOPMENT CORPORATION",
+      "COINIT": "CDC",
       "TELNO": "8893-6060",
       "REGTIN": "000-527-103-00000",
-      "CLTNME": "AT GROUP SERVICES LIMITED - PHILIPPINE BRANCH",
-      "RADDR1": "LU001 CITYNET CENTRAL, SULTAN STREET, BRGY. HIGHWAY HILLS, MANDALUYONG CITY",
-      "RADDR2": "",
-      "CLTTIN": "010-410-346-00000 ",
-      "CLTKEY": "CL310074L00",
-      "PRJNAM": "CITYNET CENTRAL",
-      "PBLKEY": "CL3 L  U001  ",
-      "DATSTP": 20241203,
-      "TIMSTP": 104542,
-      "AUTHSG": "CDJANE",
+      "CADDR1": "2/F CITYLAND CONDOMINIUM 10 TOWER I,",
+      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
+      "CLTNME": "JUAN DELA CRUZ",
+      "RADDR1": "UNIT 2412 CITYLAND CONDOMINIUM 10 TOWER 1, 156 H.V. DELA COSTA STREET, SALCEDO V",
+      "RADDR2": "ILLAGE, MAKATI CITY",
+      "CLTTIN": "123-456-789-00000 ",
+      "CLTKEY": "C1010817L00",
+      "PRJNAM": "CITYLAND CONDOMINIUM 10 TOWER I",
+      "PBLKEY": "C10 L  MP06  ",
+      "STAFF1": "NQE",
+      "STAFF2": "",
+      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
+      "RUNDAT": 0,
+      "RUNTME": 0,
+      "RUNBY": "CDJANE",
+      "AUTHSG": "JANE DELA CRUZ",
+      "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
+      "ACDAT": "Date Issued : MM/DD/YYYY",
+      "STRRNG": "",
       "STATUS": "",
       "PRSTAT": "",
-
       "PRCNT": 0,
       "RPDATE": 0,
       "RPTIME": 0,
       "REPRBY": "",
-
-      "RUNDAT": 20241203,
-      "RUNTME": 104542,
-      "RUNBY": "CDJANE"
+      "UPDDTE": 0,
+      "UPDTME": 0,
+      "UPDBY": "CDJANE"
     },
     "ITEM_BREAKDOWNS": [
       {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 1,
-        "ITEM": "WATER CHARGES ( January 2025 ) VAT Exempt",
-        "QTY": 1,
-        "UNTCST": 596.36,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 596.36,
-        "ZERSAL": 0,
-        "NETVAT": 596.36,
-        "WTHTAX": 11.93,
-        "GOVTAX": 14.91,
-        "WTXRAT": 2,
-        "AMTDUE": 596.36,
-        "FRDATE": 20250113,
-        "TODATE": 20250212,
-        "DUEDAT": 20250113
-      },
+        "RECTYP": "IS",
+        "ORNUM": "011111A000048",
+        "ITEMNO": 1,
+        "BILTYP": 1,
+        "ITEM": "RENTAL (November 2025) (VATable)",
+        "QTY": 1,
+        "UNTCST": 625,
+        "VATAMT": 75,
+        "VATSAL": 625,
+        "VATEXM": 0,
+        "ZERSAL": 0,
+        "NETVAT": 625,
+        "WTHTAX": 0,
+        "GOVTAX": 0,
+        "WTXRAT": 0,
+        "AMTDUE": 700,
+        "FRDATE": 20251124,
+        "TODATE": 20251223,
+        "DUEDAT": 20251124
+      }
     ],
     "TOTAL_BREAKDOWN": {
-      "RECTYP": "BI",
-      "ORNUM": "01111xxxxxxxx",
+      "RECTYP": "IS",
+      "ORNUM": "011111A000048",
       "BILTYP": 0,
-      "VATSAL": 0,
-      "VATEXM": 596.36,
+      "VATSAL": 625,
+      "VATEXM": 0,
       "ZERSAL": 0,
-      "GOVTAX": 14.91,
-      "TOTSAL": 596.36,
-      "NETVAT": 596.36,
-      "VATAMT": 0,
-      "PRDTAX": 11.93,
-      "AMTDUE": 599.34
+      "GOVTAX": 0,
+      "TOTSAL": 700,
+      "NETVAT": 625,
+      "VATAMT": 75,
+      "PRDTAX": 0,
+      "AMTDUE": 700
     },
     "CORFPF": {
       "COMPCD": 1,
@@ -4225,7 +2876,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "DATOR": 0,
       "CASHCD": "CDJANE",
       "COLSTF": "",
-      "ORAMT": 86487.03,
+      "ORAMT": 700,
       "NOACCT": 0,
       "PAYTYP": "Y",
       "INTRST": 0,
@@ -4233,16 +2884,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "OTHERS": 0,
       "OVRPAY": 0,
       "UNDPAY": 0,
-      "PROJCD": "CL3",
+      "PROJCD": "C10",
       "PCSCOD": " ",
       "PHASE": "L",
       "BLOCK": "  ",
-      "LOT": "U001",
+      "LOT": "MP06",
       "UNITCD": "  ",
       "PAYCOD": "",
-      "PAYEE": "AT GROUP SERVICES LIMITED - PHILIPP",
+      "PAYEE": "JENNYLYN R. OJANO-SABADO",
       "PN#": 0,
-      "DATVAL": 20250101,
+      "DATVAL": 20251120,
       "DATPRT": 0,
       "BANKCD": "",
       "BNKACT": "",
@@ -4265,54 +2916,54 @@ export const useIssuanceStore = defineStore('issuance', () => {
       "DEPTCD": 11,
       "ORCOD": "",
       "ORNUM": 0,
-      "DATVAL": 20250101,
-      "PROJCD": "CL3",
+      "DATVAL": 20251120,
+      "PROJCD": "C10",
       "PCSCOD": " ",
       "PHASE": "L",
       "BLOCK": "  ",
-      "LOT": "U001",
+      "LOT": "MP06",
       "UNITCD": "  ",
       "PAYTYP": "Y",
       "CLTNUM": 0,
       "PDSCOD": "L",
       "PDSNUM": 0,
-      "TCLTNO": 2405014,
-      "DATINS": 20250113,
+      "TCLTNO": 2509035,
+      "DATINS": 20251124,
       "BALRUN": 0,
       "PAYNO": 0,
       "NOMOS": 0
     },
     "CRMKPF": {
-      COMPCD: 0,
-      BRANCH: 0,
-      DEPTCD: 0,
-      ORCOD: '',
-      ORNUM: 0,
-      RMARK1: '',
-      RMARK2: '',
-      RMARK3: '',
-      RMARK4: ''
+      "COMPCD": 1,
+      "BRANCH": 1,
+      "DEPTCD": 11,
+      "ORCOD": "",
+      "ORNUM": 0,
+      "RMARK1": "RENTAL",
+      "RMARK2": "for the period of",
+      "RMARK3": "2025/11/24 - 2025/12/23",
+      "RMARK4": ""
     },
     "CORF4PF": []
   }
 
   onMounted(() => {
     // handleActionSearch(2)
-    console.log(SAMPLE_BILLING_INVOICE);
-    console.log(SAMPLE_SERVICE_INVOICE);
-
-    handleActionGenerateDraftInvoice(
-      SAMPLE_BILLING_INVOICE,
-      () => {}
-    )
-    // handleActionGenerateDraftInvoices(
-    //   [
-    //     SAMPLE_BILLING_INVOICE,
-    //     SAMPLE_SERVICE_INVOICE
-    //   ],
-    //   new Date(),
-    //   () => {}
-    // )
+    if (IS_TEST === 'TRUE') {
+      console.log(SAMPLE_BILLING_INVOICE);
+      console.log(SAMPLE_SERVICE_INVOICE);
+      // handleActionGenerateDraftInvoice(
+      //   SAMPLE_BILLING_INVOICE,
+      //   () => {}
+      // )
+      handleActionPreviewDraftInvoice(
+        [
+          SAMPLE_BILLING_INVOICE,
+          SAMPLE_SERVICE_INVOICE
+        ],
+        new Date(),
+      )
+    }
   })
 
   return {
@@ -4330,17 +2981,18 @@ export const useIssuanceStore = defineStore('issuance', () => {
     getNOMOS,
 
     processBillings,
-    processInvoiceRecords,
+    convertBillingsToInvoiceRecords,
+    convertInvoiceRecordsToInvoicePDFs,
 
     generateInvoicePDFBlob,
 
     handleActionGenerateSummaryInvoicesPDFBlob,
-    handleActionGenerateDraftInvoice,
-    handleActionGenerateDraftInvoices,
+    handleActionPreviewDraftInvoice,
+    handleActionPreviewIssuedInvoice,
 
     handleActionSearch,
     handleActionReset,
 
-    handleActionIssueFinalInvoices,
+    handleActionPOSTNewIssueInvoices,
   }
 })

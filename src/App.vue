@@ -31,3 +31,9 @@
     <RouterView v-else class="min-h-screen"/>
   </main>
 </template>
+
+<style>
+  .p-datatable-column-filter-button {
+    display: none !important;
+  }
+</style>

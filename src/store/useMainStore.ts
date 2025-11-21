@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 import axios from '../axios'
 import { defineStore } from 'pinia'
+import { useCompanyHeaderStore } from './useCompanyHeaderStore';
 import { useSessionStore } from './useSessionStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
@@ -10,6 +11,7 @@ export const useMainStore = defineStore('main', () => {
 
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
+  const companyHeaderStore = useCompanyHeaderStore()
 
   const allowReloadExitPage = ref<boolean>(true);
 
@@ -94,7 +96,8 @@ export const useMainStore = defineStore('main', () => {
       axios.get('issuance_lease/business_day/' + new Date().getFullYear())
         .then((response) => {
           first_business_days.value = response.data.data as BusinessDay[];
-        })
+        }),
+      companyHeaderStore.fetchAllCompanyHeaderDetails(),
     ])
     .catch(utilStore.handleAxiosError)
     .finally(() => {

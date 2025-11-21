@@ -425,6 +425,9 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   COMPCD: number
   BRANCH: number
 
+  STAFF1: string
+  STAFF2: string
+
   ACNUM: string
   ACDAT: string
 
@@ -473,8 +476,6 @@ export interface LedgerRemark {
   FILL3: number;      // FILLER 3, Zoned(10,0)
   FILL4: number;      // FILLER 4, Zoned(5,0)
 }
-
-
 
 export interface ORRecord {
   COMPCD: string;        // COMPANY CODE (ZONED, 2, 0)
@@ -627,8 +628,12 @@ export interface InvoiceDetails {
 
   // COMPANY INFO
   COMPCD: number; // COMPANY CODE         (2 zoned digits)
+  CONAME: string; // COMPANY NAME         (45 chars)
+  COINIT: string; // COMPANY INITIAL      (5 chars)
   TELNO: string;  // TELEPHONE #          (9 chars)
   REGTIN: string; // VAT REG TIN          (15 chars)
+  CADDR1: string; // COMPANY ADDRESS #1   (80 chars)
+  CADDR2: string; // COMPANY ADDRESS #2   (80 chars)
 
   // CLIENT INFO
   CLTNME: string; // CLIENT NAME          (35 chars)
@@ -638,24 +643,33 @@ export interface InvoiceDetails {
   CLTKEY: string; // CLIENT KEY           (5 chars)
   PRJNAM: string; // PROJECT NAME         (50 chars)
   PBLKEY: string; // PROJECT/BLOCK/LOT KEY(13 chars)
+  STAFF1: string; // SALES STAFF 1        (4 chars)
+  STAFF2: string; // SALES STAFF 2        (4 chars)
+
+  // HEADER
+  SYSNME: string; // SYSTEM NAME          (35 chars)
+  RUNDAT: number; // RUNNING DATE         (8 zoned digits)
+  RUNTME: number; // RUNNING TIME         (6 zoned digits)
+  RUNBY:  string; // USER                 (8 chars)
 
   // FOOTER
-  AUTHSG: string; // AUTHORIZED SIGNATURE (8 chars)
-  DATSTP: number; // DATE STAMP           (8 zoned digits)
-  TIMSTP: number; // TIME STAMP           (8 zoned digits)
+  AUTHSG: string; // AUTHORIZED SIGNATURE (35 chars)
+  ACNUM:  string; // ACKNOWLEDGEMENT NO.  (100 chars)
+  ACDAT:  string; // AC DATE ISSUED       (10 chars)
+  STRRNG:  string;// SERIES RANGE         (35 chars)
 
   // TRACKING
   STATUS: InvoiceStatus; // STATUS
   PRSTAT: InvoicePrintStatus // PRINT STATUS
-  PRCNT: number;  // PRINT COUNT
+  PRCNT:  number;  // PRINT COUNT
 
-  RPDATE: number; // REPRINT DATE         (8 zoned digits)
-  RPTIME: number; // REPRINT TIME         (6 zoned digits)
-  REPRBY: string; // REPRINTED BY         (8 chars)
+  RPDATE: number;  // REPRINT DATE         (8 zoned digits)
+  RPTIME: number;  // REPRINT TIME         (6 zoned digits)
+  REPRBY: string;  // REPRINTED BY         (8 chars)
 
-  RUNDAT: number; // RUNNING DATE         (8 zoned digits)
-  RUNTME: number; // RUNNING TIME         (6 zoned digits)
-  RUNBY: string;  // USER                 (8 chars)
+  UPDDTE: number; // UPDATE DATE         (8 zoned digits)
+  UPDTME: number; // UPDATE TIME         (6 zoned digits)
+  UPDBY: string;   // UPDATED BY          (8 chars)
 }
 
 export interface InvoiceItemBreakdown {
@@ -713,22 +727,6 @@ export interface InvoiceRecord {
   CLIENT_KEY_RAW?: string
 
   BILLINGS: LeaseBill[]
-
-  // COMPUTED
-  HEADER: {
-    COMPANY_NAME:   string
-    ADDRESS:        string
-    LOGO_URL:       string
-    LOGO_SIZE_INCH: {
-      WIDTH:        number
-      HEIGHT:       number
-    }
-  },
-
-  FOOTER: {
-    ACNUM: string
-    ACDAT: string
-  }
 
   INVOICE_KEY: InvoiceKey
 
@@ -905,6 +903,43 @@ export interface FAILED_INVOICE_RECORDS {
 
 // PRINT OUT
 
+export interface VariantInfo {
+  NAME: string;
+  TEL_NO: string;
+  ADDRESS1: string;
+  ADDRESS2: string;
+  TIN_EXTENSION: string;
+}
+
+export interface COMPANY_HEADER_DETAIL {
+  COMPCD: number;
+  COINIT: string;
+  CONAME: string;
+  TIN_BASE: string;
+  VARIANTS: Record<number, VariantInfo>;
+}
+
+export interface MINOR_COMPANY_HEADER_DETAIL {
+  COMPCD:      number
+  DEPTCD:      number
+  COINIT:      string
+  CONAME:      string
+  TIN:         string
+  TEL_NO:      string
+  ADDRESS1:    string
+  ADDRESS2:    string
+  BRANCH_NAME: string
+}
+
+export interface COMPANY_LOGO {
+  COMPCD:     number
+  IMG_URL:    string
+  IMG_SIZE_INCH:   {
+    WIDTH:  number
+    HEIGHT: number
+  }
+}
+
 export interface Signatories {
   name: string
   timestamp: string
@@ -912,6 +947,8 @@ export interface Signatories {
 
 export interface InvoicePDF {
   header: {
+    systemName: string,
+
     runDateAndTime: string,
     runUsername: string,
 
@@ -938,7 +975,7 @@ export interface InvoicePDF {
     salesStaff: string,
   },
   footer: {
-    acn: string
+    acknowledgementCertificateNumber: string
     dateIssued: string,
     approvedSeriesRange: string
   },

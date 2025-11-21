@@ -1,4 +1,3 @@
-import { COMPANIES, COMPANY_DETAILS } from './config';
 import { CheckDetails, Client, ClientForm, GenHeader, HistoryOfPayment, InquiryType, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
@@ -125,18 +124,54 @@ export const usePrintingStore = defineStore('print', () => {
 
   const handleActionSearch = () => {
     const validateQueryUnitForm = () => {
-      return (
-        queryUnitForm.value.block ||
-        queryUnitForm.value.lot ||
-        queryUnitForm.value.pcs_code ||
-        queryUnitForm.value.phase ||
-        queryUnitForm.value.project_code ||
-        queryUnitForm.value.unit_code
+      const validate1 = queryUnitForm.value.project_code?.PROJCD
+      const validate2 = (
+        queryUnitForm.value.pcs_code['1']  ||
+        queryUnitForm.value.phase['1']     ||
+        queryUnitForm.value.block['1']     ||
+        queryUnitForm.value.block['2']     ||
+        queryUnitForm.value.lot['1']       ||
+        queryUnitForm.value.lot['2']       ||
+        queryUnitForm.value.lot['3']       ||
+        queryUnitForm.value.lot['4']       ||
+        queryUnitForm.value.unit_code['1'] ||
+        queryUnitForm.value.unit_code['2']
       )
+      if (!validate1) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Invalid Project',
+          detail: 'Unable to recognize the selected project. Please check.',
+          life: 3000
+        });
+        return false
+      }
+      if (!validate2) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Missing Unit Identifiers',
+          detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+          life: 3000
+        });
+        return false
+      }
+
+      return validate1 && validate2
     }
 
     const validateQueryClientForm = () => {
-      return (queryClientForm.value.name)
+      const validate = queryClientForm.value.name
+      if (!validate) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Missing Client Name',
+          detail: 'Please enter a partial or full client name before proceeding!',
+          life: 3000
+        });
+        return false
+      }
+
+      return validate
     }
 
     switch (selectedInquiryType.value) {
@@ -144,13 +179,6 @@ export const usePrintingStore = defineStore('print', () => {
       case 'Unit':
         if (validateQueryUnitForm()) {
           handleActionOpenUnit()
-        } else {
-          toast.add({
-            severity: 'warn',
-            summary: 'Error',
-            detail: 'Unable to execute search without any query details',
-            life: 3000
-          });
         }
         break;
 
@@ -171,13 +199,6 @@ export const usePrintingStore = defineStore('print', () => {
           .finally(() => {
             loading.close()
           })
-        } else {
-          toast.add({
-            severity: 'warn',
-            summary: 'Error',
-            detail: 'Unable to execute search without any query details',
-            life: 3000
-          });
         }
         break;
     }
@@ -337,18 +358,10 @@ export const usePrintingStore = defineStore('print', () => {
   const history_of_issued_documents_data = computed(():InvoiceRecord[] => {
     return selectedUnit.value?.historyOfIssuedDocuments
       .map((invoice) => {
-        const selectedCompany = COMPANIES.find((c) => c.COMPCD === invoice.DETAILS.COMPCD) as COMPANY_DETAILS || COMPANIES[0]
 
         return {
           ...invoice,
           TCLTNO: selectedUnit.value?.TCLTNO || 0,
-
-          HEADER: {
-            COMPANY_NAME:   selectedCompany.CONAME,
-            ADDRESS:        selectedCompany.ADDRESS,
-            LOGO_URL:       selectedCompany.IMG_URL,
-            LOGO_SIZE_INCH: selectedCompany.IMG_SIZE_INCH
-          },
 
           EXTRA: {
             TIMESTAMP_PRINT: invoice.DETAILS.RUNDAT ? `${ invoice.DETAILS.RUNDAT ? utilStore.formatDateNumberToStringYYYYMMDD(invoice.DETAILS.RUNDAT) : '-' } ${ invoice.DETAILS.RUNTME ? utilStore.formatTimeNumberToString12H(invoice.DETAILS.RUNTME) : '-' }` : '-',
@@ -371,6 +384,15 @@ export const usePrintingStore = defineStore('print', () => {
     .finally(() => {
       loading.close()
     })
+  }
+
+  const handleActionQuietRefresh = () => {
+    axios.get(`issuance_lease/lease_unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
+    .then((response) => {
+      selectedUnit.value = undefined
+      selectedUnit.value = response.data.data
+    })
+    .catch(utilStore.handleAxiosError)
   }
 
   const handleActionViewHistoryOfPayments = (table_data: HistoryOfPayment[]) => {
@@ -491,97 +513,34 @@ export const usePrintingStore = defineStore('print', () => {
             const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
             const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
 
-            const ORIGINAL_ISSUED_DOCUMENTS: InvoiceRecord[] =
-              selectedHistoryOfIssuedDocument.value
-                .map((selected) => {
-                  return {
-                    ...selected,
-                    DETAILS: {
-                      ...selected.DETAILS,
-                      PRSTAT: 'P' as InvoicePrintStatus,
-                      PRCNT: 1,
-                    }
-                  }
-                })
-                .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
-
-            const invoicePDFDataS: InvoicePDF[] = ORIGINAL_ISSUED_DOCUMENTS.
-              map((selectedInvoiceRecord) => {
-                const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
-
+            const ORIGINAL_ISSUED_DOCUMENTS: InvoiceRecord[] = selectedHistoryOfIssuedDocument.value
+              .map((selected) => {
                 return {
-                  header: {
-                    runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
-                    runUsername: sessionStore.authenticatedUser?.username || 'N/A',
-
-                    companyName: company.CONAME,
-                    companyAddress: company.ADDRESS,
-                    companyInitials: company.COINIT,
-                    companyTelephone: company.TEL_NO,
-                    companyRegisteredTIN: company.TIN,
-
-                    companyLogo: company.IMG_URL,
-                    companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
-                    companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
-
-                    invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
-                    controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
-                    dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
-
-                    name: selectedInvoiceRecord.DETAILS.CLTNME,
-                    address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-                    tin: selectedInvoiceRecord.DETAILS.CLTTIN,
-                    clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
-                    project: selectedInvoiceRecord.DETAILS.PRJNAM,
-                    unit: selectedInvoiceRecord.PBL_KEY.slice(3),
-                    salesStaff: 'KIM'
-                  },
-                  body: {
-                    billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
-                      .map((item) => {
-                        return {
-                          itemDescription: item.ITEM,
-                          qty: item.QTY.toString(),
-                          unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
-                          vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
-                          amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
-                        }
-                      }),
-                    breakdowns: {
-                      section1: {
-                        vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
-                        vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                        vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
-                        zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
-                        governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-                      },
-                      section2: {
-                        totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
-                        lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                        netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
-                        addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                        addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-                        lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
-                        totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
-                      },
-                    }
-                  },
-                  footer: {
-                    acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-                    dateIssued: "Date Issued : MM/DD/YYYY",
-                    approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
-                  },
-                  authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
+                  ...selected,
+                  DETAILS: {
+                    ...selected.DETAILS,
+                    PRSTAT: 'P' as InvoicePrintStatus,
+                    PRCNT: 1,
+                  }
                 }
               })
+              .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
 
-            const PDF_BLOBS = invoicePDFDataS
-              .map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
-
+            const invoicePDFDataS: InvoicePDF[] = ORIGINAL_ISSUED_DOCUMENTS.map((invoiceRecord) => issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord))
+            const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
             const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
             const header = '(ORIGINAL) Selected Documents'
-            fileStore.handleActionViewFilePDF(header, `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
+            const name = `(ORIGINAL) Selected Documents ${stampDate}-${stampTime}`
+
+            fileStore.handleActionViewFilePDF(
+              header,
+              `${name}.pdf`,
+              PDF_BLOB,
+              null,
+              () => {},
+              () => {}
+            )
 
             loading.close()
           },
@@ -627,9 +586,9 @@ export const usePrintingStore = defineStore('print', () => {
                 RPTIME: stampTime,
                 REPRBY: sessionStore.authenticatedUser?.username || '',
 
-                RUNDAT: stampDate,
-                RUNTME: stampTime,
-                RUNBY:  sessionStore.authenticatedUser?.username || '',
+                UPDDTE: stampDate,
+                UPDTME: stampTime,
+                UPDBY:  sessionStore.authenticatedUser?.username || '',
 
                 RECTYP: selected.DETAILS.RECTYP,
                 ORNUM: selected.DETAILS.ORNUM,
@@ -659,93 +618,28 @@ export const usePrintingStore = defineStore('print', () => {
             detail: response.data.message,
             life: 3000
           })
-          const invoicePDFDataS: InvoicePDF[] = REPRINTED_ISSUED_DOCUMENTS.
-            map((selectedInvoiceRecord) => {
-              const company = COMPANIES.find((company) => company.COMPCD === selectedInvoiceRecord.INVOICE_KEY.COMPCD) || COMPANIES[0]
 
-              return {
-                header: {
-                  runDateAndTime: utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()),
-                  runUsername: sessionStore.authenticatedUser?.username || 'N/A',
+          const invoicePDFDataS: InvoicePDF[] = REPRINTED_ISSUED_DOCUMENTS.map((invoiceRecord) => issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord))
 
-                  companyName: company.CONAME,
-                  companyAddress: company.ADDRESS,
-                  companyInitials: company.COINIT,
-                  companyTelephone: company.TEL_NO,
-                  companyRegisteredTIN: company.TIN,
-
-                  companyLogo: company.IMG_URL,
-                  companyLogoWidth: company.IMG_SIZE_INCH.WIDTH,
-                  companyLogoHeight: company.IMG_SIZE_INCH.HEIGHT,
-
-                  invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
-                  controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
-                  dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
-
-                  name: selectedInvoiceRecord.DETAILS.CLTNME,
-                  address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-                  tin: selectedInvoiceRecord.DETAILS.CLTTIN,
-                  clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
-                  project: selectedInvoiceRecord.DETAILS.PRJNAM,
-                  unit: selectedInvoiceRecord.PBL_KEY.slice(3),
-                  salesStaff: 'KIM'
-                },
-                body: {
-                  billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
-                    .map((item) => {
-                      return {
-                        itemDescription: item.ITEM,
-                        qty: item.QTY.toString(),
-                        unitCost: utilStore.formatNumberToString2DecimalNumber(item.UNTCST || 0),
-                        vatAmount: utilStore.formatNumberToString2DecimalNumber(item.VATAMT || 0),
-                        amount: utilStore.formatNumberToString2DecimalNumber(item.AMTDUE || 0),
-                      }
-                    }),
-                  breakdowns: {
-                    section1: {
-                      vatableSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATSAL || 0),
-                      vatAmount: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                      vatExemptSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATEXM || 0),
-                      zeroRatedSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.ZERSAL || 0),
-                      governmentTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-                    },
-                    section2: {
-                      totalSales: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.TOTSAL || 0),
-                      lessVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                      netOfVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.NETVAT || 0),
-                      addVAT: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.VATAMT || 0),
-                      addGovernmentTaxes: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.GOVTAX || 0),
-                      lessWithholdingTax: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.PRDTAX || 0),
-                      totalAmountDue: utilStore.formatNumberToString2DecimalNumber(selectedInvoiceRecord.TOTAL_BREAKDOWN.AMTDUE || 0),
-                    },
-                  }
-                },
-                footer: {
-                  acn: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-                  dateIssued: "Date Issued : MM/DD/YYYY",
-                  approvedSeriesRange: selectedInvoiceRecord.INVOICE_KEY.SERIES_RANGE
-                },
-                authorizedSignature: sessionStore.authenticatedUser?.user.full_name || 'N/A'
-              }
-            })
-
-          const PDF_BLOBS = invoicePDFDataS
-            .map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
-
+          const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) => issuanceStore.generateInvoicePDFBlob(invoicePDFData))
           const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
           const header = '(REPRINTED) Selected Documents'
-          fileStore.handleActionViewFilePDF(header, `(REPRINTED) Selected Documents ${stampDate}-${stampTime}.pdf`, PDF_BLOB, null, () => {}, () => {})
+          const name = `(REPRINTED) Selected Documents ${stampDate}-${stampTime}`
+
+          fileStore.handleActionViewFilePDF(
+            header,
+            `${name}.pdf`,
+            PDF_BLOB,
+            null,
+            () => {},
+            () => {}
+          )
         })
         .catch(utilStore.handleAxiosError)
         .finally(() => {
           loading.close()
-          axios.get(`issuance_lease/lease_unit/${selectedUnit.value?.PBL_KEY_RAW}/`)
-          .then((response) => {
-            selectedUnit.value = undefined
-            selectedUnit.value = response.data.data
-          })
-          .catch(utilStore.handleAxiosError)
+          handleActionQuietRefresh()
         })
       },
       reject: () => {

@@ -28,7 +28,6 @@
   })
 
   const dialogRef = inject<Ref<DialogRef> | null>("dialogRef", null);
-
 </script>
 
 
@@ -61,7 +60,7 @@
     </div>
     <div class="flex gap-2">
       <Button type="button" label="Close" severity="secondary" @click="dialogRef.data.cancel()"></Button>
-      <Button v-if="hasIssuedInvoices" type="button" label="View Printed Invoices" severity="primary" @click="dialogRef.data.viewSuccessInvoices()"></Button>
+      <Button v-if="hasIssuedInvoices" type="button" label="Save and View Issued Invoices" severity="primary" @click="dialogRef.data.viewSuccessInvoices()"></Button>
     </div>
   </div>
 </template>

@@ -107,6 +107,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         type = '(VAT-Exempt)'
       } else if (bill.ZERO_RATE !== 0) {
         type = '(Zero-Rated)'
+      } else if (bill.GOVT_TAX !== 0) {
+        type = "(Gov't-Taxes)"
       }
 
       return `${bill_desc} (${month} ${year}) ${type}`
@@ -195,6 +197,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
+    // console.log('Raw Billings', billings);
+
     const mergedMap: { [key: string]: LeaseBill } = {};
 
     let index = 0
@@ -203,7 +207,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
     billings.map((bill, idx) => {
 
-      const key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}`;
+      let key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}`;
+
+      if (bill.BILL_TYPE === 6 && bill.OLD_BILL_TYPE === 66) {
+        key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}-${bill.OLD_BILL_TYPE}`;
+      }
 
       const SALES_TYPE =
         bill.SALTYP === 'ZERO' ? 'Z' :
@@ -220,6 +228,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       // FOR UTILITY BILL TYPES
       if (UTILITY_BILL_TYPES.includes(bill.BILL_TYPE)){
+        // console.log(idx + 1, ' UTIL BILL TYPE ', bill.BILL_TYPE, bill.OLD_BILL_TYPE);
+
         if (mergedMap[key]) {
           mergedMap[key].BALAMT += bill.BALAMT;
           mergedMap[key].BILAMT += bill.BILAMT;
@@ -285,6 +295,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           // GOVT TAX
           else if (UTILITY_BILL_TYPE_PER_CLASSIFICATION.GOVT_TAX.includes(bill.OLD_BILL_TYPE)) {
+            mergedMap[key].AMOUNT += bill.BILAMT
+            mergedMap[key].UNIT_COST += bill.BILAMT
+
             mergedMap[key].GOVT_TAX += bill.BILAMT
             mergedMap[key].TOTAL_AMOUNT += bill.BILAMT
           }
@@ -463,7 +476,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               VATSAL:         bill.VAT_SALES || 0,
               VATEXM:         bill.VAT_EXEMPT || 0,
               ZERSAL:         bill.ZERO_RATE || 0,
-              NETVAT:         bill.UNIT_COST || 0,
+              NETVAT:         (bill.OLD_BILL_TYPE === 66 ? 0 : bill.UNIT_COST || 0),
               WTHTAX:         bill.WITHHOLDING_TAX || 0,
               GOVTAX:         bill.GOVT_TAX || 0,
               WTXRAT:         bill.WHTAX_RATE || 0,
@@ -485,7 +498,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             GOVTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.GOVTAX + bill.GOVT_TAX),
 
             TOTSAL:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.TOTSAL + bill.AMOUNT),
-            NETVAT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.NETVAT + bill.UNIT_COST),
+            NETVAT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.NETVAT + (bill.OLD_BILL_TYPE === 66 ? 0 : bill.UNIT_COST || 0)),
             VATAMT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.VATAMT + bill.VAT),
             PRDTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.PRDTAX + bill.WITHHOLDING_TAX),
             AMTDUE:         utilStore.convertNumberToRoundedNumber(mergedMap[key].TOTAL_BREAKDOWN.AMTDUE + bill.TOTAL_AMOUNT),
@@ -595,7 +608,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               VATSAL:         bill.VAT_SALES || 0,
               VATEXM:         bill.VAT_EXEMPT || 0,
               ZERSAL:         bill.ZERO_RATE || 0,
-              NETVAT:         bill.UNIT_COST || 0,
+              NETVAT:         bill.OLD_BILL_TYPE === 66 ? 0 : bill.UNIT_COST || 0,
               WTHTAX:         bill.WITHHOLDING_TAX || 0,
               GOVTAX:         bill.GOVT_TAX || 0,
               WTXRAT:         bill.WHTAX_RATE || 0,
@@ -622,7 +635,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             GOVTAX:         bill.GOVT_TAX || 0,         //INCREMENT THIS PER ITEM
 
             TOTSAL:         bill.AMOUNT || 0,           //INCREMENT THIS PER ITEM
-            NETVAT:         bill.UNIT_COST || 0,        //INCREMENT THIS PER ITEM
+            NETVAT:         bill.OLD_BILL_TYPE === 66 ? 0 : bill.UNIT_COST || 0, //INCREMENT THIS PER ITEM
             VATAMT:         bill.VAT || 0,              //INCREMENT THIS PER ITEM
             PRDTAX:         bill.WITHHOLDING_TAX || 0,  //INCREMENT THIS PER ITEM
             AMTDUE:         bill.TOTAL_AMOUNT || 0,     //INCREMENT THIS PER ITEM
@@ -744,7 +757,21 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
     })
 
-    return [...Object.values(mergedMap)] as InvoiceRecord[]
+    const result = [...Object.values(mergedMap)]
+      .map((invoiceRecord) => {
+        return {
+          ...invoiceRecord,
+          ITEM_BREAKDOWNS: invoiceRecord.ITEM_BREAKDOWNS
+            .sort((a, b) => {
+              if (a.DUEDAT !== b.DUEDAT) {
+                return a.DUEDAT - b.DUEDAT
+              }
+              return a.BILTYP - b.BILTYP
+            })
+        }
+      })
+
+    return result
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {

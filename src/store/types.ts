@@ -692,7 +692,7 @@ export interface InvoiceItemBreakdown {
   NETVAT: number; // NET OF VAT           (13 zoned digits with 2 decimals)
   WTHTAX: number; // WITHHOLDING TAX      (13 zoned digits with 2 decimals)
   GOVTAX: number; // GOVERNMENT TAX       (13 zoned digits with 2 decimals)
-  WTXRAT: number; // WITHHOLDING TAX RATE (5 zoned digits with 2 decimals)
+  WTXRAT: number; // WITHHOLDING TAX RATE (05 zoned digits with 2 decimals)
   AMTDUE: number; // TOTAL AMOUNT DUE     (13 zoned digits with 2 decimals)
 
   // PERIOD

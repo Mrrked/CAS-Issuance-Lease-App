@@ -106,7 +106,7 @@
             </div>
             <div class="flex flex-col gap-1">
               <label for="password" class="font-semibold tracking-wider ">
-                Password
+                ISeries Password
               </label>
               <InputText
                 name="password"

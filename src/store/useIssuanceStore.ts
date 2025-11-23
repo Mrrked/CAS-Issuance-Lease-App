@@ -786,8 +786,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         runDateAndTime: isDraft ?
           utilStore.convertDateObjToStringMMDDYYYY24HSS(new Date().toISOString()) :
           utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.RUNDAT) + ' ' + utilStore.formatTimeNumberToString24H(selectedInvoiceRecord.DETAILS.RUNTME),
-        // runUsername: selectedInvoiceRecord.DETAILS.RUNBY || 'N/A',
-        runUsername: 'CDJANE',
+        runUsername: selectedInvoiceRecord.DETAILS.RUNBY || 'N/A',
+        // runUsername: 'CDJANE',
 
         companyName: selectedInvoiceRecord.DETAILS.CONAME,
         companyAddress: selectedInvoiceRecord.DETAILS.CADDR1 + '\n' + selectedInvoiceRecord.DETAILS.CADDR2,
@@ -803,18 +803,18 @@ export const useIssuanceStore = defineStore('issuance', () => {
         controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
         dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
 
-        // name: selectedInvoiceRecord.DETAILS.CLTNME,
+        name: selectedInvoiceRecord.DETAILS.CLTNME,
         address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
-        // tin: selectedInvoiceRecord.DETAILS.CLTTIN,
+        tin: selectedInvoiceRecord.DETAILS.CLTTIN,
         clientKey: selectedInvoiceRecord.DETAILS.CLTKEY,
         project: selectedInvoiceRecord.DETAILS.PRJNAM,
         unit: selectedInvoiceRecord.PBL_KEY.slice(3),
-        // salesStaff: selectedInvoiceRecord.DETAILS.STAFF1 + ( selectedInvoiceRecord.DETAILS.STAFF2 ? '/' + selectedInvoiceRecord.DETAILS.STAFF2 : '' ),
-
-
-        name: "ABC TRADING CORPORATION",
-        tin: '123-456-789-00000',
         salesStaff: selectedInvoiceRecord.DETAILS.STAFF1 + ( selectedInvoiceRecord.DETAILS.STAFF2 ? '/' + selectedInvoiceRecord.DETAILS.STAFF2 : '' ),
+
+
+        // name: "ABC TRADING CORPORATION",
+        // tin: '123-456-789-00000',
+        // salesStaff: selectedInvoiceRecord.DETAILS.STAFF1 + ( selectedInvoiceRecord.DETAILS.STAFF2 ? '/' + selectedInvoiceRecord.DETAILS.STAFF2 : '' ),
       },
       body: {
         billings: selectedInvoiceRecord.ITEM_BREAKDOWNS
@@ -852,8 +852,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         dateIssued: selectedInvoiceRecord.DETAILS.ACDAT,
         approvedSeriesRange: selectedInvoiceRecord.DETAILS.STRRNG,
       },
-      // authorizedSignature: selectedInvoiceRecord.DETAILS.AUTHSG || 'N/A',
-      authorizedSignature: 'JANE DELA CRUZ',
+      authorizedSignature: selectedInvoiceRecord.DETAILS.AUTHSG || 'N/A',
+      // authorizedSignature: 'JANE DELA CRUZ',
       reprinting: {
         isReprint: selectedInvoiceRecord.DETAILS.PRSTAT === 'R',
         reprintBy: selectedInvoiceRecord.DETAILS.REPRBY,
@@ -2313,7 +2313,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       )
     } else if (!isMultiple) {
 
-      console.log(JSON.stringify(selectedInvoiceRecords));
+      // console.log(JSON.stringify(selectedInvoiceRecords));
 
       const invoicePDFData = convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecords, true)
       const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)

@@ -1,11 +1,11 @@
 import { COMPANY_HEADER_DETAIL, COMPANY_LOGO, MINOR_COMPANY_HEADER_DETAIL } from './types'
+import { computed, ref } from 'vue';
 
 import axios from '../axios';
 import cdcLogo from '../assets/cdc.jpg';
 import ciLogo from '../assets/ci.jpg';
 import cldiLogo from '../assets/cldi.jpg';
 import { defineStore } from 'pinia'
-import { ref } from 'vue';
 
 export const useCompanyHeaderStore = defineStore('companyHeader', () => {
 
@@ -37,6 +37,25 @@ export const useCompanyHeaderStore = defineStore('companyHeader', () => {
   ]
 
   const all_company_header_details = ref<COMPANY_HEADER_DETAIL[]>([])
+
+  const getCompanyHeaderDetails = computed(() => {
+    return all_company_header_details.value
+      .filter((company) => company.VARIANTS !== undefined)
+      .map((company) => {
+        return Object.entries(company.VARIANTS).map(([key, variant]) => ({
+          VARIANT_CODE: Number(key),
+          ...company,
+          ...variant,
+          TIN: company.TIN_BASE + variant.TIN_EXTENSION,
+          TIN_EXTENSION: undefined,
+          TIN_BASE: undefined,
+          VARIANTS: undefined,
+          // COMPCD: undefined,
+          // COINIT: undefined,
+          // CONAME: undefined,
+        }));
+      })
+  })
 
   const getCompanyLogoByCompanyCode = (company_code: number): COMPANY_LOGO => {
     const logo = COMPANY_LOGOS.find(logo => logo.COMPCD === company_code);
@@ -96,6 +115,8 @@ export const useCompanyHeaderStore = defineStore('companyHeader', () => {
     COMPANY_LOGOS,
 
     all_company_header_details,
+
+    getCompanyHeaderDetails,
 
     getCompanyLogoByCompanyCode,
     getCompanyHeaderDetail,

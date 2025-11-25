@@ -783,8 +783,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       header: {
         systemName: selectedInvoiceRecord.DETAILS.SYSNME,
 
-        runDateAndTime: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.RUNDAT) + ' ' + utilStore.formatTimeNumberToString24H(selectedInvoiceRecord.DETAILS.RUNTME),
+        // runDateAndTime: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.RUNDAT) + ' ' + utilStore.formatTimeNumberToString24H(selectedInvoiceRecord.DETAILS.RUNTME),
         // runUsername: selectedInvoiceRecord.DETAILS.RUNBY || 'N/A',
+        runDateAndTime: '10/01/2025 10:16:01',
         runUsername: 'CDJANE',
 
         companyName: selectedInvoiceRecord.DETAILS.CONAME,
@@ -799,7 +800,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         invoiceTypeName: selectedInvoiceRecord.INVOICE_KEY.INVOICE_NAME,
         controlNumber: selectedInvoiceRecord.INVOICE_KEY.RECTYP + selectedInvoiceRecord.INVOICE_KEY.COMPLETE_OR_KEY,
-        dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+        // dateValue: utilStore.formatDateNumberToStringMMDDYYYY(selectedInvoiceRecord.DETAILS.DATVAL),
+        dateValue: '10/01/2025',
 
         // name: selectedInvoiceRecord.DETAILS.CLTNME,
         address: selectedInvoiceRecord.DETAILS.RADDR1 + selectedInvoiceRecord.DETAILS.RADDR2,
@@ -980,7 +982,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           "Page " + pageNumber + " of " + total,
 
           invoicePDFData.header.companyName.toUpperCase(),
-          "VAT REG. TIN. " + invoicePDFData.header.companyRegisteredTIN.toUpperCase(),
+          "VAT REG TIN: " + invoicePDFData.header.companyRegisteredTIN.toUpperCase(),
           invoicePDFData.header.companyAddress.toUpperCase(),
           "TEL. NO. " + invoicePDFData.header.companyTelephone.toUpperCase(),
 
@@ -1046,7 +1048,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         addMultiLineText(
           TEXT[4],
-          HEADER_COL_START[2] - HEADER_COL_START[1],
+          HEADER_COL_START[2] - HEADER_COL_START[1] + 1,
           MEDIUM_TEXT_FONT_SIZE + 1,
           "bold",
           MEDIUM_LINE_HEIGHT,
@@ -1057,7 +1059,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         addMultiLineText(
           TEXT[5],
-          HEADER_COL_START[2] - HEADER_COL_START[1] - 1,
+          HEADER_COL_START[2] - HEADER_COL_START[1] + 1,
           NORMAL_TEXT_FONT_SIZE,
           "normal",
           NORMAL_LINE_HEIGHT,
@@ -1068,7 +1070,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         addMultiLineText(
           TEXT[6],
-          HEADER_COL_START[2] - HEADER_COL_START[1],
+          HEADER_COL_START[2] - HEADER_COL_START[1] + 1,
           NORMAL_TEXT_FONT_SIZE,
           "normal",
           NORMAL_LINE_HEIGHT,
@@ -1079,7 +1081,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         addMultiLineText(
           TEXT[7],
-          HEADER_COL_START[2] - HEADER_COL_START[1],
+          HEADER_COL_START[2] - HEADER_COL_START[1] + 1,
           NORMAL_TEXT_FONT_SIZE,
           "normal",
           NORMAL_LINE_HEIGHT,
@@ -2752,653 +2754,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
     "CORF4PF": []
   }
 
-  const SAMPLE_BILLING_INVOICE_WATER_CDC_REPRINT: InvoiceRecord = {
-    "PBL_KEY": "CL1 L  U001  ",
-    "TCLTNO": 2405073,
-    "CLIENT_KEY_RAW": "CL1173L0",
-    "BILLINGS": [],
-    "INVOICE_KEY": {
-      "RECTYP": "BI",
-      "TRNTYP": "B",
-      "COMPLETE_OR_KEY": "0111101000023",
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "PROJCD": "CL1",
-      "YY": 2025,
-      "MM": 11,
-      "INVOICE_NAME": "BILLING",
-      "INVOICE_NUMBER": "BI0111101000023",
-      "SERIES_RANGE": "BI0111101000001 - BI0111199999999"
-    },
-    "DETAILS": {
-      "RECTYP": "BI",
-      "ORNUM": "0111101000023",
-      "PAYTYP": "Y",
-      "PIBIG": "Z",
-      "SLSTYP": "",
-      "DATVAL": 20251122,
-      "COMPCD": 1,
-      "CONAME": "CITYLAND DEVELOPMENT CORPORATION",
-      "COINIT": "CDC",
-      "TELNO": "8893-6060",
-      "REGTIN": "000-527-103-00000",
-      "CADDR1": "2/F CITYLAND CONDOMINIUM 10 TOWER I,",
-      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
-      "CLTNME": "INTEGRATED CALL CENTER SOLUTIONS (PHILIPPINES), INC.",
-      "RADDR1": "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
-      "RADDR2": "",
-      "CLTTIN": "010-238-043-00000 ",
-      "CLTKEY": "CL110073L00",
-      "PRJNAM": "CITYNET1",
-      "PBLKEY": "CL1 L  U001  ",
-      "STAFF1": "KIM",
-      "STAFF2": "",
-      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
-      "RUNDAT": 0,
-      "RUNTME": 0,
-      "RUNBY": "IT_MARK",
-      "AUTHSG": "MARK EDISON ROSARIO",
-      "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
-      "ACDAT": "Date Issued : MM/DD/YYYY",
-      "STRRNG": "BI0111101000001 - BI0111199999999",
-      "STATUS": "",
-      "PRSTAT": "",
-      "PRCNT": 0,
-      "RPDATE": 0,
-      "RPTIME": 0,
-      "REPRBY": "",
-      "UPDDTE": 0,
-      "UPDTME": 0,
-      "UPDBY": "IT_MARK"
-    },
-    "ITEM_BREAKDOWNS": [
-      {
-        "RECTYP": "BI",
-        "ORNUM": "0111101000023",
-        "ITEMNO": 8,
-        "BILTYP": 65,
-        "ITEM": "WATER CHARGES (September 2025) (VAT-Exempt)",
-        "QTY": 1,
-        "UNTCST": 1961.11,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 1961.11,
-        "ZERSAL": 0,
-        "NETVAT": 1961.11,
-        "WTHTAX": 39.22,
-        "GOVTAX": 0,
-        "WTXRAT": 2,
-        "AMTDUE": 1961.11,
-        "FRDATE": 20250803,
-        "TODATE": 20250902,
-        "DUEDAT": 20251002
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "0111101000023",
-        "ITEMNO": 7,
-        "BILTYP": 66,
-        "ITEM": "WATER CHARGES (September 2025) (Gov't-Taxes)",
-        "QTY": 1,
-        "UNTCST": 49.03,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 0,
-        "ZERSAL": 0,
-        "NETVAT": 0,
-        "WTHTAX": 0,
-        "GOVTAX": 49.03,
-        "WTXRAT": 2,
-        "AMTDUE": 49.03,
-        "FRDATE": 20250803,
-        "TODATE": 20250902,
-        "DUEDAT": 20251002
-      },
-    ],
-    "TOTAL_BREAKDOWN": {
-      "RECTYP": "BI",
-      "ORNUM": "0111101000023",
-      "BILTYP": 0,
-      "VATSAL": 0,
-      "VATEXM": 1961.11,
-      "ZERSAL": 0,
-      "GOVTAX": 49.03,
-      "TOTSAL": 2010.14,
-      "NETVAT": 1961.11,
-      "VATAMT": 0,
-      "PRDTAX": 39.22,
-      "AMTDUE": 1970.92
-    },
-    "CORFPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATOR": 0,
-      "CASHCD": "IT_MARK",
-      "COLSTF": "",
-      "ORAMT": 10758.150000000001,
-      "NOACCT": 0,
-      "PAYTYP": "Y",
-      "INTRST": 0,
-      "PNALTY": 0,
-      "OTHERS": 0,
-      "OVRPAY": 0,
-      "UNDPAY": 0,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "U001",
-      "UNITCD": "  ",
-      "PAYCOD": "",
-      "PAYEE": "INTEGRATED CALL CENTER SOLUTIONS (P",
-      "PN#": 0,
-      "DATVAL": 20251122,
-      "DATPRT": 0,
-      "BANKCD": "",
-      "BNKACT": "",
-      "NOCHK": 0,
-      "PRNO": 0,
-      "CSHAMT": 0,
-      "TCHKAM": 0,
-      "LEAFNO": 0,
-      "NORMRK": 0,
-      "DATCAN": 0,
-      "RETCOD": "",
-      "UPDCOD": "",
-      "NOMOS": 0,
-      "TRANSN": 0,
-      "DELOR": ""
-    },
-    "CORTPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATVAL": 20251122,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "U001",
-      "UNITCD": "  ",
-      "PAYTYP": "Y",
-      "CLTNUM": 73,
-      "PDSCOD": "L",
-      "PDSNUM": 0,
-      "TCLTNO": 2405073,
-      "DATINS": 20250703,
-      "BALRUN": 0,
-      "PAYNO": 0,
-      "NOMOS": 0
-    },
-    "CRMKPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "RMARK1": "WATER CHARGES",
-      "RMARK2": "for the period of",
-      "RMARK3": "2025/09/03 - 2025/9/04",
-      "RMARK4": ""
-    },
-    "CORF4PF": []
-  }
-
-  const SAMPLE_BILLING_INVOICE_WATER_CLDI: InvoiceRecord = {
-    "PBL_KEY": "CL1 L  PL10B1",
-    "TCLTNO": 2009022,
-    "CLIENT_KEY_RAW": "CL1145L0",
-    "BILLINGS": [],
-    "INVOICE_KEY": {
-      "RECTYP": "BI",
-      "TRNTYP": "B",
-      "COMPLETE_OR_KEY": "121110100009",
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "PROJCD": "CL1",
-      "YY": 2025,
-      "MM": 11,
-      "INVOICE_NAME": "BILLING",
-      "INVOICE_NUMBER": "BI121110100009",
-      "SERIES_RANGE": "BI1211101000001 - BI1211199999999"
-    },
-    "DETAILS": {
-      "RECTYP": "BI",
-      "ORNUM": "121110100009",
-      "PAYTYP": "Y",
-      "PIBIG": "V",
-      "SLSTYP": "",
-      "DATVAL": 20251122,
-      "COMPCD": 1,
-      "CONAME": "CITY & LAND DEVELOPERS, INCORPORATED",
-      "COINIT": "CLDI",
-      "TELNO": "8893-6060",
-      "REGTIN": "000-444-840-00000",
-      "CADDR1": "3/F CITYLAND CONDOMINIUM 10 TOWER I,",
-      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
-      "CLTNME": "POWERVISION EAPINC.",
-      "RADDR1": "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-      "RADDR2": "",
-      "CLTTIN": "008-567-658-000   ",
-      "CLTKEY": "C5311707L00",
-      "PRJNAM": "GRAND EMERALD TOWER",
-      "PBLKEY": "C53 L  PL10B1",
-      "STAFF1": "KRN",
-      "STAFF2": "KIM",
-      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
-      "RUNDAT": 0,
-      "RUNTME": 0,
-      "RUNBY": "IT_MARK",
-      "AUTHSG": "MARK EDISON ROSARIO",
-      "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
-      "ACDAT": "Date Issued : MM/DD/YYYY",
-      "STRRNG": "BI1211101000001 - BI1211199999999",
-      "STATUS": "",
-      "PRSTAT": "",
-      "PRCNT": 0,
-      "RPDATE": 0,
-      "RPTIME": 0,
-      "REPRBY": "",
-      "UPDDTE": 0,
-      "UPDTME": 0,
-      "UPDBY": "IT_MARK"
-    },
-    "ITEM_BREAKDOWNS": [
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 65,
-        "ITEM": "WATER CHARGES (September 2025) (VAT-Exempt)",
-        "QTY": 1,
-        "UNTCST": 595.17,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 595.17,
-        "ZERSAL": 0,
-        "NETVAT": 595.17,
-        "WTHTAX": 11.9,
-        "GOVTAX": 0,
-        "WTXRAT": 2,
-        "AMTDUE": 595.17,
-        "FRDATE": 20250906,
-        "TODATE": 20251007,
-        "DUEDAT": 20251031
-      },
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 2,
-        "BILTYP": 66,
-        "ITEM": "WATER CHARGES (September 2025) (Gov't-Taxes)",
-        "QTY": 1,
-        "UNTCST": 14.88,
-        "VATAMT": 0,
-        "VATSAL": 0,
-        "VATEXM": 0,
-        "ZERSAL": 0,
-        "NETVAT": 0,
-        "WTHTAX": 0,
-        "GOVTAX": 14.88,
-        "WTXRAT": 2,
-        "AMTDUE": 14.88,
-        "FRDATE": 20250906,
-        "TODATE": 20251007,
-        "DUEDAT": 20251031
-      }
-    ],
-    "TOTAL_BREAKDOWN": {
-      "RECTYP": "BI",
-      "ORNUM": "01111xxxxxxxx",
-      "BILTYP": 0,
-      "VATSAL": 0,
-      "VATEXM": 595.17,
-      "ZERSAL": 0,
-      "GOVTAX": 14.88,
-      "TOTSAL": 610.05,
-      "NETVAT": 595.17,
-      "VATAMT": 0,
-      "PRDTAX": 11.9,
-      "AMTDUE": 598.15
-    },
-    "CORFPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATOR": 0,
-      "CASHCD": "IT_MARK",
-      "COLSTF": "",
-      "ORAMT": 179.74,
-      "NOACCT": 0,
-      "PAYTYP": "Y",
-      "INTRST": 0,
-      "PNALTY": 0,
-      "OTHERS": 0,
-      "OVRPAY": 0,
-      "UNDPAY": 0,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "G-15",
-      "UNITCD": "  ",
-      "PAYCOD": "",
-      "PAYEE": "POWERVISION EAPINC.",
-      "PN#": 0,
-      "DATVAL": 20251122,
-      "DATPRT": 0,
-      "BANKCD": "",
-      "BNKACT": "",
-      "NOCHK": 0,
-      "PRNO": 0,
-      "CSHAMT": 0,
-      "TCHKAM": 0,
-      "LEAFNO": 0,
-      "NORMRK": 0,
-      "DATCAN": 0,
-      "RETCOD": "",
-      "UPDCOD": "",
-      "NOMOS": 0,
-      "TRANSN": 0,
-      "DELOR": ""
-    },
-    "CORTPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATVAL": 20251122,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "G-15",
-      "UNITCD": "  ",
-      "PAYTYP": "Y",
-      "CLTNUM": 45,
-      "PDSCOD": "L",
-      "PDSNUM": 0,
-      "TCLTNO": 2009022,
-      "DATINS": 20251126,
-      "BALRUN": 0,
-      "PAYNO": 0,
-      "NOMOS": 0
-    },
-    "CRMKPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "RMARK1": "ELECTRICITY CHARGES",
-      "RMARK2": "for the period of",
-      "RMARK3": "2025/09/19 - 2025/10/18",
-      "RMARK4": ""
-    },
-    "CORF4PF": [
-      {
-        "COMPCD": 1,
-        "BRANCH": 1,
-        "DEPTCD": 11,
-        "ORCOD": "",
-        "ORNUM": 0,
-        "DATVAL": 20251122,
-        "PROJCD": "CL1",
-        "PCSCOD": " ",
-        "PHASE": "L",
-        "BLOCK": "  ",
-        "LOT": "G-15",
-        "UNITCD": "  ",
-        "PAYTYP": "Y",
-        "BTYPE": 5,
-        "MBTYPE": 5,
-        "LESDES": "ELECTRICITY CHARGES",
-        "ORAMT": 179.74,
-        "VATSAL": 0,
-        "VATXMP": 0,
-        "VATZRO": 0,
-        "TOTSAL": 179.74,
-        "VATAMT": 179.74,
-        "WITTAX": 0,
-        "GRSAMT": 179.74,
-        "ENTDES": "",
-        "ENTAMT": 0,
-        "LESRF": 0,
-        "ORTYPE": "",
-        "DATENT": 0,
-        "TIMENT": 0,
-        "USRENT": "IT_MARK"
-      }
-    ]
-  }
-
-  const SAMPLE_BILLING_INVOICE_ELEC_CLDI: InvoiceRecord = {
-    "PBL_KEY": "CL1 L  PL10B1",
-    "TCLTNO": 2009022,
-    "CLIENT_KEY_RAW": "CL1145L0",
-    "BILLINGS": [],
-    "INVOICE_KEY": {
-      "RECTYP": "BI",
-      "TRNTYP": "B",
-      "COMPLETE_OR_KEY": "1211101000313",
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "PROJCD": "CL1",
-      "YY": 2025,
-      "MM": 11,
-      "INVOICE_NAME": "BILLING",
-      "INVOICE_NUMBER": "BI1211101000313",
-      "SERIES_RANGE": "BI1211101000001 - BI1211199999999"
-    },
-    "DETAILS": {
-      "RECTYP": "BI",
-      "ORNUM": "1211101000313",
-      "PAYTYP": "Y",
-      "PIBIG": "V",
-      "SLSTYP": "",
-      "DATVAL": 20251122,
-      "COMPCD": 1,
-      "CONAME": "CITY & LAND DEVELOPERS, INCORPORATED",
-      "COINIT": "CLDI",
-      "TELNO": "8893-6060",
-      "REGTIN": "000-444-840-00000",
-      "CADDR1": "3/F CITYLAND CONDOMINIUM 10 TOWER I,",
-      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
-      "CLTNME": "POWERVISION EAPINC.",
-      "RADDR1": "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-      "RADDR2": "",
-      "CLTTIN": "008-567-658-000   ",
-      "CLTKEY": "C5311707L00",
-      "PRJNAM": "GRAND EMERALD TOWER",
-      "PBLKEY": "C53 L  PL10B1",
-      "STAFF1": "KRN",
-      "STAFF2": "KIM",
-      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
-      "RUNDAT": 0,
-      "RUNTME": 0,
-      "RUNBY": "IT_MARK",
-      "AUTHSG": "MARK EDISON ROSARIO",
-      "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
-      "ACDAT": "Date Issued : MM/DD/YYYY",
-      "STRRNG": "BI1211101000001 - BI1211199999999",
-      "STATUS": "",
-      "PRSTAT": "",
-      "PRCNT": 0,
-      "RPDATE": 0,
-      "RPTIME": 0,
-      "REPRBY": "",
-      "UPDDTE": 0,
-      "UPDTME": 0,
-      "UPDBY": "IT_MARK"
-    },
-    "ITEM_BREAKDOWNS": [
-      {
-        "RECTYP": "BI",
-        "ORNUM": "01111xxxxxxxx",
-        "ITEMNO": 1,
-        "BILTYP": 53,
-        "ITEM": "ELECTRICITY CHARGES (September 2025) (VATable)",
-        "QTY": 1,
-        "UNTCST": 9396.59,
-        "VATAMT": 1047.28,
-        "VATSAL": 8727.32,
-        "VATEXM": 669.27,
-        "ZERSAL": 0,
-        "NETVAT": 9396.59,
-        "WTHTAX": 174.55,
-        "GOVTAX": 0,
-        "WTXRAT": 2,
-        "AMTDUE": 10443.87,
-        "FRDATE": 20250919,
-        "TODATE": 20251018,
-        "DUEDAT": 20251126
-      }
-    ],
-    "TOTAL_BREAKDOWN": {
-      "RECTYP": "BI",
-      "ORNUM": "01111xxxxxxxx",
-      "BILTYP": 0,
-      "VATSAL": 8727.32,
-      "VATEXM": 669.27,
-      "ZERSAL": 0,
-      "GOVTAX": 0,
-      "TOTSAL": 10443.87,
-      "NETVAT": 9396.59,
-      "VATAMT": 1047.28,
-      "PRDTAX": 174.55,
-      "AMTDUE": 10269.320000000002
-    },
-    "CORFPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATOR": 0,
-      "CASHCD": "IT_MARK",
-      "COLSTF": "",
-      "ORAMT": 179.74,
-      "NOACCT": 0,
-      "PAYTYP": "Y",
-      "INTRST": 0,
-      "PNALTY": 0,
-      "OTHERS": 0,
-      "OVRPAY": 0,
-      "UNDPAY": 0,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "G-15",
-      "UNITCD": "  ",
-      "PAYCOD": "",
-      "PAYEE": "POWERVISION EAPINC.",
-      "PN#": 0,
-      "DATVAL": 20251122,
-      "DATPRT": 0,
-      "BANKCD": "",
-      "BNKACT": "",
-      "NOCHK": 0,
-      "PRNO": 0,
-      "CSHAMT": 0,
-      "TCHKAM": 0,
-      "LEAFNO": 0,
-      "NORMRK": 0,
-      "DATCAN": 0,
-      "RETCOD": "",
-      "UPDCOD": "",
-      "NOMOS": 0,
-      "TRANSN": 0,
-      "DELOR": ""
-    },
-    "CORTPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "DATVAL": 20251122,
-      "PROJCD": "CL1",
-      "PCSCOD": " ",
-      "PHASE": "L",
-      "BLOCK": "  ",
-      "LOT": "G-15",
-      "UNITCD": "  ",
-      "PAYTYP": "Y",
-      "CLTNUM": 45,
-      "PDSCOD": "L",
-      "PDSNUM": 0,
-      "TCLTNO": 2009022,
-      "DATINS": 20251126,
-      "BALRUN": 0,
-      "PAYNO": 0,
-      "NOMOS": 0
-    },
-    "CRMKPF": {
-      "COMPCD": 1,
-      "BRANCH": 1,
-      "DEPTCD": 11,
-      "ORCOD": "",
-      "ORNUM": 0,
-      "RMARK1": "ELECTRICITY CHARGES",
-      "RMARK2": "for the period of",
-      "RMARK3": "2025/09/19 - 2025/10/18",
-      "RMARK4": ""
-    },
-    "CORF4PF": [
-      {
-        "COMPCD": 1,
-        "BRANCH": 1,
-        "DEPTCD": 11,
-        "ORCOD": "",
-        "ORNUM": 0,
-        "DATVAL": 20251122,
-        "PROJCD": "CL1",
-        "PCSCOD": " ",
-        "PHASE": "L",
-        "BLOCK": "  ",
-        "LOT": "G-15",
-        "UNITCD": "  ",
-        "PAYTYP": "Y",
-        "BTYPE": 5,
-        "MBTYPE": 5,
-        "LESDES": "ELECTRICITY CHARGES",
-        "ORAMT": 179.74,
-        "VATSAL": 0,
-        "VATXMP": 0,
-        "VATZRO": 0,
-        "TOTSAL": 179.74,
-        "VATAMT": 179.74,
-        "WITTAX": 0,
-        "GRSAMT": 179.74,
-        "ENTDES": "",
-        "ENTAMT": 0,
-        "LESRF": 0,
-        "ORTYPE": "",
-        "DATENT": 0,
-        "TIMENT": 0,
-        "USRENT": "IT_MARK"
-      }
-    ]
-  }
-
   const SAMPLE_SERVICE_INVOICE: InvoiceRecord = {
     "PBL_KEY": "C10 L  MP06  ",
     "TCLTNO": 2509035,
@@ -3679,41 +3034,255 @@ export const useIssuanceStore = defineStore('issuance', () => {
     "CORF4PF": []
   }
 
+  const SAMPLE_BILLING_INVOICE_WATER_CDC_REPRINT: InvoiceRecord = {
+    "PBL_KEY": "CL1 L  U001  ",
+    "TCLTNO": 2405073,
+    "CLIENT_KEY_RAW": "CL1173L0",
+    "BILLINGS": [],
+    "INVOICE_KEY": {
+      "RECTYP": "BI",
+      "TRNTYP": "B",
+      "COMPLETE_OR_KEY": "0111101000023",
+      "COMPCD": 1,
+      "BRANCH": 1,
+      "DEPTCD": 11,
+      "ORCOD": "",
+      "ORNUM": 0,
+      "PROJCD": "CL1",
+      "YY": 2025,
+      "MM": 11,
+      "INVOICE_NAME": "BILLING",
+      "INVOICE_NUMBER": "BI0111101000023",
+      "SERIES_RANGE": "BI0111101000001 - BI0111199999999"
+    },
+    "DETAILS": {
+      "RECTYP": "BI",
+      "ORNUM": "0111101000023",
+      "PAYTYP": "Y",
+      "PIBIG": "Z",
+      "SLSTYP": "",
+      "DATVAL": 20251122,
+      "COMPCD": 1,
+      "CONAME": "CITYLAND DEVELOPMENT CORPORATION",
+      "COINIT": "CDC",
+      "TELNO": "8893-6060",
+      "REGTIN": "000-527-103-00000",
+      "CADDR1": "2/F CITYLAND CONDOMINIUM 10 TOWER I,",
+      "CADDR2": "156 H.V. DELA COSTA STREET, MAKATI CITY",
+      "CLTNME": "INTEGRATED CALL CENTER SOLUTIONS (PHILIPPINES), INC.",
+      "RADDR1": "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
+      "RADDR2": "",
+      "CLTTIN": "010-238-043-00000 ",
+      "CLTKEY": "CL110073L00",
+      "PRJNAM": "CITYNET1",
+      "PBLKEY": "CL1 L  U001  ",
+      "STAFF1": "KIM",
+      "STAFF2": "",
+      "SYSNME": "CGC ACCOUNTING SYSTEM VERSION 2.0",
+      "RUNDAT": 0,
+      "RUNTME": 0,
+      "RUNBY": "IT_MARK",
+      "AUTHSG": "MARK EDISON ROSARIO",
+      "ACNUM": "Acknowledgement Certificate Number : AC_RDO_mmyyyy_xxxxxx",
+      "ACDAT": "Date Issued : MM/DD/YYYY",
+      "STRRNG": "BI0111101000001 - BI0111199999999",
+      "STATUS": "",
+      "PRSTAT": "",
+      "PRCNT": 0,
+      "RPDATE": 0,
+      "RPTIME": 0,
+      "REPRBY": "",
+      "UPDDTE": 0,
+      "UPDTME": 0,
+      "UPDBY": "IT_MARK"
+    },
+    "ITEM_BREAKDOWNS": [
+      {
+        "RECTYP": "BI",
+        "ORNUM": "0111101000023",
+        "ITEMNO": 8,
+        "BILTYP": 65,
+        "ITEM": "WATER CHARGES (September 2025) (VAT-Exempt)",
+        "QTY": 1,
+        "UNTCST": 1961.11,
+        "VATAMT": 0,
+        "VATSAL": 0,
+        "VATEXM": 1961.11,
+        "ZERSAL": 0,
+        "NETVAT": 1961.11,
+        "WTHTAX": 39.22,
+        "GOVTAX": 0,
+        "WTXRAT": 2,
+        "AMTDUE": 1961.11,
+        "FRDATE": 20250803,
+        "TODATE": 20250902,
+        "DUEDAT": 20251002
+      },
+      {
+        "RECTYP": "BI",
+        "ORNUM": "0111101000023",
+        "ITEMNO": 7,
+        "BILTYP": 66,
+        "ITEM": "WATER CHARGES (September 2025) (Gov't-Taxes)",
+        "QTY": 1,
+        "UNTCST": 49.03,
+        "VATAMT": 0,
+        "VATSAL": 0,
+        "VATEXM": 0,
+        "ZERSAL": 0,
+        "NETVAT": 0,
+        "WTHTAX": 0,
+        "GOVTAX": 49.03,
+        "WTXRAT": 2,
+        "AMTDUE": 49.03,
+        "FRDATE": 20250803,
+        "TODATE": 20250902,
+        "DUEDAT": 20251002
+      },
+    ],
+    "TOTAL_BREAKDOWN": {
+      "RECTYP": "BI",
+      "ORNUM": "0111101000023",
+      "BILTYP": 0,
+      "VATSAL": 0,
+      "VATEXM": 1961.11,
+      "ZERSAL": 0,
+      "GOVTAX": 49.03,
+      "TOTSAL": 2010.14,
+      "NETVAT": 1961.11,
+      "VATAMT": 0,
+      "PRDTAX": 39.22,
+      "AMTDUE": 1970.92
+    },
+    "CORFPF": {
+      "COMPCD": 1,
+      "BRANCH": 1,
+      "DEPTCD": 11,
+      "ORCOD": "",
+      "ORNUM": 0,
+      "DATOR": 0,
+      "CASHCD": "IT_MARK",
+      "COLSTF": "",
+      "ORAMT": 10758.150000000001,
+      "NOACCT": 0,
+      "PAYTYP": "Y",
+      "INTRST": 0,
+      "PNALTY": 0,
+      "OTHERS": 0,
+      "OVRPAY": 0,
+      "UNDPAY": 0,
+      "PROJCD": "CL1",
+      "PCSCOD": " ",
+      "PHASE": "L",
+      "BLOCK": "  ",
+      "LOT": "U001",
+      "UNITCD": "  ",
+      "PAYCOD": "",
+      "PAYEE": "INTEGRATED CALL CENTER SOLUTIONS (P",
+      "PN#": 0,
+      "DATVAL": 20251122,
+      "DATPRT": 0,
+      "BANKCD": "",
+      "BNKACT": "",
+      "NOCHK": 0,
+      "PRNO": 0,
+      "CSHAMT": 0,
+      "TCHKAM": 0,
+      "LEAFNO": 0,
+      "NORMRK": 0,
+      "DATCAN": 0,
+      "RETCOD": "",
+      "UPDCOD": "",
+      "NOMOS": 0,
+      "TRANSN": 0,
+      "DELOR": ""
+    },
+    "CORTPF": {
+      "COMPCD": 1,
+      "BRANCH": 1,
+      "DEPTCD": 11,
+      "ORCOD": "",
+      "ORNUM": 0,
+      "DATVAL": 20251122,
+      "PROJCD": "CL1",
+      "PCSCOD": " ",
+      "PHASE": "L",
+      "BLOCK": "  ",
+      "LOT": "U001",
+      "UNITCD": "  ",
+      "PAYTYP": "Y",
+      "CLTNUM": 73,
+      "PDSCOD": "L",
+      "PDSNUM": 0,
+      "TCLTNO": 2405073,
+      "DATINS": 20250703,
+      "BALRUN": 0,
+      "PAYNO": 0,
+      "NOMOS": 0
+    },
+    "CRMKPF": {
+      "COMPCD": 1,
+      "BRANCH": 1,
+      "DEPTCD": 11,
+      "ORCOD": "",
+      "ORNUM": 0,
+      "RMARK1": "WATER CHARGES",
+      "RMARK2": "for the period of",
+      "RMARK3": "2025/09/03 - 2025/9/04",
+      "RMARK4": ""
+    },
+    "CORF4PF": []
+  }
+
   onMounted(() => {
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Makati)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Ortigas)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_VitoCruz)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Manila)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CDC_Manila)
 
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Makati)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Ortigas)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_VitoCruz)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Manila)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CI_Manila)
 
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Makati)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Ortigas)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_VitoCruz)
-    handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Manila)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Service_Invoice_CLDI_Manila)
 
+    ////////////////////////////////////////////////////////////////////////
 
-    // handleActionPreviewDraftInvoice(SAMPLE_SERVICE_INVOICE_WATER_CDC_Makati)
-    if (IS_TEST === 'TRUE') {
-      console.log(SAMPLE_BILLING_INVOICE);
-      console.log(SAMPLE_BILLING_INVOICE_WATER_CDC_REPRINT);
-      console.log(SAMPLE_BILLING_INVOICE_WATER_CLDI);
-      console.log(SAMPLE_BILLING_INVOICE_ELEC_CLDI);
-      // handleActionGenerateDraftInvoice(
-      //   SAMPLE_BILLING_INVOICE,
-      //   () => {}
-      // )
-      handleActionPreviewDraftInvoice(
-        [
-          SAMPLE_BILLING_INVOICE,
-          SAMPLE_SERVICE_INVOICE
-        ],
-        new Date(),
-      )
-    }
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CDC_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CDC_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CDC_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CDC_Manila)
+
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CI_Manila)
+
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CLDI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CLDI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CLDI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Water_CLDI_Manila)
+
+    ////////////////////////////////////////////////////////////////////////
+
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CDC_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CDC_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CDC_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CDC_Manila)
+
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CI_Manila)
+
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CLDI_Makati)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CLDI_Ortigas)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CLDI_VitoCruz)
+    // handlePreviewInvoicePDf(InvoicePDF_Billing_Invoice_Elec_CLDI_Manila)
   })
 
   const InvoicePDF_Service_Invoice_CDC_Makati: InvoicePDF = {
@@ -3724,7 +3293,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: 'CDJANE',
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "2/F CITYLAND CONDOMINIUM 10 TOWER I," + '\n' + '156 H.V. DELA COSTA STREET, MAKATI CITY',
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
       companyInitials: 'CDC',
       companyTelephone: '8893-6060',
       companyRegisteredTIN: '000-527-103-00000',
@@ -3802,10 +3371,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress:
-        "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR ROAD CORNER\nRUBY AND GARNET ROADS ORTIGAS CENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
       companyInitials: "CDC",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-527-103-00002",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
@@ -3844,10 +3412,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress:
-        "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY 760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
       companyInitials: "CDC",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-527-103-00003",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
@@ -3885,10 +3452,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress:
-        "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
       companyInitials: "CDC",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8242-1212",
       companyRegisteredTIN: "000-527-103-00001",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
@@ -3928,7 +3494,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: 'CDJANE',
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER I,\n156 H.V. DELA COSTA STREET, MAKATI CITY",
+      companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA STREET\nBEL-AIR 1209 CITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
       companyInitials: 'CI',
       companyTelephone: '8893-6060',
       companyRegisteredTIN: '000-662-829-00000',
@@ -3999,10 +3565,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress:
-        "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR ROAD CORNER\nRUBY AND GARNET ROADS ORTIGAS CENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-662-829-00002",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
@@ -4041,10 +3606,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress:
-        "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY 760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-662-829-00003",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
@@ -4082,10 +3646,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress:
-        "517-519 QUINTIN PAREDES ST BRGY 289 ZONE 027\nBINONDO MANILA 1006",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8242-1212",
       companyRegisteredTIN: "000-662-829-00001",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
@@ -4125,7 +3688,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: 'CDJANE',
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER I,\n156 H.V. DELA COSTA STREET, MAKATI CITY",
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
       companyInitials: 'CI',
       companyTelephone: '8893-6060',
       companyRegisteredTIN: '000-444-840-00000',
@@ -4196,11 +3759,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress:
-        "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD. COR.\n" +
-        "RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
@@ -4239,11 +3800,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress:
-        "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760 PABLO OCAMPO ST ZONE 78" +
-        "BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-444-840-00003",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
@@ -4281,11 +3840,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress:
-        "517-519 QUINTIN PAREDES ST. BGY. 289 ZONE 027\n" +
-        "BINONDO MANILA 1006",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
       companyInitials: "CI",
-      companyTelephone: "8893-6060",
+      companyTelephone: "8242-1212",
       companyRegisteredTIN: "000-444-840-00001",
 
       companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
@@ -4316,621 +3873,1194 @@ export const useIssuanceStore = defineStore('issuance', () => {
     reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
   };
 
-
-
-  // const InvoicePDF_Billing_Invoice_Water_CDC_Makati: InvoicePDF = {
-  //   header: {
-  //     systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
-
-  //     runDateAndTime: '10/01/2025 10:16:01',
-  //     runUsername: 'CDJANE',
-
-  //     companyName: "CITYLAND DEVELOPMENT CORPORATION",
-  //     companyAddress: "2/F CITYLAND CONDOMINIUM 10 TOWER I," + '\n' + '156 H.V. DELA COSTA STREET, MAKATI CITY',
-  //     companyInitials: 'CDC',
-  //     companyTelephone: '8893-6060',
-  //     companyRegisteredTIN: '000-527-103-00000',
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: 'BILLING',
-  //     controlNumber: 'BI0111101000167',
-  //     dateValue: '10/01/2025',
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address: "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
-  //     tin: '123-456-789-00000',
-  //     clientKey: 'CL110073L00',
-  //     project: 'CITYNET1',
-  //     unit: ' L  U001',
-  //     salesStaff: 'KIM',
-  //   },
-  //   body: {
-  //     billings: [
-  //       {
-  //         itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
-  //         qty: '1',
-  //         unitCost: '1,961.11',
-  //         vatAmount: '0.00',
-  //         amount: '1,961.11',
-  //       },
-  //       {
-  //         itemDescription: "WATER CHARGES (September 2025) (Gov't-Taxes)",
-  //         qty: '1',
-  //         unitCost: '49.03',
-  //         vatAmount: '0.00',
-  //         amount: '49.03',
-  //       },
-  //     ],
-  //     breakdowns: {
-  //       section1: {
-  //         vatableSales: '0.00',
-  //         vatAmount: '1,961.11',
-  //         vatExemptSales: '0.00',
-  //         zeroRatedSales: '0.00',
-  //         governmentTax: '49.03',
-  //       },
-  //       section2: {
-  //         totalSales: '2,010.14',
-  //         lessVAT: '0.00',
-  //         netOfVAT: '1,961.11',
-  //         addVAT: '0.00',
-  //         addGovernmentTaxes: '49.03',
-  //         lessWithholdingTax: '39.22',
-  //         totalAmountDue: '1,970.92',
-  //       },
-  //     }
-  //   },
-  //   footer: {
-  //     acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: 'BI0111101000001 - BI0111199999999',
-  //   },
-  //   authorizedSignature: 'JANE DELA CRUZ',
-  //   reprinting: {
-  //     isReprint: false,
-  //     reprintBy: '',
-  //     reprintDateTime: '',
-  //   }
-  // }
-
-  // const InvoicePDF_Billing_Invoice_Water_CDC_Ortigas: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND DEVELOPMENT CORPORATION",
-  //     companyAddress:
-  //       "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR ROAD CORNER\nRUBY AND GARNET ROADS ORTIGAS CENTER PASIG CITY 1605",
-  //     companyInitials: "CDC",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-527-103-00002",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0113301000058", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "CL110073L00",
-  //     project: "CITYNET1",
-  //     unit: " L  U001",
-  //     salesStaff: "KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI011331A000001 - BI0111399999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CDC_VitoCruz: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND DEVELOPMENT CORPORATION",
-  //     companyAddress:
-  //       "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY 760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DBITRICT PHILIPPINES 1004",
-  //     companyInitials: "CDC",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-527-103-00003",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0114401000569", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "CL110073L00",
-  //     project: "CITYNET1",
-  //     unit: " L  U001",
-  //     salesStaff: "KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI011441A000001 - BI0111499999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CDC_Manila: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND DEVELOPMENT CORPORATION",
-  //     companyAddress:
-  //       "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DBITRICT BINONDO 1006",
-  //     companyInitials: "CDC",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-527-103-00001",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0115501000070", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "CL110073L00",
-  //     project: "CITYNET1",
-  //     unit: " L  U001",
-  //     salesStaff: "KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI0115501000001 - BI0115599999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-
-  // const InvoicePDF_Billing_Invoice_Water_CI_Makati: InvoicePDF = {
-  //   header: {
-  //     systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
-
-  //     runDateAndTime: '10/01/2025 10:16:01',
-  //     runUsername: 'CDJANE',
-
-  //     companyName: "CITYLAND, INC.",
-  //     companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER I,\n156 H.V. DELA COSTA STREET, MAKATI CITY",
-  //     companyInitials: 'CI',
-  //     companyTelephone: '8893-6060',
-  //     companyRegisteredTIN: '000-662-829-00000',
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: 'BILLING',
-  //     controlNumber: 'BI0211101000017',
-  //     dateValue: '10/01/2025',
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address: "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
-  //     tin: '123-456-789-00000',
-  //     clientKey: 'O2511040L00',
-  //     project: 'UDC (PASIG)',
-  //     unit: ' L BP117',
-  //     salesStaff: 'RLP/KIM',
-  //   },
-  //   body: {
-  //     billings: [
-  //       {
-  //         itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
-  //         qty: '1',
-  //         unitCost: '14,082.31',
-  //         vatAmount: ' 73.98',
-  //         amount: '14,156.29',
-  //       },
-  //       {
-  //         itemDescription: "WATER CHARGES (September 2025) (Gov't-Taxes)",
-  //         qty: '1',
-  //         unitCost: '343.38',
-  //         vatAmount: '0.00',
-  //         amount: '343.38',
-  //       },
-  //     ],
-  //     breakdowns: {
-  //       section1: {
-  //         vatableSales: '616.48',
-  //         vatAmount: '73.98',
-  //         vatExemptSales: '13,465.83',
-  //         zeroRatedSales: '0.00',
-  //         governmentTax: '343.38',
-  //       },
-  //       section2: {
-  //         totalSales: '14,499.67',
-  //         lessVAT: '73.98',
-  //         netOfVAT: '14,082.31',
-  //         addVAT: '73.98',
-  //         addGovernmentTaxes: '343.38',
-  //         lessWithholdingTax: '281.65',
-  //         totalAmountDue: '14,218.02',
-  //       },
-  //     }
-  //   },
-  //   footer: {
-  //     acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: 'BI0211101000001 - BI0211199999999',
-  //   },
-  //   authorizedSignature: 'JANE DELA CRUZ',
-  //   reprinting: {
-  //     isReprint: false,
-  //     reprintBy: '',
-  //     reprintDateTime: '',
-  //   }
-  // }
-
-  // const InvoicePDF_Billing_Invoice_Water_CI_Ortigas: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND, INC.",
-  //     companyAddress:
-  //       "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR ROAD CORNER\nRUBY AND GARNET ROADS ORTIGAS CENTER PASIG CITY 1605",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-662-829-00002",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0213301000088", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "O2511040L00",
-  //     project: "UDC (PASIG)",
-  //     unit: " L BP117",
-  //     salesStaff: "RLP/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI021331A000001 - BI0211399999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CI_VitoCruz: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND, INC.",
-  //     companyAddress:
-  //       "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY 760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DBITRICT PHILIPPINES 1004",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-662-829-00003",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0214401000039", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "O2511040L00",
-  //     project: "UDC (PASIG)",
-  //     unit: " L BP117",
-  //     salesStaff: "RLP/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI021441A000001 - BI0211499999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CI_Manila: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITYLAND, INC.",
-  //     companyAddress:
-  //       "517-519 QUINTIN PAREDES ST BRGY 289 ZONE 027\nBINONDO MANILA 1006",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-662-829-00001",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI0215501000170", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "O2511040L00",
-  //     project: "UDC (PASIG)",
-  //     unit: " L BP117",
-  //     salesStaff: "RLP/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI0215501000001 - BI0215599999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-
-  // const InvoicePDF_Billing_Invoice_Water_CLDI_Makati: InvoicePDF = {
-  //   header: {
-  //     systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
-
-  //     runDateAndTime: '10/01/2025 10:16:01',
-  //     runUsername: 'CDJANE',
-
-  //     companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-  //     companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER I,\n156 H.V. DELA COSTA STREET, MAKATI CITY",
-  //     companyInitials: 'CI',
-  //     companyTelephone: '8893-6060',
-  //     companyRegisteredTIN: '000-444-840-00000',
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: 'BILLING',
-  //     controlNumber: 'BI1211101000176',
-  //     dateValue: '10/01/2025',
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address: "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-  //     tin: '123-456-789-00000',
-  //     clientKey: 'C5311707L00',
-  //     project: 'GRAND EMERALD TOWER',
-  //     unit: ' L  PL10B1',
-  //     salesStaff: 'KRN/KIM',
-  //   },
-  //   body: {
-  //     billings: [
-  //       {
-  //         itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
-  //         qty: '1',
-  //         unitCost: '595.17',
-  //         vatAmount: '0.00',
-  //         amount: '595.17',
-  //       },
-  //       {
-  //         itemDescription: 'WATER CHARGES (September 2025) (Gov\'t-Taxes)',
-  //         qty: '1',
-  //         unitCost: '14.88',
-  //         vatAmount: '0.00',
-  //         amount: '14.88',
-  //       },
-  //     ],
-  //     breakdowns: {
-  //       section1: {
-  //         vatableSales: '0.00',
-  //         vatAmount: '0.00',
-  //         vatExemptSales: '595.17',
-  //         zeroRatedSales: '0.00',
-  //         governmentTax: '14.88',
-  //       },
-  //       section2: {
-  //         totalSales: '610.05',
-  //         lessVAT: '0.00',
-  //         netOfVAT: '595.17',
-  //         addVAT: '0.00',
-  //         addGovernmentTaxes: '14.88',
-  //         lessWithholdingTax: '11.90',
-  //         totalAmountDue: '598.15',
-  //       },
-  //     }
-  //   },
-  //   footer: {
-  //     acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: 'BI1211101000001 - BI1211199999999',
-  //   },
-  //   authorizedSignature: 'JANE DELA CRUZ',
-  //   reprinting: {
-  //     isReprint: false,
-  //     reprintBy: '',
-  //     reprintDateTime: '',
-  //   }
-  // }
-
-  // const InvoicePDF_Billing_Invoice_Water_CLDI_Ortigas: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-  //     companyAddress:
-  //       "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD. COR.\n" +
-  //       "RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY 1605",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-444-840-00002",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI1213301000012", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "C5311707L00",
-  //     project: "GRAND EMERALD TOWER",
-  //     unit: " L  PL10B1",
-  //     salesStaff: "KRN/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI1213301000001 - BI1213399999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CLDI_VitoCruz: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-  //     companyAddress:
-  //       "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760 PABLO OCAMPO ST ZONE 78" +
-  //       "BARANGAY 719, MALATE NCR, CITY OF MANILA, FIRST DBITRICT PHILIPPINES 1004",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-444-840-00003",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI1214401000090", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "C5311707L00",
-  //     project: "GRAND EMERALD TOWER",
-  //     unit: " L  PL10B1",
-  //     salesStaff: "KRN/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI1214401000001 - BI1214499999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
-
-  // const InvoicePDF_Billing_Invoice_Water_CLDI_Manila: InvoicePDF = {
-  //   header: {
-  //     systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
-
-  //     runDateAndTime: "10/01/2025 10:16:01",
-  //     runUsername: "CDJANE",
-
-  //     companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-  //     companyAddress:
-  //       "517-519 QUINTIN PAREDES ST. BGY. 289 ZONE 027\n" +
-  //       "BINONDO MANILA 1006",
-  //     companyInitials: "CI",
-  //     companyTelephone: "8893-6060",
-  //     companyRegisteredTIN: "000-444-840-00001",
-
-  //     companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
-  //     companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
-  //     companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
-
-  //     invoiceTypeName: "BILLING",
-  //     controlNumber: "BI1215501000017", // NEW CONTROL NUMBER
-  //     dateValue: "10/01/2025",
-
-  //     name: "ABC TRADING CORPORATION",
-  //     address:
-  //       "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
-  //     tin: "123-456-789-00000",
-  //     clientKey: "C5311707L00",
-  //     project: "GRAND EMERALD TOWER",
-  //     unit: " L  PL10B1",
-  //     salesStaff: "KRN/KIM",
-  //   },
-  //   body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
-  //   footer: {
-  //     acknowledgementCertificateNumber:
-  //       "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
-  //     dateIssued: "Date Issued : MM/DD/YYYY",
-  //     approvedSeriesRange: "BI1215501000001 - BI1215599999999",
-  //   },
-  //   authorizedSignature: "JANE DELA CRUZ",
-  //   reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
-  // };
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  const InvoicePDF_Billing_Invoice_Water_CDC_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CDC',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-527-103-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI0111101000167',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
+      tin: '123-456-789-00000',
+      clientKey: 'CL110073L00',
+      project: 'CITYNET1',
+      unit: ' L  U001',
+      salesStaff: 'KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
+          qty: '1',
+          unitCost: '1,961.11',
+          vatAmount: '0.00',
+          amount: '1,961.11',
+        },
+        {
+          itemDescription: "WATER CHARGES (September 2025) (Gov't-Taxes)",
+          qty: '1',
+          unitCost: '49.03',
+          vatAmount: '0.00',
+          amount: '49.03',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '0.00',
+          vatAmount: '1,961.11',
+          vatExemptSales: '0.00',
+          zeroRatedSales: '0.00',
+          governmentTax: '49.03',
+        },
+        section2: {
+          totalSales: '2,010.14',
+          lessVAT: '0.00',
+          netOfVAT: '1,961.11',
+          addVAT: '0.00',
+          addGovernmentTaxes: '49.03',
+          lessWithholdingTax: '39.22',
+          totalAmountDue: '1,970.92',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI0111101000001 - BI0111199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Water_CDC_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyInitials: "CDC",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-527-103-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0113301000058", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
+      tin: "123-456-789-00000",
+      clientKey: "CL110073L00",
+      project: "CITYNET1",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI011331A000001 - BI0111399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CDC_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
+      companyInitials: "CDC",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-527-103-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0114401000569", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
+      tin: "123-456-789-00000",
+      clientKey: "CL110073L00",
+      project: "CITYNET1",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI011441A000001 - BI0111499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CDC_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CDC",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-527-103-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0115501000070", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "3/F CITYNET1 183 EDSA WACK WACK, MANDALUYONG CITY ",
+      tin: "123-456-789-00000",
+      clientKey: "CL110073L00",
+      project: "CITYNET1",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI0115501000001 - BI0115599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+
+  const InvoicePDF_Billing_Invoice_Water_CI_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA STREET\nBEL-AIR 1209 CITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CI',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-662-829-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI0211101000017',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
+      tin: '123-456-789-00000',
+      clientKey: 'O2511040L00',
+      project: 'UDC (PASIG)',
+      unit: ' L BP117',
+      salesStaff: 'RLP/KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
+          qty: '1',
+          unitCost: '14,082.31',
+          vatAmount: ' 73.98',
+          amount: '14,156.29',
+        },
+        {
+          itemDescription: "WATER CHARGES (September 2025) (Gov't-Taxes)",
+          qty: '1',
+          unitCost: '343.38',
+          vatAmount: '0.00',
+          amount: '343.38',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '616.48',
+          vatAmount: '73.98',
+          vatExemptSales: '13,465.83',
+          zeroRatedSales: '0.00',
+          governmentTax: '343.38',
+        },
+        section2: {
+          totalSales: '14,499.67',
+          lessVAT: '73.98',
+          netOfVAT: '14,082.31',
+          addVAT: '73.98',
+          addGovernmentTaxes: '343.38',
+          lessWithholdingTax: '281.65',
+          totalAmountDue: '14,218.02',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI0211101000001 - BI0211199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Water_CI_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyInitials: "CI",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-662-829-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0213301000088", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
+      tin: "123-456-789-00000",
+      clientKey: "O2511040L00",
+      project: "UDC (PASIG)",
+      unit: " L BP117",
+      salesStaff: "RLP/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI021331A000001 - BI0211399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CI_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyInitials: "CI",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-662-829-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0214401000039", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
+      tin: "123-456-789-00000",
+      clientKey: "O2511040L00",
+      project: "UDC (PASIG)",
+      unit: " L BP117",
+      salesStaff: "RLP/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI021441A000001 - BI0211499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CI_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CI",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-662-829-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0215501000170", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "110 E. RODRIGUEZ JR. AVENUE, BAGUMBAYAN, QUEZON CITY",
+      tin: "123-456-789-00000",
+      clientKey: "O2511040L00",
+      project: "UDC (PASIG)",
+      unit: " L BP117",
+      salesStaff: "RLP/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI0215501000001 - BI0215599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+
+  const InvoicePDF_Billing_Invoice_Water_CLDI_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CI',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-444-840-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI1211101000176',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: '123-456-789-00000',
+      clientKey: 'C5311707L00',
+      project: 'GRAND EMERALD TOWER',
+      unit: ' L  PL10B1',
+      salesStaff: 'KRN/KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'WATER CHARGES (September 2025) (VAT-Exempt)',
+          qty: '1',
+          unitCost: '595.17',
+          vatAmount: '0.00',
+          amount: '595.17',
+        },
+        {
+          itemDescription: 'WATER CHARGES (September 2025) (Gov\'t-Taxes)',
+          qty: '1',
+          unitCost: '14.88',
+          vatAmount: '0.00',
+          amount: '14.88',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '0.00',
+          vatAmount: '0.00',
+          vatExemptSales: '595.17',
+          zeroRatedSales: '0.00',
+          governmentTax: '14.88',
+        },
+        section2: {
+          totalSales: '610.05',
+          lessVAT: '0.00',
+          netOfVAT: '595.17',
+          addVAT: '0.00',
+          addGovernmentTaxes: '14.88',
+          lessWithholdingTax: '11.90',
+          totalAmountDue: '598.15',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI1211101000001 - BI1211199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Water_CLDI_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
+      companyInitials: "CI",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-444-840-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1213301000012", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1213301000001 - BI1213399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CLDI_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyInitials: "CI",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-444-840-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1214401000090", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1214401000001 - BI1214499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Water_CLDI_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CI",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-444-840-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1215501000017", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Water_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1215501000001 - BI1215599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  const InvoicePDF_Billing_Invoice_Elec_CDC_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CDC',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-527-103-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI0111101001167',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "2401-2402 24TH FLR. CITYNET CNETRAL, 298-B EDSA CORNER SULTAN ST., HIGHWAY HILLS, MANDALUYONG CITY, PHILIPPINES",
+      tin: '123-456-789-00000',
+      clientKey: 'CL310078L00',
+      project: 'CITYNET CENTRAL',
+      unit: ' L  U003',
+      salesStaff: 'KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'ELECTRICITY CHARGES (September 2025) (VATable)',
+          qty: '1',
+          unitCost: '85,213.74',
+          vatAmount: '9,507.50',
+          amount: '94,721.24',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '79,229.15',
+          vatAmount: '9,507.50',
+          vatExemptSales: '5,984.59',
+          zeroRatedSales: '0.00',
+          governmentTax: '0.00',
+        },
+        section2: {
+          totalSales: '94,721.24',
+          lessVAT: '9,507.50',
+          netOfVAT: '85,213.74',
+          addVAT: '9,507.50',
+          addGovernmentTaxes: '0.00',
+          lessWithholdingTax: '1,584.58',
+          totalAmountDue: '93,136.66',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI0111101000001 - BI0111199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Elec_CDC_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyInitials: "CDC",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-527-103-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0113301000158", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "2401-2402 24TH FLR. CITYNET CNETRAL, 298-B EDSA CORNER SULTAN ST., HIGHWAY HILLS, MANDALUYONG CITY, PHILIPPINES",
+      tin: "123-456-789-00000",
+      clientKey: "CL310078L00",
+      project: "CITYNET CENTRAL",
+      unit: " L  U003",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI011331A000001 - BI0111399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CDC_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
+      companyInitials: "CDC",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-527-103-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0114401001569", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "2401-2402 24TH FLR. CITYNET CNETRAL, 298-B EDSA CORNER SULTAN ST., HIGHWAY HILLS, MANDALUYONG CITY, PHILIPPINES",
+      tin: "123-456-789-00000",
+      clientKey: "CL310078L00",
+      project: "CITYNET CENTRAL",
+      unit: " L  U003",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI011441A000001 - BI0111499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CDC_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND DEVELOPMENT CORPORATION",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CDC",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-527-103-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[0].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[0].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0115501000701", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "2401-2402 24TH FLR. CITYNET CNETRAL, 298-B EDSA CORNER SULTAN ST., HIGHWAY HILLS, MANDALUYONG CITY, PHILIPPINES",
+      tin: "123-456-789-00000",
+      clientKey: "CL310078L00",
+      project: "CITYNET CENTRAL",
+      unit: " L  U003",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CDC_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI0115501000001 - BI0115599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+
+  const InvoicePDF_Billing_Invoice_Elec_CI_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "3/F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA STREET\nBEL-AIR 1209 CITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CI',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-662-829-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI0211101001017',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "MORNING VIEW SUBD. LOT 3 BLK. 3, BARANGAY PUTING KAHOY, SILANG CAVITE",
+      tin: '123-456-789-00000',
+      clientKey: 'CL210022L00',
+      project: 'TAGAYTAY COMMERCIAL COMPLEX',
+      unit: ' L  U001',
+      salesStaff: 'KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'ELECTRICITY CHARGES (September 2025) (VATable)',
+          qty: '1',
+          unitCost: '7,135.44',
+          vatAmount: '794.21',
+          amount: '7,929.65',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '6,618.38',
+          vatAmount: '794.21',
+          vatExemptSales: '517.06',
+          zeroRatedSales: '0.00',
+          governmentTax: '0.00',
+        },
+        section2: {
+          totalSales: '7,929.65',
+          lessVAT: '794.21',
+          netOfVAT: '7,135.44',
+          addVAT: '794.21',
+          addGovernmentTaxes: '0.00',
+          lessWithholdingTax: '132.37',
+          totalAmountDue: '7,797.28',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI0211101000001 - BI0211199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Elec_CI_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyInitials: "CI",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-662-829-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0213301000188", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "MORNING VIEW SUBD. LOT 3 BLK. 3, BARANGAY PUTING KAHOY, SILANG CAVITE",
+      tin: "123-456-789-00000",
+      clientKey: "CL210022L00",
+      project: "TAGAYTAY COMMERCIAL COMPLEX",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI021331A000001 - BI0211399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CI_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyInitials: "CI",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-662-829-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0214401000139", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "MORNING VIEW SUBD. LOT 3 BLK. 3, BARANGAY PUTING KAHOY, SILANG CAVITE",
+      tin: "123-456-789-00000",
+      clientKey: "CL210022L00",
+      project: "TAGAYTAY COMMERCIAL COMPLEX",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI021441A000001 - BI0211499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CI_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITYLAND, INC.",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CI",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-662-829-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[1].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[1].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI0215501001170", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "MORNING VIEW SUBD. LOT 3 BLK. 3, BARANGAY PUTING KAHOY, SILANG CAVITE",
+      tin: "123-456-789-00000",
+      clientKey: "CL210022L00",
+      project: "TAGAYTAY COMMERCIAL COMPLEX",
+      unit: " L  U001",
+      salesStaff: "KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI0215501000001 - BI0215599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+
+  const InvoicePDF_Billing_Invoice_Elec_CLDI_Makati: InvoicePDF = {
+    header: {
+      systemName: 'CGC ACCOUNTING SYSTEM VERSION 2.0',
+
+      runDateAndTime: '10/01/2025 10:16:01',
+      runUsername: 'CDJANE',
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "3F CITYLAND CONDOMINIUM 10 TOWER 1 156 H.V DELA COSTA BEL-AIR 1209\nCITY OF MAKATI NCR, FOURTH DISTRICT PHILIPPINES",
+      companyInitials: 'CI',
+      companyTelephone: '8893-6060',
+      companyRegisteredTIN: '000-444-840-00000',
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: 'BILLING',
+      controlNumber: 'BI1211101001176',
+      dateValue: '10/01/2025',
+
+      name: "ABC TRADING CORPORATION",
+      address: "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: '123-456-789-00000',
+      clientKey: 'C5311707L00',
+      project: 'GRAND EMERALD TOWER',
+      unit: ' L  PL10B1',
+      salesStaff: 'KRN/KIM',
+    },
+    body: {
+      billings: [
+        {
+          itemDescription: 'ELECTRICITY CHARGES (September 2025) (VATable)',
+          qty: '1',
+          unitCost: '9,396.59',
+          vatAmount: '1,047.28',
+          amount: '10,443.87',
+        },
+      ],
+      breakdowns: {
+        section1: {
+          vatableSales: '8,727.32',
+          vatAmount: '1,047.28',
+          vatExemptSales: '669.27',
+          zeroRatedSales: '0.00',
+          governmentTax: '0.00',
+        },
+        section2: {
+          totalSales: '10,443.87',
+          lessVAT: '1,047.28',
+          netOfVAT: '9,396.59',
+          addVAT: '1,047.28',
+          addGovernmentTaxes: '0.00',
+          lessWithholdingTax: '174.55',
+          totalAmountDue: '10,269.32',
+        },
+      }
+    },
+    footer: {
+      acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: 'BI1211101000001 - BI1211199999999',
+    },
+    authorizedSignature: 'JANE DELA CRUZ',
+    reprinting: {
+      isReprint: false,
+      reprintBy: '',
+      reprintDateTime: '',
+    }
+  }
+
+  const InvoicePDF_Billing_Invoice_Elec_CLDI_Ortigas: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
+      companyInitials: "CI",
+      companyTelephone: "8687-3333",
+      companyRegisteredTIN: "000-444-840-00002",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1213301000112", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1213301000001 - BI1213399999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CLDI_VitoCruz: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyInitials: "CI",
+      companyTelephone: "8567-3333",
+      companyRegisteredTIN: "000-444-840-00003",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1214401000190", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber: "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1214401000001 - BI1214499999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
+
+  const InvoicePDF_Billing_Invoice_Elec_CLDI_Manila: InvoicePDF = {
+    header: {
+      systemName: "CGC ACCOUNTING SYSTEM VERSION 2.0",
+
+      runDateAndTime: "10/01/2025 10:16:01",
+      runUsername: "CDJANE",
+
+      companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
+      companyAddress: "581 QUINTIN PAREDES ST., ZONE 027 BARANGAY 289 NCR,\nCITY OF MANILA, FIRST DISTRICT BINONDO 1006",
+      companyInitials: "CI",
+      companyTelephone: "8242-1212",
+      companyRegisteredTIN: "000-444-840-00001",
+
+      companyLogo: companyHeaderStore.COMPANY_LOGOS[2].IMG_URL,
+      companyLogoWidth: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.WIDTH,
+      companyLogoHeight: companyHeaderStore.COMPANY_LOGOS[2].IMG_SIZE_INCH.HEIGHT,
+
+      invoiceTypeName: "BILLING",
+      controlNumber: "BI1215501000117", // NEW CONTROL NUMBER
+      dateValue: "10/01/2025",
+
+      name: "ABC TRADING CORPORATION",
+      address:
+        "9K TOWER 2, DANSALAN GARDENS, 347 M VICENTE ST., BRGY. MALAMIG, MANDALUYONG",
+      tin: "123-456-789-00000",
+      clientKey: "C5311707L00",
+      project: "GRAND EMERALD TOWER",
+      unit: " L  PL10B1",
+      salesStaff: "KRN/KIM",
+    },
+    body: { ...InvoicePDF_Billing_Invoice_Elec_CLDI_Makati.body },
+    footer: {
+      acknowledgementCertificateNumber:
+        "Acknowledgement Certificate Number : xxxxxxxxxxxxxxx",
+      dateIssued: "Date Issued : MM/DD/YYYY",
+      approvedSeriesRange: "BI1215501000001 - BI1215599999999",
+    },
+    authorizedSignature: "JANE DELA CRUZ",
+    reprinting: { isReprint: false, reprintBy: "", reprintDateTime: "" },
+  };
 
 
   return {

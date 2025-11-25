@@ -908,6 +908,7 @@ export interface VariantInfo {
   TEL_NO: string;
   ADDRESS1: string;
   ADDRESS2: string;
+  ADDRESS3: string;
   TIN_EXTENSION: string;
 }
 

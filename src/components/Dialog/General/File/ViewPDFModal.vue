@@ -55,12 +55,12 @@
             })
           })
           .finally(() => {
-            toast.add({
-              summary: 'Success',
-              detail: 'File has been downloaded successfully!',
-              severity: 'success',
-              life: 5000
-            })
+            // toast.add({
+            //   summary: 'Success',
+            //   detail: 'File has been downloaded successfully!',
+            //   severity: 'success',
+            //   life: 5000
+            // })
           })
       },
       reject: () => {

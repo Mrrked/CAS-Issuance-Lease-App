@@ -2689,7 +2689,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD.\nCOR. RUBY & GARNET RDS ORTIGAS CENTER\nPASIG CITY 1605",
       companyInitials: "CDC",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-527-103-00002",
@@ -2730,7 +2730,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BRGY 719 NCR,\nCITY OF MANILA, FIRST DISTRICT MALATE 1004",
       companyInitials: "CDC",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-527-103-00003",
@@ -2924,7 +2924,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-662-829-00003",
@@ -3077,7 +3077,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
@@ -3118,7 +3118,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ST ZONE 78 BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-444-840-00003",
@@ -3280,7 +3280,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD.\nCOR. RUBY & GARNET RDS ORTIGAS CENTER\nPASIG CITY 1605",
       companyInitials: "CDC",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-527-103-00002",
@@ -3321,7 +3321,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BRGY 719 NCR,\nCITY OF MANILA, FIRST DISTRICT MALATE 1004",
       companyInitials: "CDC",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-527-103-00003",
@@ -3522,7 +3522,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-662-829-00003",
@@ -3682,7 +3682,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
@@ -3723,7 +3723,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ST ZONE 78 BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-444-840-00003",
@@ -3878,7 +3878,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD.\nCOR. RUBY & GARNET RDS ORTIGAS CENTER\nPASIG CITY 1605",
       companyInitials: "CDC",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-527-103-00002",
@@ -3919,7 +3919,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND DEVELOPMENT CORPORATION",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BARANGAY 719 NCR, CITY OF\nMANILA, FIRST DISTRICT MALATE 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO ZONE 78 BRGY 719 NCR,\nCITY OF MANILA, FIRST DISTRICT MALATE 1004",
       companyInitials: "CDC",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-527-103-00003",
@@ -4113,7 +4113,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BRGY 719 MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GROUND FLOOR THE PACIFIC REGENCY\n760 PABLO OCAMPO STREET BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-662-829-00003",
@@ -4266,7 +4266,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD,\nCOR. RUBY & GARNET RDS ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
@@ -4307,7 +4307,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ZONE 78 BRGY 719,MALATE NCR, CITY\nOF MANILA, FIRST DISTRICT PHILIPPINES 1004",
+      companyAddress: "UNIT 102 & 103 GRD FLR, THE PACIFIC REGENCY 760\nPABLO OCAMPO ST ZONE 78 BARANGAY 719, MALATE NCR,\nCITY OF MANILA, FIRST DISTRICT PHILIPPINES 1004",
       companyInitials: "CI",
       companyTelephone: "8567-3333",
       companyRegisteredTIN: "000-444-840-00003",

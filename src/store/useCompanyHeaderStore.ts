@@ -98,6 +98,7 @@ export const useCompanyHeaderStore = defineStore('companyHeader', () => {
       TEL_NO: appropriate_branch.TEL_NO,
       ADDRESS1: appropriate_branch.ADDRESS1,
       ADDRESS2: appropriate_branch.ADDRESS2,
+      ADDRESS3: appropriate_branch.ADDRESS3,
       BRANCH_NAME: appropriate_branch.NAME
     };
   }

@@ -929,6 +929,7 @@ export interface MINOR_COMPANY_HEADER_DETAIL {
   TEL_NO:      string
   ADDRESS1:    string
   ADDRESS2:    string
+  ADDRESS3:    string
   BRANCH_NAME: string
 }
 

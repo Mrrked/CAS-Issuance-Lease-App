@@ -105,7 +105,7 @@ export const useCompanyHeaderStore = defineStore('companyHeader', () => {
 
   const fetchAllCompanyHeaderDetails = async (force: boolean = false) => {
     if (all_company_header_details.value.length === 0 || force) {
-      return axios.get('issuance_lease/company_header/all/')
+      return axios.get('general/session_company_header/all/')
         .then((response) => {
           all_company_header_details.value = response.data.data;
         })

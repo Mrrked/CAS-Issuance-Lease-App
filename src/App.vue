@@ -5,8 +5,10 @@
   import './main.css'
   import { useRoute } from 'vue-router';
   import { useThemeStore } from './store/useThemeStore';
+  import { useSampleStore } from './store/useSampleStore';
 
   useThemeStore()
+  useSampleStore()
   const route = useRoute()
 </script>
 

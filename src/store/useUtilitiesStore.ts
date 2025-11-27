@@ -21,6 +21,147 @@ export const useUtilitiesStore = defineStore('utils', () => {
 
   const isOpenConfirmAdminPassword = ref(false);
 
+  const isInvalidValue = (value: any): boolean => {
+    if (value === undefined) return true
+    if (value === null) return true
+    if (value === '') return true
+    if (value === 0) return true
+
+    return false
+  }
+
+  const addLeadingZeroes = (num: number | string, length: number): string => {
+    return num.toString().trim().padStart(length, '0');
+  }
+
+  const startLoadingModal = (label: string): DynamicDialogInstance => {
+    const loadingDialogRef = dialog.open(LoadingModal, {
+      data: {
+        label
+      },
+      props: {
+        style: {
+          paddingTop: '1.5rem',
+        },
+        showHeader: false,
+        modal: true
+      }
+    })
+
+    return loadingDialogRef;
+  }
+
+  const handleAxiosError = (error: ExtendedAxiosError):void => {
+    if (error.response) {
+      const { status, data }: { status: number, data: { error: string, details: [], exception: string} } = error.response as any;
+      // console.error(`HTTP Status: ${status}`);
+      // console.error("Response Data:", data);
+
+      if (status === 401) {
+        toast.add({
+          severity: 'error',
+          summary: 'Session has expired.',
+          detail: 'Please login again.',
+          life: 5000
+        });
+        localStorage.removeItem('access')
+        localStorage.removeItem('refresh')
+        router.push('/login')
+      } else if (status === 500 && data?.exception) {
+        console.error('EXCEPTION: ', data.exception)
+      }
+
+      if (data?.error && data.error !== 'Invalid submission data!') {
+        // Custom error message from the server
+        console.error(`Server Error: ${data.error}`);
+        toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: data.error,
+          life: 5000
+        });
+      }
+
+      if (data?.details) {
+        console.error("Details:", data.details);
+        const details = Object.entries(data.details)
+
+        details.forEach((pair) => {
+          const key = pair[0] as string
+          const values = pair[1] as string[]
+
+          values.forEach((value) => {
+            toast.add({
+              severity: 'error',
+              summary: key !== 'non_field_errors' ? 'Invalid field: ' + key : 'Error',
+              detail: value,
+              life: 5000
+            });
+          })
+        })
+      }
+
+    } else if (error.request) {
+      toast.add({
+        severity: 'error',
+        summary: 'Exception',
+        detail: 'Server can\'t be reached.',
+        life: 5000
+      });
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message,
+        life: 5000
+      });
+    }
+  }
+
+  const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
+    if (!isOpenConfirmAdminPassword.value) {
+      isOpenConfirmAdminPassword.value = true
+      const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
+        data: {
+          password,
+          submit: () => {
+            EnterPasswordDialogRef.close()
+            callback()
+          },
+          cancel: () => {
+            EnterPasswordDialogRef.close()
+          }
+        },
+        props: {
+          header: '(OVERRIDE) Authorization Required!',
+          style: {
+            width: '26rem'
+          },
+          showHeader: true,
+          modal: true,
+        },
+        onClose: () => {
+          isOpenConfirmAdminPassword.value = false
+        }
+      })
+    }
+  }
+
+  const formatBytesToFileSize = (bytes: number) => {
+    const k = 1024;
+    const dm = 3;
+    const sizes = $primevue.config.locale?.fileSizeTypes || [];
+
+    if (bytes === 0) {
+      return `0 ${sizes[0]}`;
+    }
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+
+    return `${formattedSize} ${sizes[i]}`;
+  }
+
   const formatTimeNumberToString12H = (number: number):string => {
     const timeStr = number.toString().padStart(6, '0');
 
@@ -51,20 +192,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   }
 
-  const formatDateNumberToStringMONTHDDYYYY = (number: number):string => {
-    const dateStr: string = number.toString().padStart(8, '0');
-
-    const year: number = parseInt(dateStr.slice(0, 4), 10);
-    const month: number = parseInt(dateStr.slice(4, 6), 10) - 1;
-    const day: number = parseInt(dateStr.slice(6, 8), 10);
-
-    const date: Date = new Date(year, month, day);
-
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-
-    return date.toLocaleDateString('en-US', options);
-  }
-
   const formatDateNumberToStringYYYYMMDD = (number: number):string => {
     const dateStr = number.toString();
     const year = dateStr.slice(0, 4);
@@ -81,19 +208,25 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return `${month}/${day}/${year}`;
   }
 
-  const formatBytesToFileSize = (bytes: number) => {
-    const k = 1024;
-    const dm = 3;
-    const sizes = $primevue.config.locale?.fileSizeTypes || [];
+  const formatDateNumberToStringMONTHDDYYYY = (number: number):string => {
+    const dateStr: string = number.toString().padStart(8, '0');
 
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
-    }
+    const year: number = parseInt(dateStr.slice(0, 4), 10);
+    const month: number = parseInt(dateStr.slice(4, 6), 10) - 1;
+    const day: number = parseInt(dateStr.slice(6, 8), 10);
 
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+    const date: Date = new Date(year, month, day);
 
-    return `${formattedSize} ${sizes[i]}`;
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+
+    return date.toLocaleDateString('en-US', options);
+  }
+
+  const formatNumberToString2DecimalNumber = (num: number):string => {
+    if(num)
+      return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    else
+      return '0.00'
   }
 
   const convertDateObjToNumberYYYYMMDD = (date: Date):number => {
@@ -117,6 +250,22 @@ export const useUtilitiesStore = defineStore('utils', () => {
         minute: "numeric", // '10'
         second: "numeric", // '47'
         hour12: true       // 12-hour clock with AM/PM
+      };
+      return new Date(date).toLocaleString("en-US", options);
+    } catch (error) {
+      return ''
+    }
+  }
+
+  const convertDateObjToStringMONDDYYYY = (date: string):string => {
+    try {
+      if (!date) {
+        return ''
+      }
+      const options: Intl.DateTimeFormatOptions = {
+        month: "long",    // 'December'
+        day: "numeric",    // '14'
+        year: "numeric",   // '2024'
       };
       return new Date(date).toLocaleString("en-US", options);
     } catch (error) {
@@ -203,22 +352,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     }
   }
 
-  const convertDateObjToStringMONDDYYYY = (date: string):string => {
-    try {
-      if (!date) {
-        return ''
-      }
-      const options: Intl.DateTimeFormatOptions = {
-        month: "long",    // 'December'
-        day: "numeric",    // '14'
-        year: "numeric",   // '2024'
-      };
-      return new Date(date).toLocaleString("en-US", options);
-    } catch (error) {
-      return ''
-    }
-  }
-
   const convertDatesObjToDurationString = (start: string, end: string):string => {
     try {
       if (!start || !end) {
@@ -265,15 +398,26 @@ export const useUtilitiesStore = defineStore('utils', () => {
     return Math.round(num * 100) / 100
   }
 
-  const addLeadingZeroes = (num: number | string, length: number): string => {
-    return num.toString().trim().padStart(length, '0');
-  }
+  const convertSentenceStringToSplitSubString = (string: string, chunkSize: number) => {
+    const words = string.split(" ");
+    const results = [];
+    let currentLine = "";
 
-  const formatNumberToString2DecimalNumber = (num: number):string => {
-    if(num)
-      return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    else
-      return '0.00'
+    for (const word of words) {
+      if ((currentLine + (currentLine ? " " : "") + word).length <= chunkSize) {
+        // Add word to current line
+        currentLine += (currentLine ? " " : "") + word;
+      } else {
+        // Push current line and start a new one
+        if (currentLine) results.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    // Push the last line if it exists
+    if (currentLine) results.push(currentLine);
+
+    return results;
   }
 
   const convert2DecimalNumberAmountToAmountInWords = (num: number): string => {
@@ -323,157 +467,39 @@ export const useUtilitiesStore = defineStore('utils', () => {
       : `${pesoWords} Pesos And ${centavoText}/100 Only`;
   };
 
-  const isInvalidValue = (value: any): boolean => {
-    if (value === undefined) return true
-    if (value === null) return true
-    if (value === '') return true
-    if (value === 0) return true
-
-    return false
-  }
-
-  const startLoadingModal = (label: string): DynamicDialogInstance => {
-    const loadingDialogRef = dialog.open(LoadingModal, {
-      data: {
-        label
-      },
-      props: {
-        style: {
-          paddingTop: '1.5rem',
-        },
-        showHeader: false,
-        modal: true
-      }
-    })
-
-    return loadingDialogRef;
-  }
-
-  const handleAxiosError = (error: ExtendedAxiosError):void => {
-    if (error.response) {
-      const { status, data }: { status: number, data: { error: string, details: [], exception: string} } = error.response as any;
-      // console.error(`HTTP Status: ${status}`);
-      // console.error("Response Data:", data);
-
-      if (status === 401) {
-        toast.add({
-          severity: 'error',
-          summary: 'Session has expired.',
-          detail: 'Please login again.',
-          life: 5000
-        });
-        localStorage.removeItem('access')
-        localStorage.removeItem('refresh')
-        router.push('/login')
-      } else if (status === 500 && data?.exception) {
-        console.error('EXCEPTION: ', data.exception)
-      }
-
-      if (data?.error && data.error !== 'Invalid submission data!') {
-        // Custom error message from the server
-        console.error(`Server Error: ${data.error}`);
-        toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: data.error,
-          life: 5000
-        });
-      }
-
-      if (data?.details) {
-        console.error("Details:", data.details);
-        const details = Object.entries(data.details)
-
-        details.forEach((pair) => {
-          const key = pair[0] as string
-          const values = pair[1] as string[]
-
-          values.forEach((value) => {
-            toast.add({
-              severity: 'error',
-              summary: key !== 'non_field_errors' ? 'Invalid field: ' + key : 'Error',
-              detail: value,
-              life: 5000
-            });
-          })
-        })
-      }
-
-    } else if (error.request) {
-      toast.add({
-        severity: 'error',
-        summary: 'Exception',
-        detail: 'Server can\'t be reached.',
-        life: 5000
-      });
-    } else {
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error.message,
-        life: 5000
-      });
-    }
-  };
-
-  const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
-    if (!isOpenConfirmAdminPassword.value) {
-      isOpenConfirmAdminPassword.value = true
-      const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
-        data: {
-          password,
-          submit: () => {
-            EnterPasswordDialogRef.close()
-            callback()
-          },
-          cancel: () => {
-            EnterPasswordDialogRef.close()
-          }
-        },
-        props: {
-          header: '(OVERRIDE) Authorization Required!',
-          style: {
-            width: '26rem'
-          },
-          showHeader: true,
-          modal: true,
-        },
-        onClose: () => {
-          isOpenConfirmAdminPassword.value = false
-        }
-      })
-    }
-  }
-
   return {
-    formatTimeNumberToString12H,
-    formatTimeNumberToString24H,
-
-    formatDateNumberToStringMONTHDDYYYY,
-    convertDateObjToStringMMDDYY24H,
-    convertDateObjToStringMMDDYYYY24H,
-    convertDateObjToStringMMDDYYYY24HSS,
-    convertDateObjToStringMMDDYY12H,
-    formatDateNumberToStringYYYYMMDD,
-    formatDateNumberToStringMMDDYYYY,
-
-    formatBytesToFileSize,
-
-    convertDateObjToNumberYYYYMMDD,
-    convertDateObjToStringMONDDYYYY12H,
-    convertDateObjToStringMONDDYYYY,
-    convertDatesObjToDurationString,
-    convertNumberToRoundedNumber,
+    isInvalidValue,
 
     addLeadingZeroes,
-    formatNumberToString2DecimalNumber,
-    convert2DecimalNumberAmountToAmountInWords,
-
-    isInvalidValue,
 
     startLoadingModal,
 
     handleAxiosError,
     handleActionConfirmAdminPassword,
+
+    formatBytesToFileSize,
+
+    formatTimeNumberToString12H,
+    formatTimeNumberToString24H,
+    formatDateNumberToStringYYYYMMDD,
+    formatDateNumberToStringMMDDYYYY,
+    formatDateNumberToStringMONTHDDYYYY,
+
+    formatNumberToString2DecimalNumber,
+
+    convertDateObjToNumberYYYYMMDD,
+    convertDateObjToStringMONDDYYYY12H,
+    convertDateObjToStringMONDDYYYY,
+    convertDateObjToStringMMDDYY24H,
+    convertDateObjToStringMMDDYYYY24H,
+    convertDateObjToStringMMDDYYYY24HSS,
+    convertDateObjToStringMMDDYY12H,
+
+    convertDatesObjToDurationString,
+
+    convertNumberToRoundedNumber,
+
+    convertSentenceStringToSplitSubString,
+    convert2DecimalNumberAmountToAmountInWords,
   }
 })

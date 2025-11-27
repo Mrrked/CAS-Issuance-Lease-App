@@ -362,7 +362,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS\nORTIGAS CENTER PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-662-829-00002",
@@ -556,7 +556,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
@@ -960,7 +960,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS\nORTIGAS CENTER PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-662-829-00002",
@@ -1161,7 +1161,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",
@@ -1551,7 +1551,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITYLAND, INC.",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS ORTIGAS\nCENTER PASIG CITY 1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR\nROAD CORNER RUBY AND GARNET ROADS\nORTIGAS CENTER PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-662-829-00002",
@@ -1745,7 +1745,7 @@ export const useSampleStore = defineStore('sample', () => {
       runUsername: "CDJANE",
 
       companyName: "CITY & LAND DEVELOPERS, INCORPORATED",
-      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY\n1605",
+      companyAddress: "UNIT 105 GRAND EMERALD TOWER #6F ORTIGAS JR. RD\nCOR. RUBY & GARNET RDS. ORTIGAS CTR. PASIG CITY 1605",
       companyInitials: "CI",
       companyTelephone: "8687-3333",
       companyRegisteredTIN: "000-444-840-00002",

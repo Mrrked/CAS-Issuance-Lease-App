@@ -549,6 +549,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             REGTIN:         selectedCompanyHeader?.TIN || '',
             CADDR1:         selectedCompanyHeader?.ADDRESS1 || '',
             CADDR2:         selectedCompanyHeader?.ADDRESS2 || '',
+            CADDR3:         selectedCompanyHeader?.ADDRESS3 || '',
 
             // CLIENT INFO
             CLTNME:         bill.CLIENT_NAME || '',
@@ -771,7 +772,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
     return result
   }
 
-  const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord, isSample?: boolean): InvoicePDF => {
+  const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
+
+    const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
     // console.log(selectedInvoiceRecord);
 
     const company_logo = companyHeaderStore.getCompanyLogoByCompanyCode(selectedInvoiceRecord.DETAILS.COMPCD)
@@ -784,7 +787,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         runUsername: isSample ? 'CDJANE' : (selectedInvoiceRecord.DETAILS.RUNBY || 'N/A'),
 
         companyName: selectedInvoiceRecord.DETAILS.CONAME,
-        companyAddress: selectedInvoiceRecord.DETAILS.CADDR1 + '\n' + selectedInvoiceRecord.DETAILS.CADDR2,
+        companyAddress: selectedInvoiceRecord.DETAILS.CADDR1 + '\n' + selectedInvoiceRecord.DETAILS.CADDR2 + (selectedInvoiceRecord.DETAILS.CADDR3 ? '\n' + selectedInvoiceRecord.DETAILS.CADDR3 : ''),
         companyInitials: selectedInvoiceRecord.DETAILS.COINIT,
         companyTelephone: selectedInvoiceRecord.DETAILS.TELNO,
         companyRegisteredTIN: selectedInvoiceRecord.DETAILS.REGTIN,
@@ -2284,7 +2287,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     if (isMultiple && invoiceDate) {
-      const invoicePDFDataS: InvoicePDF[] = selectedInvoiceRecords.map((selectedInvoiceRecord) => convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecord, true))
+      const invoicePDFDataS: InvoicePDF[] = selectedInvoiceRecords.map((selectedInvoiceRecord) => convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecord))
       const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) => generateInvoicePDFBlob(invoicePDFData))
       const PDF_BLOB = await fileStore.mergePDFBlobs(PDF_BLOBS)
 
@@ -2301,9 +2304,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
       )
     } else if (!isMultiple) {
 
-      console.log(JSON.stringify(selectedInvoiceRecords));
+      // console.log(JSON.stringify(selectedInvoiceRecords));
 
-      const invoicePDFData = convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecords, true)
+      const invoicePDFData = convertInvoiceRecordsToInvoicePDFs(selectedInvoiceRecords)
       const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
 
       const name = selectedInvoiceRecords.INVOICE_KEY.INVOICE_NAME + ' INVOICE (DRAFT) - ' + selectedInvoiceRecords.INVOICE_KEY.INVOICE_NUMBER

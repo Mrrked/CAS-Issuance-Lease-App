@@ -634,6 +634,7 @@ export interface InvoiceDetails {
   REGTIN: string; // VAT REG TIN          (15 chars)
   CADDR1: string; // COMPANY ADDRESS #1   (80 chars)
   CADDR2: string; // COMPANY ADDRESS #2   (80 chars)
+  CADDR3: string; // COMPANY ADDRESS #3   (80 chars)
 
   // CLIENT INFO
   CLTNME: string; // CLIENT NAME          (35 chars)

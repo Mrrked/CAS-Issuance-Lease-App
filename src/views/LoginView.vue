@@ -93,9 +93,9 @@
                 name="username"
                 type="text"
                 v-model="username"
-                placeholder="ex. DEP_NAME"
+                placeholder="ex. SAJUANA"
                 minlength="4"
-                maxlength="8"
+                maxlength="10"
                 required
                 class="uppercase"
                 autocomplete="off"

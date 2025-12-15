@@ -510,8 +510,8 @@ export const usePrintingStore = defineStore('print', () => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             const currentDate = new Date()
-            const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
-            const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+            const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
+            const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
             const ORIGINAL_ISSUED_DOCUMENTS: InvoiceRecord[] = selectedHistoryOfIssuedDocument.value
               .map((selected) => {
@@ -570,8 +570,8 @@ export const usePrintingStore = defineStore('print', () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         const currentDate = new Date()
-        const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
-        const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+        const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
+        const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
         const FOR_UPDATE_CIRCLTPF: object[] = []
         const REPRINTED_ISSUED_DOCUMENTS: InvoiceRecord[] =

@@ -180,8 +180,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       ...invoice_records_data.value.map((INVOICE) => {
 
         const currentDate = new Date()
-        const stampDate = parseInt(currentDate.toISOString().slice(0, 10).replace(/-/g, ''))
-        const stampTime = parseInt(currentDate.toTimeString().slice(0, 8).replace(/:/g, ''))
+        const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
+        const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
         const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [1, 11])
 

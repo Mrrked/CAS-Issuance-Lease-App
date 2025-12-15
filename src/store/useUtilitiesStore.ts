@@ -21,6 +21,20 @@ export const useUtilitiesStore = defineStore('utils', () => {
 
   const isOpenConfirmAdminPassword = ref(false);
 
+  const getCurrentDateNumberYYYYMMDD = (today: Date): number => {
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return parseInt(`${year}${month}${day}`);
+  }
+
+  const getCurrentTimeNumberHHMMSS = (now: Date): number => {
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    return parseInt(`${hours}${minutes}${seconds}`);
+  }
+
   const isInvalidValue = (value: any): boolean => {
     if (value === undefined) return true
     if (value === null) return true
@@ -468,6 +482,9 @@ export const useUtilitiesStore = defineStore('utils', () => {
   };
 
   return {
+    getCurrentDateNumberYYYYMMDD,
+    getCurrentTimeNumberHHMMSS,
+
     isInvalidValue,
 
     addLeadingZeroes,

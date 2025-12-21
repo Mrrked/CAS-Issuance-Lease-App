@@ -14,7 +14,7 @@ import { useUtilitiesStore } from './useUtilitiesStore';
 
 const CheckDetailsModal = defineAsyncComponent(() => import('../components/Dialog/Printing/CheckDetailsModal.vue'));
 const HistoryOfPaymentsTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/HistoryOfPaymentsTableModal.vue'));
-const OfficialReceiptModal = defineAsyncComponent(() => import('../components/Dialog/Printing/OfficialReceiptModal.vue'));
+const InvoiceReceiptDetailsModal = defineAsyncComponent(() => import('../components/Dialog/Printing/InvoiceReceiptDetailsModal.vue'));
 const LeaseBillTypesTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/LeaseBillTypesTableModal.vue'));
 const RemarksTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/RemarksTableModal.vue'));
 
@@ -419,20 +419,20 @@ export const usePrintingStore = defineStore('print', () => {
   }
 
   const handleActionViewHistoryOfPayment = (selectedHistoryOfPayment: HistoryOfPayment) => {
-    const HistoryOfPaymentDialog = dialog.open(OfficialReceiptModal, {
+    const InvoiceReceiptDetailsDialog = dialog.open(InvoiceReceiptDetailsModal, {
       data: {
-        or_record: selectedHistoryOfPayment,
+        invoice_receipt: selectedHistoryOfPayment,
         submit: (selectedCheck: CheckDetails) => {
           handleActionViewSelectedCheckDetails(selectedCheck)
         },
         cancel: () => {
-          HistoryOfPaymentDialog.close()
+          InvoiceReceiptDetailsDialog.close()
         }
       },
       props: {
-        header: 'Official Receipt: ' + selectedHistoryOfPayment.OR_KEY,
+        header: (selectedHistoryOfPayment.DOCUMENT_TYPE || 'Old Official Receipt') + ' # ' + selectedHistoryOfPayment.OR_KEY,
         style: {
-          width: '45vw'
+          width: '47vw'
         },
         showHeader: true,
         modal: true,

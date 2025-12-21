@@ -581,14 +581,21 @@ export interface CheckDetails {
   DELCHK: string;        // DELETE CHECK (CHAR, 1)
 }
 
+export type IssuedDocumentType = 'Sales Invoice' | 'Service Invoice' | 'Billing Invoice' | 'Collection Receipt' | 'Acknowledgement Receipt' | 'Old Official Receipt'
+export type HistoryOfPaymentStatus = 'VALID' | 'DELETED' | 'CANCELLED' | 'RETURNED'
 export interface HistoryOfPayment extends ORRecord, ORRecord_Temporary {
   OR_KEY: string;
   OR_KEY_RAW: string;
   PBL_KEY: string;
   PBL_KEY_RAW: string;
-  recordRemarks: ORRemarks;
-  recordCheck: CheckDetails[];
+
+  STATUS: HistoryOfPaymentStatus;
+  DOCUMENT_TYPE: IssuedDocumentType
+
+  recordRemarks: ORRemarks | null;
+  recordChecks: CheckDetails[];
 }
+
 
 export interface InvoiceKey {
   RECTYP:   'IS' | 'BI'

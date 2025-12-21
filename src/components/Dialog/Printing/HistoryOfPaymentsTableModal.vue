@@ -21,6 +21,7 @@
 
   const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    DOCUMENT_TYPE: { value: null, matchMode: FilterMatchMode.CONTAINS },
     DATOR: { value: null, matchMode: FilterMatchMode.CONTAINS },
     DATVAL: { value: null, matchMode: FilterMatchMode.CONTAINS },
     OR_KEY: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -28,6 +29,7 @@
     ORAMT: { value: null, matchMode: FilterMatchMode.CONTAINS },
     PNALTY: { value: null, matchMode: FilterMatchMode.CONTAINS },
     DATCAN: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    STATUS: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
   const onRowSelect = (event: DataTableRowSelectEvent) => {
@@ -48,15 +50,15 @@
 
     v-model:filters="filters"
     :filterDisplay="'undefined'"
-    :globalFilterFields="['DATOR', 'DATVAL', 'OR_KEY', 'PAYTYP', 'ORAMT', 'PNALTY', 'DATCAN']"
+    :globalFilterFields="['DOCUMENT_TYPE','DATOR', 'DATVAL', 'OR_KEY', 'PAYTYP', 'ORAMT', 'PNALTY', 'DATCAN']"
 
     scrollable
     size="small"
     resizableColumns
 
     stripedRows
-    :rows="15"
-    :rowsPerPageOptions="[15, 30, 50]"
+    :rows="10"
+    :rowsPerPageOptions="[10, 30, 50]"
 
     paginator
     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
@@ -64,7 +66,39 @@
   >
     <template #empty> No history of payment found. </template>
 
-    <Column header="O.R. Date"
+    <Column header="Document Type"
+      field="DOCUMENT_TYPE"
+      sortable
+      filterField="DOCUMENT_TYPE"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Document Type'"
+        />
+      </template>
+    </Column>
+
+    <Column header="Invoice / Receipt #"
+      field="OR_KEY"
+      sortable
+      filterField="OR_KEY"
+    >
+      <template #filter="{ filterModel, filterCallback }">
+        <InputText
+          v-model="filterModel.value"
+          type="text"
+          size="small"
+          @input="filterCallback()"
+          :placeholder="'Search by Invoice / Receipt #'"
+        />
+      </template>
+    </Column>
+
+    <Column header="Date Issued"
       field="DATOR"
       sortable
       filterField="DATOR"
@@ -75,7 +109,7 @@
           type="text"
           size="small"
           @input="filterCallback()"
-          :placeholder="'Search by O.R. Date'"
+          :placeholder="'Search by Date Issued'"
         />
       </template>
       <template #body="{ data }">
@@ -99,22 +133,6 @@
       </template>
       <template #body="{ data }">
         {{ utilStore.formatDateNumberToStringYYYYMMDD(data.DATVAL) }}
-      </template>
-    </Column>
-
-    <Column header="O.R. Key"
-      field="OR_KEY"
-      sortable
-      filterField="OR_KEY"
-    >
-      <template #filter="{ filterModel, filterCallback }">
-        <InputText
-          v-model="filterModel.value"
-          type="text"
-          size="small"
-          @input="filterCallback()"
-          :placeholder="'Search by O.R. Key'"
-        />
       </template>
     </Column>
 
@@ -144,7 +162,7 @@
       </template>
     </Column>
 
-    <Column header="Total O.R. Amount"
+    <Column header="Total Amount"
       field="ORAMT"
       sortable
       filterField="ORAMT"
@@ -155,7 +173,7 @@
           type="text"
           size="small"
           @input="filterCallback()"
-          :placeholder="'Search by Total O.R. Amount'"
+          :placeholder="'Search by Total Amount'"
         />
       </template>
       <template #body="{ data }">
@@ -182,10 +200,10 @@
       </template>
     </Column>
 
-    <Column header="Cancelled Date"
-      field="DATCAN"
+    <Column header="Status"
+      field="STATUS"
       sortable
-      filterField="DATCAN"
+      filterField="STATUS"
     >
       <template #filter="{ filterModel, filterCallback }">
         <InputText
@@ -193,11 +211,17 @@
           type="text"
           size="small"
           @input="filterCallback()"
-          :placeholder="'Search by Cancelled Date'"
+          :placeholder="'Search by Status'"
         />
       </template>
       <template #body="{ data }">
-        {{ data.DATCAN ? utilStore.formatDateNumberToStringYYYYMMDD(data.DATCAN) : '-' }}
+        <svg v-if="data.STATUS === 'VALID'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="text-green-800 dark:text-green-400 size-6">
+          <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" />
+        </svg>
+        <Tag v-else-if="data.DATCAN"
+          :value="data.STATUS + (data.DATCAN ? ' - ' + utilStore.formatDateNumberToStringYYYYMMDD(data.DATCAN) : '')"
+          severity="danger"
+        />
       </template>
     </Column>
 

@@ -13,7 +13,6 @@ declare module 'vue' {
     ClientInquiry1: typeof import('./src/components/Reprint/InquiryForm/ClientInquiry1.vue')['default']
     Column: typeof import('primevue/column')['default']
     ConfirmDialog: typeof import('primevue/confirmdialog')['default']
-    DataTable: typeof import('primevue/datatable')['default']
     DatePicker: typeof import('primevue/datepicker')['default']
     Divider: typeof import('primevue/divider')['default']
     Drawer: typeof import('primevue/drawer')['default']
@@ -24,10 +23,8 @@ declare module 'vue' {
     ForgotPasswordModal: typeof import('./src/components/Dialog/ForgotPasswordModal.vue')['default']
     HistoryOfIssuedDocumentsDataTable: typeof import('./src/components/Reprint/HistoryOfIssuedDocumentsDataTable.vue')['default']
     HistoryOfPaymentsTableModal: typeof import('./src/components/Dialog/Printing/HistoryOfPaymentsTableModal.vue')['default']
-    IconField: typeof import('primevue/iconfield')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
-    InputIcon: typeof import('primevue/inputicon')['default']
     InputText: typeof import('primevue/inputtext')['default']
     InvoiceReceiptDetailsModal: typeof import('./src/components/Dialog/Printing/InvoiceReceiptDetailsModal.vue')['default']
     LeaseBillTypesTableModal: typeof import('./src/components/Dialog/Printing/LeaseBillTypesTableModal.vue')['default']
@@ -37,7 +34,6 @@ declare module 'vue' {
     NotFoundComponent: typeof import('./src/components/Core/NotFoundComponent.vue')['default']
     PartialUnitInquiry: typeof import('./src/components/Issuance/InquiryForm/PartialUnitInquiry.vue')['default']
     Popover: typeof import('primevue/popover')['default']
-    ProgressBar: typeof import('primevue/progressbar')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RemarksTableModal: typeof import('./src/components/Dialog/Printing/RemarksTableModal.vue')['default']
     ResetButton: typeof import('./src/components/Reprint/ResetButton.vue')['default']
@@ -72,6 +68,5 @@ declare module 'vue' {
   }
   export interface ComponentCustomProperties {
     FocusTrap: typeof import('primevue/focustrap')['default']
-    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

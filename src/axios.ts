@@ -2,6 +2,7 @@ import axios from 'axios';
 import router from './router';
 
 const apiBaseUrl = import.meta.env.VITE_SERVER_API_BASE_URL;
+const casProgramID = import.meta.env.VITE_CAS_PROGRAM_ID;
 
 const instance = axios.create({
   baseURL: apiBaseUrl,
@@ -19,6 +20,7 @@ instance.interceptors.request.use(
       return new Promise((resolve) => {
         addSubscriber((newToken: string | null) => {
           config.headers['Authorization'] = `Bearer ${newToken}`;
+          config.headers['ProgramID'] = `${casProgramID}`;
           resolve(config);
         });
       });
@@ -26,6 +28,7 @@ instance.interceptors.request.use(
 
     if (accessToken) {
       config.headers['Authorization'] = `Bearer ${accessToken}`;
+      config.headers['ProgramID'] = `${casProgramID}`;
     }
 
     return config;

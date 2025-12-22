@@ -432,7 +432,7 @@ export const usePrintingStore = defineStore('print', () => {
       props: {
         header: (selectedHistoryOfPayment.DOCUMENT_TYPE || 'Old Official Receipt') + ' # ' + selectedHistoryOfPayment.OR_KEY,
         style: {
-          width: '47vw'
+          width: '49vw'
         },
         showHeader: true,
         modal: true,

@@ -21,6 +21,7 @@ instance.interceptors.request.use(
         addSubscriber((newToken: string | null) => {
           config.headers['Authorization'] = `Bearer ${newToken}`;
           config.headers['ProgramID'] = `${casProgramID}`;
+          config.headers['ProgramName'] = `Invoice Issuance for Lease`;
           resolve(config);
         });
       });
@@ -29,6 +30,7 @@ instance.interceptors.request.use(
     if (accessToken) {
       config.headers['Authorization'] = `Bearer ${accessToken}`;
       config.headers['ProgramID'] = `${casProgramID}`;
+      config.headers['ProgramName'] = `Invoice Issuance for Lease`;
     }
 
     return config;

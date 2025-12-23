@@ -1,4 +1,4 @@
-import { defineAsyncComponent, ref } from 'vue';
+import { defineAsyncComponent } from 'vue';
 
 import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
 import { ExtendedAxiosError } from './types';
@@ -9,7 +9,6 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 
 const LoadingModal = defineAsyncComponent(() => import('../components/Dialog/General/LoadingModal.vue'));
-const EnterPasswordDialogModal = defineAsyncComponent(() => import('../components/Dialog/General/EnterPasswordDialogModal.vue'));
 
 export const useUtilitiesStore = defineStore('utils', () => {
 
@@ -18,8 +17,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
   const toast = useToast();
   const router = useRouter();
   const dialog = useDialog();
-
-  const isOpenConfirmAdminPassword = ref(false);
 
   const getCurrentDateNumberYYYYMMDD = (today: Date): number => {
     const year = today.getFullYear();
@@ -129,35 +126,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
         detail: error.message,
         life: 5000
       });
-    }
-  }
-
-  const handleActionConfirmAdminPassword = (password: string, callback: Function) => {
-    if (!isOpenConfirmAdminPassword.value) {
-      isOpenConfirmAdminPassword.value = true
-      const EnterPasswordDialogRef = dialog.open(EnterPasswordDialogModal, {
-        data: {
-          password,
-          submit: () => {
-            EnterPasswordDialogRef.close()
-            callback()
-          },
-          cancel: () => {
-            EnterPasswordDialogRef.close()
-          }
-        },
-        props: {
-          header: '(OVERRIDE) Authorization Required!',
-          style: {
-            width: '26rem'
-          },
-          showHeader: true,
-          modal: true,
-        },
-        onClose: () => {
-          isOpenConfirmAdminPassword.value = false
-        }
-      })
     }
   }
 
@@ -492,7 +460,6 @@ export const useUtilitiesStore = defineStore('utils', () => {
     startLoadingModal,
 
     handleAxiosError,
-    handleActionConfirmAdminPassword,
 
     formatBytesToFileSize,
 

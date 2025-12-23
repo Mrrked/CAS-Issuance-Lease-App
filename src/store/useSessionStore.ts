@@ -7,8 +7,10 @@ import { jwtDecode } from 'jwt-decode';
 import { useDialog } from 'primevue/usedialog';
 import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
+import { useUtilitiesStore } from './useUtilitiesStore';
 
 const SessionTimeoutModal = defineAsyncComponent(() => import('../components/Dialog/General/SessionTimeoutModal.vue'));
+const VerifyUserAuthorityModal = defineAsyncComponent(() => import('../components/Dialog/General/VerifyUserAuthorityModal.vue'));
 
 export const useSessionStore = defineStore('session', () => {
 
@@ -16,8 +18,11 @@ export const useSessionStore = defineStore('session', () => {
   const dialog = useDialog()
   const router = useRouter()
 
+  const utilStore = useUtilitiesStore()
+
   const currentDateTime = ref<Date>(new Date())
   const isSessionModalOpen = ref<boolean>(false)
+  const isOpenConfirmAdminPassword = ref<boolean>(false);
 
   const authenticatedUser = ref<User | null>(null)
 
@@ -67,6 +72,56 @@ export const useSessionStore = defineStore('session', () => {
   const resetStore = () => {
     localStorage.removeItem('access')
     localStorage.removeItem('refresh')
+  }
+
+  const handleActionVerifyUserAuthority = (PERMISSION_CODE: string, callback: Function) => {
+    if (!isOpenConfirmAdminPassword.value) {
+      isOpenConfirmAdminPassword.value = true
+      const VerifyUserAuthorityRef = dialog.open(VerifyUserAuthorityModal, {
+        data: {
+          submit: (username: string, password: string) => {
+            const loading = utilStore.startLoadingModal('Verifying credentials...')
+
+            const data = {
+              username: username,
+              password: password,
+              permission_code: PERMISSION_CODE
+            }
+
+            axios.post(`session/action_authorization/`, data)
+              .then((response) => {
+                VerifyUserAuthorityRef.close()
+                callback()
+                toast.add({
+                  severity: 'success',
+                  summary: 'Success',
+                  detail: response.data.message,
+                  life: 3000
+                });
+              })
+              .catch(utilStore.handleAxiosError)
+              .finally(() => {
+                loading.close()
+              })
+
+          },
+          cancel: () => {
+            VerifyUserAuthorityRef.close()
+          }
+        },
+        props: {
+          header: '(SPECIAL ACTION) Authorization Required!',
+          style: {
+            width: '30rem'
+          },
+          showHeader: true,
+          modal: true,
+        },
+        onClose: () => {
+          isOpenConfirmAdminPassword.value = false
+        }
+      })
+    }
   }
 
   onMounted(() => {
@@ -121,6 +176,8 @@ export const useSessionStore = defineStore('session', () => {
     getCurrentTime,
 
     fetchAuthenticatedUser,
+
+    handleActionVerifyUserAuthority,
 
     resetStore,
   }

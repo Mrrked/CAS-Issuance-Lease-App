@@ -10,12 +10,11 @@ import { useIssuanceStore } from './useIssuanceStore';
 import { useMainStore } from './useMainStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+import { useSessionStore } from './useSessionStore';
 
 const ResultIssuedInvoicesModal = defineAsyncComponent(() => import('../components/Dialog/General/ResultIssuedInvoicesModal.vue'));
 const SelectedBillsTableModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModal.vue'));
 const ViewScheduleBatchIssuanceModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/ViewScheduleBatchIssuanceModal.vue'));
-
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
@@ -26,6 +25,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const fileStore = useFileStore()
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
+  const sessionStore = useSessionStore()
   const issuanceStore = useIssuanceStore()
 
   const perBatchRunForm = ref<PerBatchRunForm>({
@@ -354,7 +354,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   }
 
   const handleActionAdminBatchIssuance = () => {
-    utilStore.handleActionConfirmAdminPassword(ADMIN_PASSWORD, () => {
+    sessionStore.handleActionVerifyUserAuthority("GENERAL_OVERRIDE", () => {
       issuanceStore.handleActionSearch(2)
     })
   }

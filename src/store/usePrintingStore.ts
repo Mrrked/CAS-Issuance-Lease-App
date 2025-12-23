@@ -18,8 +18,6 @@ const InvoiceReceiptDetailsModal = defineAsyncComponent(() => import('../compone
 const LeaseBillTypesTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/LeaseBillTypesTableModal.vue'));
 const RemarksTableModal = defineAsyncComponent(() => import('../components/Dialog/Printing/RemarksTableModal.vue'));
 
-const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
-
 export const usePrintingStore = defineStore('print', () => {
 
   interface ClientUnit extends Client, Unit {
@@ -491,7 +489,7 @@ export const usePrintingStore = defineStore('print', () => {
 
   const handleActionPrintOriginal = () => {
     if (selectedHistoryOfIssuedDocument.value.length > 0) {
-      utilStore.handleActionConfirmAdminPassword(ADMIN_PASSWORD, () => {
+      sessionStore.handleActionVerifyUserAuthority("GENERAL_OVERRIDE", () => {
         confirm.require({
           message: 'Are you sure you want to print the selected document(s)?',
           header: 'Confirm Printing of Selected Documents',

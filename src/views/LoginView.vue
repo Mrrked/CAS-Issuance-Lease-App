@@ -119,6 +119,7 @@
                 autocomplete="off"
                 aria-autocomplete="none"
                 size="small"
+                class="uppercase"
               />
             </div>
             <Button

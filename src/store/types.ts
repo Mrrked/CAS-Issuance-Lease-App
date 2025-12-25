@@ -926,6 +926,8 @@ export interface COMPANY_HEADER_DETAIL {
   CONAME: string;
   TIN_BASE: string;
   VARIANTS: Record<number, VariantInfo>;
+  ACN:        string
+  DATE_ISSUED:string
 }
 
 export interface MINOR_COMPANY_HEADER_DETAIL {
@@ -939,6 +941,8 @@ export interface MINOR_COMPANY_HEADER_DETAIL {
   ADDRESS2:    string
   ADDRESS3:    string
   BRANCH_NAME: string
+  ACN:         string
+  DATE_ISSUED: string
 }
 
 export interface COMPANY_LOGO {

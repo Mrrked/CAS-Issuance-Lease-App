@@ -570,8 +570,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
             // FOOTER
             AUTHSG:         sessionStore.authenticatedUser?.user.full_name.toUpperCase() || '',
-            ACNUM:          bill.ACNUM,
-            ACDAT:          bill.ACDAT,
+            ACNUM:          selectedCompanyHeader?.ACN || bill.ACDAT,
+            ACDAT:          selectedCompanyHeader?.DATE_ISSUED || bill.ACDAT,
             STRRNG:         bill.INVOICE_KEY.SERIES_RANGE,
 
             // TRACKING
@@ -839,8 +839,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
       },
       footer: {
-        // acknowledgementCertificateNumber: selectedInvoiceRecord.DETAILS.ACNUM,
-        acknowledgementCertificateNumber: 'Acknowledgement Certificate Number : xxxxxxxxxxxxxxx',
+        acknowledgementCertificateNumber: selectedInvoiceRecord.DETAILS.ACNUM,
         dateIssued: selectedInvoiceRecord.DETAILS.ACDAT,
         approvedSeriesRange: selectedInvoiceRecord.DETAILS.STRRNG,
       },

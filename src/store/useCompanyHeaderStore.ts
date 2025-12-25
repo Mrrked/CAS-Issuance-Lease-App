@@ -99,7 +99,9 @@ export const useCompanyHeaderStore = defineStore('companyHeader', () => {
       ADDRESS1: appropriate_branch.ADDRESS1,
       ADDRESS2: appropriate_branch.ADDRESS2,
       ADDRESS3: appropriate_branch.ADDRESS3,
-      BRANCH_NAME: appropriate_branch.NAME
+      BRANCH_NAME: appropriate_branch.NAME,
+      ACN: appropriate_company.ACN,
+      DATE_ISSUED: appropriate_company.DATE_ISSUED
     };
   }
 

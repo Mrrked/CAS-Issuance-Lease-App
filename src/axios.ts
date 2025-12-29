@@ -29,9 +29,9 @@ instance.interceptors.request.use(
 
     if (accessToken) {
       config.headers['Authorization'] = `Bearer ${accessToken}`;
-      config.headers['ProgramID'] = `${casProgramID}`;
-      config.headers['ProgramName'] = `Invoice Issuance for Lease`;
     }
+    config.headers['ProgramID'] = `${casProgramID}`;
+    config.headers['ProgramName'] = `Invoice Issuance for Lease`;
 
     return config;
   },

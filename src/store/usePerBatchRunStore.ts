@@ -8,9 +8,9 @@ import { useDialog } from 'primevue/usedialog';
 import { useFileStore } from './useFileStore';
 import { useIssuanceStore } from './useIssuanceStore';
 import { useMainStore } from './useMainStore';
+import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
-import { useSessionStore } from './useSessionStore';
 
 const ResultIssuedInvoicesModal = defineAsyncComponent(() => import('../components/Dialog/General/ResultIssuedInvoicesModal.vue'));
 const SelectedBillsTableModal = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModal.vue'));
@@ -229,7 +229,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     const data = {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),
       month: perBatchRunForm.value.invoiceDate.getMonth() + 1,
-      type: 'BATCH',
+      day: perBatchRunForm.value.invoiceDate.getDate(),
+      type: 'Batch',
       invoices: SELECTED_INVOICES as InvoiceRecord[],
     }
 

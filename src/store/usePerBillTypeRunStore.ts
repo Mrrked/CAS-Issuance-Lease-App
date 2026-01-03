@@ -183,10 +183,22 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
     // console.log("FOR ISSUANCE", SELECTED_INVOICES);
 
+    var type = ''
+
+    const billType = BILL_TYPE_OPTIONS.find(type => type.value === perBillTypeRunForm.value.billType)
+    if (billType && billType.value !== 'A') {
+      type = `Bill Group ${billType.name} for ${perBillTypeRunForm.value.projectCode?.PROJCD}`
+    } else if (billType && billType.value === 'A'){
+      const form = perBillTypeRunForm.value.PBL
+      const pbl = `${perBillTypeRunForm.value.projectCode?.PROJCD || '   '}${form.pcs_code['1'] || ' '}${form.phase['1'] || ' '}${form.block['1'] || ' '}${form.block['2'] || ' '}${form.lot['1'] || ' '}${form.lot['2'] || ' '}${form.lot['3'] || ' '}${form.lot['4'] || ' '}${form.unit_code['1'] || ' '}${form.unit_code['2'] || ' '}`.toUpperCase()
+      type = `Bill Group ${billType.name} for ${pbl}`
+    }
+
     const data = {
       year: perBillTypeRunForm.value.invoiceDate.getFullYear(),
       month: perBillTypeRunForm.value.invoiceDate.getMonth() + 1,
-      type: 'BILL GROUP ' + perBillTypeRunForm.value.billType,
+      day: perBillTypeRunForm.value.invoiceDate.getDate(),
+      type: type,
       invoices: SELECTED_INVOICES as InvoiceRecord[],
     }
 

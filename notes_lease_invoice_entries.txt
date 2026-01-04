@@ -1,0 +1,178 @@
+NOTES:
+    - PRJ is the project code
+    - 3 files are going to be affected:
+        GFL1PF, GFL2PF, GPARPF
+
+---------------------------------------------------------
+    FOR GFL2PF
+
+    note:
+        for first record, set PRNTCD to 'P'
+---------------------------------------------------------
+
+FOR ELECTRICITY BILLING:
+
+    * for unit O25  L  W-01:
+        - entry:
+            ACCTCD = '1028O250030000'
+            DEBIT = 53 + 54
+            CREDIT = 0
+
+        - entry:
+            ACCTCD = '1028O250030001'
+            DEBIT = 55
+            CREDIT = 0
+
+    * other units:
+        - entry:
+            ACCTCD = '1028PRJ0009001'
+            DEBIT = 53 + 54
+            CREDIT = 0
+
+        - entry:
+            ACCTCD = '1028PRJ0009002'
+            DEBIT = 55
+            CREDIT = 0
+
+    - entry:
+        ACCTCD = '2001PRJ0000011'
+        DEBIT = 0
+        CREDIT = 54 + penalty vat
+
+    - entry:
+        ACCTCD = '6012PRJ0000028'
+        DEBIT = 0
+        CREDIT = 53
+
+    - entry:
+        ACCTCD = '6012PRJ0000029'
+        DEBIT = 0
+        CREDIT = 55
+
+    * IF WITH PENALTY:
+        - entry:
+            ACCTCD = '1028PRJ0009005'
+            DEBIT = 51
+            CREDIT = 0
+
+        - entry:
+            ACCTCD = '6010PRJ0000005'
+            DEBIT = 0
+            CREDIT = penalty net of vat
+
+-----
+
+FOR WATER BILLING:
+
+    * for unit O25  L  W-01:
+
+        - if 63 > 0 then
+            - entry:
+                ACCTCD = '1028O250010001'
+                DEBIT = 63 + 64
+                CREDIT = 0
+
+            - entry:
+                ACCTCD = '6012O250000030'
+                DEBIT = 0
+                CREDIT = 63
+
+    - entry:
+        ACCTCD = '1028PRJ0010002'
+        DEBIT = 65
+        CREDIT = 0
+
+    - entry:
+        ACCTCD = '6012PRJ0000031'
+        DEBIT = 0
+        CREDIT = 65
+
+    - if 64 > 0 or 61 > 0 then
+        - entry:
+            ACCTCD = '2001PRJ0000012'
+            DEBIT = 0
+            CREDIT = 64 + penalty vat
+
+    - if 66 > 0 then
+        - entry:
+            ACCTCD = '1028PRJ0010003'
+            DEBIT = 66
+            CREDIT = 0
+
+        - entry:
+            ACCTCD = '6012PRJ0000033'
+            DEBIT = 0
+            CREDIT = 66
+
+    * IF WITH PENALTY:
+        - entry:
+            ACCTCD = '1028PRJ0010005'
+            DEBIT = 61
+            CREDIT = 0
+
+        - entry:
+            ACCTCD = '6012PRJ0000006'
+            DEBIT = 0
+            CREDIT = penalty net of vat
+
+-----
+
+FOR BTYPE 84:
+
+    - entry:
+        ACCTCD = '1028PRJ0013000'
+        DEBIT = invoice amount
+        CREDIT = 0
+    
+    - entry:
+        ACCTCD = '6012PRJ0000007'
+        DEBIT = 0
+        CREDIT = net of vat
+
+    - entry:
+        ACCTCD = '2001PRJ0000002'
+        DEBIT = 0
+        CREDIT = vat amount
+
+---------------------------------------------------------
+    FOR GPARPF
+---------------------------------------------------------
+first particular:
+    for rental and no cusa:
+        'RENTAL AND PEN BILLING ' || PRJ
+    for rental with cusa:
+        'RENTAL, CUSA, AND PEN BILLING ' || PRJ 
+    for electricity:
+        'ELEC AND PEN BILLING ' || PRJ
+    for water:
+        'WATER AND PEN BILLING ' || PRJ
+    for btype 84:
+        'OTHERS BILLING ' || PRJ
+
+second particular:
+    client name - trim to 35 chars
+
+third particular:
+    client key || '/' || pbl key || '/' || temp client number
+
+fourth particular:
+    'NOTICE NO. ' || notice number
+
+---------------------------------------------------------
+    FOR GFL1PF
+---------------------------------------------------------
+    NOACCT = number of entries saved in GFL2PF
+    DATTRN = invoice date
+    DATECR = DATTRN
+    PAYCOD = '8888' for BILLING GROUP, '9999' for batch invoice
+    PAYEE = 'N.A.' for BILLING GROUP,
+        client key || '/' || pbl key || '/' || temp client number for batch invoice
+    PARCLR = get the first word of bill type description || ' BILL ' ||
+        9 characters of client name ||
+        'MM/DD - MM/DD/YY' of billing period
+        (sample WATER BILL UNIONBANK 10/02-11/03/25)
+    PARTNO = total count of particulars saved in GPARPF
+    ORCOD = invoice code
+    ORNUM = invoice number
+
+    other fields are blank or zero

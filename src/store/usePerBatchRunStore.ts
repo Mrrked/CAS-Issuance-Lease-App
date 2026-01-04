@@ -185,6 +185,30 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
         const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [1, 11])
 
+        var entry = undefined
+        // const invoice_date = INVOICE.CORFPF.DATVAL
+
+        // if (entry) {
+        //   entry = {
+        //     ...entry,
+        //     GFL1PF: {
+        //       ...entry.GFL1PF,
+        //         DATTRN: invoice_date,
+        //         DATECR: invoice_date,
+        //         PAYCOD: '9999',
+        //         PAYEE: INVOICE.DETAILS.CLTKEY + '/' +
+        //           INVOICE.PBL_KEY + '/' +
+        //           INVOICE.TCLTNO
+        //     },
+        //     GFL2PF: entry.GFL2PF.map((acc_entry) => {
+        //       return {
+        //         ...acc_entry,
+        //         DATTRN: invoice_date
+        //       }
+        //     })
+        //   }
+        // }
+
         return {
           ...INVOICE,
           DETAILS: {
@@ -220,6 +244,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 TIMENT: stampTime,
               }
             }),
+          ENTRY: entry
         }
       })
     ]

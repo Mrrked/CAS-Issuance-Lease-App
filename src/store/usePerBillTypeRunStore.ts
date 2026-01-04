@@ -142,6 +142,28 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
         const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [1, 11])
 
+        var entry = INVOICE.ENTRY || undefined
+        const invoice_date = INVOICE.CORFPF.DATVAL
+
+        if (entry) {
+          entry = {
+            ...entry,
+            GFL1PF: {
+              ...entry.GFL1PF,
+                DATTRN: invoice_date,
+                DATECR: invoice_date,
+                PAYCOD: '8888',
+                PAYEE:  'N.A.',
+            },
+            GFL2PF: entry.GFL2PF.map((acc_entry) => {
+              return {
+                ...acc_entry,
+                DATTRN: invoice_date
+              }
+            })
+          }
+        }
+
         return {
           ...INVOICE,
           DETAILS: {
@@ -177,6 +199,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
                 TIMENT: stampTime,
               }
             }),
+          ENTRY: entry
         }
       })
     ]

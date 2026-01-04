@@ -431,6 +431,8 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   ACNUM: string
   ACDAT: string
 
+  NOTICE_NUMBER: string
+
   INVOICE_KEY: InvoiceKey
 
   IS_VATABLE: boolean
@@ -733,6 +735,7 @@ export interface InvoiceRecord {
   PBL_KEY: string
   TCLTNO: number
   CLIENT_KEY_RAW?: string
+  NOTICE_NUMBER: string
 
   BILLINGS: LeaseBill[]
 
@@ -752,7 +755,82 @@ export interface InvoiceRecord {
   CORTPF: CORTPF
   CRMKPF: CRMKPF
   CORF4PF: CORF4PF[]
+
+  // ENTRIES
+  ENTRY?: ACCOUNTING_ENTRIES
 }
+
+export interface ACCOUNTING_ENTRIES {
+  GFL1PF: GFL1PF
+  GFL2PF: GFL2PF[]
+  GPARPF: GPARPF[]
+}
+
+export interface GFL1PF { //ACCOUNTING FILE 1 (MAIN VOUCHER RECORD)
+  VTYPE: string
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+  YY: number
+  MM: number
+  VRCOD: string
+  'VOUCH#': number
+  // ---------------------
+  NOACCT: number
+  DATTRN: number //value date, max 1 month advance
+  DATECR: number //creation date
+  PAYCOD: string
+  PAYEE: string
+  PARCLR: string
+  AMPAID: number
+  BALNCE: number
+  CONTNO: number
+  PARTNO: number
+  BRNHCD: number
+  'PN#': number
+  FAO: string
+  FAOCOD: number
+  VSCODE: string
+  ORCOD: string
+  ORNUM: number
+}
+
+export interface GFL2PF { //ACCOUNTING FILE 2 (ACCOUNTING ENTRIES ARRAY)
+  VTYPE: string
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+  YY: number
+  MM: number
+  VRCOD: string
+  'VOUCH#': number
+  // ---------------------
+  'ACCT#': number
+  ACCTCD: string
+  DEBIT: number
+  CREDIT: number
+  CHKNUM: number
+  PRNTCD: string
+  MCCODE: string
+  DATTRN: number
+  ORCOD: string
+  ORNUM: number
+}
+
+export interface GPARPF { //PARTICULARS FILE (PARTICULARS ARRAY)
+  VTYPE: string
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+  YY: number
+  MM: number
+  VRCOD: string
+  'VOUCH#': number
+  // ---------------------
+  PARTNO: number
+  PARCLR: string
+}
+
 
 export interface INVOICE_PER_COMPANY_AND_PROJECT {
   COMPCD: number

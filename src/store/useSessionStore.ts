@@ -10,8 +10,8 @@ import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
 const GROUP_A_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
-const GROUP_B_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
-const GROUP_C_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
+const GROUP_B_USERNAMES: string[] = import.meta.env.VITE_GROUP_B_USERNAMES.split(',')
+const GROUP_C_USERNAMES: string[] = import.meta.env.VITE_GROUP_C_USERNAMES.split(',')
 
 const SessionTimeoutModal = defineAsyncComponent(() => import('../components/Dialog/General/SessionTimeoutModal.vue'));
 const VerifyUserAuthorityModal = defineAsyncComponent(() => import('../components/Dialog/General/VerifyUserAuthorityModal.vue'));

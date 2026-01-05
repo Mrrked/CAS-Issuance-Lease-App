@@ -3,7 +3,7 @@
   import { usePerBatchRunStore } from '../../store/usePerBatchRunStore';
   import { useIssuanceStore } from '../../store/useIssuanceStore';
   import { useMainStore } from '../../store/useMainStore';
-  import { defineAsyncComponent, onMounted, ref } from 'vue'
+  import { defineAsyncComponent, onMounted, ref, watch } from 'vue'
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
   import { useSessionStore } from '../../store/useSessionStore';
 
@@ -18,13 +18,33 @@
   const ALLOW_ADVANCE_BATCH = import.meta.env.VITE_ALLOW_ADVANCE_BATCH || 'FALSE';
   const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
 
-  const selectedTab = ref<'A'|'B'|'C'>('A')
+  const selectedTab = ref<'A'|'B'|'C'|''>('')
 
   const sessionStore = useSessionStore()
 
   onMounted(() => {
     mainStore.fetchAllData()
   })
+
+  watch(
+    () => sessionStore.authenticatedUser?.username,
+    () => {
+      console.log(sessionStore.authenticatedUser?.username);
+      console.log(sessionStore.userHasPermissionForTabA);
+      console.log(sessionStore.userHasPermissionForTabB);
+      console.log(sessionStore.userHasPermissionForTabC);
+      if (sessionStore.userHasPermissionForTabA) {
+        selectedTab.value = 'A'
+      } else if (sessionStore.userHasPermissionForTabB) {
+        selectedTab.value = 'B'
+      } else if (sessionStore.userHasPermissionForTabC) {
+        selectedTab.value = 'C'
+      } else {
+        selectedTab.value = ''
+      }
+    },
+    { immediate: true }
+  )
 </script>
 
 <template>
@@ -205,7 +225,7 @@
       </Fieldset>
     </div>
 
-    <!-- PER BILL TYPE RUNNING - UTILITIES -->
+    <!-- OK PER BILL TYPE RUNNING - UTILITIES -->
     <div v-else-if="selectedTab === 'C'" class="flex flex-col items-center justify-start">
       <Fieldset legend="Bill Type Group Running" class="min-w-[700px] max-w-[700px]">
         <div v-focustrap class="flex flex-col gap-2">

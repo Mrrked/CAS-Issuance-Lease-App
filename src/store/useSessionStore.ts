@@ -9,6 +9,10 @@ import { useRouter } from 'vue-router';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
+const GROUP_A_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
+const GROUP_B_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
+const GROUP_C_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
+
 const SessionTimeoutModal = defineAsyncComponent(() => import('../components/Dialog/General/SessionTimeoutModal.vue'));
 const VerifyUserAuthorityModal = defineAsyncComponent(() => import('../components/Dialog/General/VerifyUserAuthorityModal.vue'));
 
@@ -41,6 +45,24 @@ export const useSessionStore = defineStore('session', () => {
       hour12: true
     };
     return currentDateTime.value.toLocaleString("en-US", TimeOptions);
+  })
+
+  // TAB 1 = Batch Long Term Lease Rental Cusa and VIP
+  const userHasPermissionForTabA = computed((): boolean => {
+    if (authenticatedUser.value?.username) return GROUP_A_USERNAMES.includes(authenticatedUser.value.username)
+    return false
+  })
+
+  // TAB 2 = Batch Short Term Lease Rental Cusa
+  const userHasPermissionForTabB = computed((): boolean => {
+    if (authenticatedUser.value?.username) return GROUP_B_USERNAMES.some((u) => u === authenticatedUser.value?.username)
+    return false
+  })
+
+  // TAB 3 = Billing Group Water and Elec / Genset
+  const userHasPermissionForTabC = computed((): boolean => {
+    if (authenticatedUser.value?.username) return GROUP_C_USERNAMES.includes(authenticatedUser.value.username)
+    return false
   })
 
   const fetchAuthenticatedUser = () => {
@@ -174,6 +196,10 @@ export const useSessionStore = defineStore('session', () => {
 
     getCurrentDate,
     getCurrentTime,
+
+    userHasPermissionForTabA,
+    userHasPermissionForTabB,
+    userHasPermissionForTabC,
 
     fetchAuthenticatedUser,
 

@@ -115,9 +115,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
   const getNOMOS = (invoiceRecord: InvoiceRecord, billTypes: number[]) => {
     const billings = invoiceRecord.BILLINGS
+    const uniqueBillings = Array.from(
+      new Map(
+        billings.map(b => [`${b.YYYYMM}-${b.MBTYPE}`, b])
+      ).values()
+    )
+
     var max = 0
     billTypes.forEach(billType => {
-      const count = billings.filter((bill) => bill.BILL_TYPE === billType)?.length || 0
+      const count = uniqueBillings.filter((bill) => bill.BILL_TYPE === billType)?.length || 0
       if (count > max) {
         max = count
       }
@@ -207,14 +213,14 @@ export const useIssuanceStore = defineStore('issuance', () => {
     };
 
     return `${formatDate(FRDATE)}-${formatDate(TODATE, true)}`;
-  };
+  }
 
   const generateAccountingEntry = (invoiceRecord: InvoiceRecord): ACCOUNTING_ENTRIES | undefined => {
     const RENTAL_CUSA_BT = [1, 4, 11, 41]
     const ELEC_GENSET_BT = [5, 7, 51, 71]
 
-    // const RENTAL_BT = [1]
-    // const CUSA_BT   = [4]
+    const RENTAL_PEN_BT = [1, 11]
+    const CUSA_PEN_BT   = [4, 41]
     // const ELEC_BT   = [5, 51]
     // const GENSET_BT = [7, 71]
     const WATER_BT  = [6, 61]
@@ -224,13 +230,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
     var GFL2PF: GFL2PF[] = []
     var MAIN_PAR = ''
 
-    // console.log(invoiceRecord);
+    console.log(invoiceRecord);
 
     // RENTAL AND CUSA
     if (invoiceRecord.BILLINGS.some((bill) => RENTAL_CUSA_BT.includes(bill.BILL_TYPE))) {
-      return undefined
 
-      const hasCUSA = invoiceRecord.BILLINGS.some((bill) => CUSA_BT.includes(bill.BILL_TYPE))
+      const hasCUSA = invoiceRecord.BILLINGS.some((bill) => CUSA_PEN_BT.includes(bill.BILL_TYPE))
 
       // PARTICULARS
       GPARPF  = [
@@ -251,6 +256,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       // MAIN PARTICULAR
       MAIN_PAR = 'RENT'
+
+      // ENTRIES (51,53,54,55)
+      const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+      // 1
+      var ELEC_VAT_SALES_SP_DEBIT = 0
+      var ELEC_VAT_SALES_DEBIT = 0
+      var ELEC_VAT_SALES_CREDIT = 0
+      // 4
+      var ELEC_VAT_CREDIT = 0
     }
 
     // ELECTRICITY AND GENSET
@@ -857,6 +871,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
             invoiceRecord.PBL_KEY + '/' +
             invoiceRecord.TCLTNO
         },
+    ]
+
+    if (invoiceRecord.NOTICE_NUMBER) {
+      GPARPF = [
+        ...GPARPF,
         {
           VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
           COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
@@ -870,7 +889,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
           PARCLR: 'NOTICE NO. ' +
             invoiceRecord.NOTICE_NUMBER
         },
-    ]
+      ]
+    }
 
     // MAIN PARTICULAR
     const earliestFRDATE = invoiceRecord.BILLINGS.reduce(
@@ -3161,7 +3181,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
               perBatchRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER || 'None');
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
               })
             })
             .catch(utilStore.handleAxiosError)
@@ -3208,7 +3228,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
               perBatchRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER || 'None');
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
               })
             })
             .catch(utilStore.handleAxiosError)
@@ -3255,7 +3275,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBillTypeRunStore.billings = response.data.data as LeaseBill[];
               perBillTypeRunStore.handleActionViewMainDialog()
               perBillTypeRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER || 'None');
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
               })
             })
             .catch(utilStore.handleAxiosError)

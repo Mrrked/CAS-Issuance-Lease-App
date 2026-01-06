@@ -213,8 +213,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
     const RENTAL_CUSA_BT = [1, 4, 11, 41]
     const ELEC_GENSET_BT = [5, 7, 51, 71]
 
-    // const RENTAL_BT = [1, 11]
-    const CUSA_BT   = [4, 41]
+    // const RENTAL_BT = [1]
+    // const CUSA_BT   = [4]
     // const ELEC_BT   = [5, 51]
     // const GENSET_BT = [7, 71]
     const WATER_BT  = [6, 61]

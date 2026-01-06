@@ -1,0 +1,94 @@
+NOTES:
+    - PRJ is the project code
+    - 3 files are going to be affected:
+        GFL1PF, GFL2PF, GPARPF
+
+---------------------------------------------------------
+    FOR GFL2PF
+
+    note:
+        for first record, set PRNTCD to 'P'
+---------------------------------------------------------
+FOR RENTAL:
+    if unit SALTYP in LEASEPF is VAT:
+        ACCTCD = 1028PRJ0000006
+        DEBIT = gross rental amount
+        CREDIT = 0
+
+    if unit SALTYP in LEASEPF is NVAT:
+        ACCTCD = 1028PRJ0000007
+        DEBIT = gross rental amount
+        CREDIT = 0
+
+    if unit SALTYP in LEASEPF is ZERO:
+        ACCTCD = 1028PRJ0000008
+        DEBIT = gross rental amount
+        CREDIT = 0
+
+    ACCTCD = 4006PRJ0000000
+    DEBIT = 0
+    CREDIT = gross rental amount - vat
+
+    if with vat:
+        ACCTCD = 2001PRJ0000001
+        DEBIT = 0
+        CREDIT = vat amount
+
+FOR CUSA:
+    if unit SALTYP in LEASEPF is VAT:
+        ACCTCD = 1028PRJ0000003
+        DEBIT = gross cusa amount
+        CREDIT = 0
+
+    if unit SALTYP in LEASEPF is ZERO:
+        ACCTCD = 1028PRJ0000004
+        DEBIT = gross cusa amount
+        CREDIT = 0
+
+    ACCTCD = 6012PRJ0000010
+    DEBIT = 0
+    CREDIT = gross cusa amount - vat
+
+    if with vat:
+        ACCTCD = 2011PRJ0000015
+        DEBIT = 0
+        CREDIT = vat amount    
+
+
+---------------------------------------------------------
+    FOR GPARPF
+---------------------------------------------------------
+first particular:
+    for rental and no cusa:
+        'RENTAL AND PEN BILLING ' || PRJ
+    for rental with cusa:
+        'RENTAL, CUSA, AND PEN BILLING ' || PRJ 
+
+second particular:
+    client name - trim to 35 chars
+
+third particular:
+    client key || '/' || pbl key || '/' || temp client number
+
+fourth particular - if notice number exists:
+    'NOTICE NO. ' || notice number
+
+
+---------------------------------------------------------
+    FOR GFL1PF
+---------------------------------------------------------
+    NOACCT = number of entries saved in GFL2PF
+    DATTRN = invoice date
+    DATECR = DATTRN
+    PAYCOD = '8888' for BILLING GROUP, '9999' for batch invoice
+    PAYEE = 'N.A.' for BILLING GROUP,
+        client key || '/' || pbl key || '/' || temp client number for batch invoice
+    PARCLR = get the first word of bill type description || ' BILL ' ||
+        9 chracters of client name ||
+        'MM/DD - MM/DD/YY' of billing period
+        (sample WATER BILL UNIONBANK 10/02-11/03/25)
+    PARTNO = total count of particulars saved in GPARPF
+    ORCOD = invoice code
+    ORNUM = invoice number
+
+    other fields are blank or zero

@@ -126,7 +126,7 @@
                 placeholder="Select..."
               ></Select>
             </InputGroup>
-            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
+            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" type="A"/>
             <InputGroup v-else>
               <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
                 <label for="project_code" class="font-bold w-28">
@@ -254,7 +254,7 @@
                 placeholder="Select..."
               ></Select>
             </InputGroup>
-            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
+            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" type="B" />
             <InputGroup v-else>
               <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
                 <label for="project_code" class="font-bold w-28">

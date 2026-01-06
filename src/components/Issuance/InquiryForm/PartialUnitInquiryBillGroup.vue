@@ -107,7 +107,7 @@
 
 
 <template>
-  <form @submit.prevent="issuanceStore.handleActionSearch(1)" class="flex flex-col gap-5">
+  <form @submit.prevent="issuanceStore.handleActionSearch('A')" class="flex flex-col gap-5">
     <InputGroup>
       <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
         <label for="project_code" class="font-bold">

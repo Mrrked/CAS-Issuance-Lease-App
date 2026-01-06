@@ -4,6 +4,12 @@
   import { useIssuanceStore } from "../../../store/useIssuanceStore";
   import { usePerBatchRunStore } from "../../../store/usePerBatchRunStore";
 
+  interface Props {
+    type: 'A' | 'B' | 'C'
+  }
+
+  const props = defineProps<Props>();
+
   const mainStore = useMainStore()
   const issuanceStore = useIssuanceStore()
   const perBatchRunStore = usePerBatchRunStore()
@@ -107,7 +113,7 @@
 
 
 <template>
-  <form @submit.prevent="issuanceStore.handleActionSearch(1)" class="flex flex-col gap-5">
+  <form @submit.prevent="issuanceStore.handleActionSearch(type)" class="flex flex-col gap-5">
     <InputGroup>
       <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
         <label for="project_code" class="font-bold">

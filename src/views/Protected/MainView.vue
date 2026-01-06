@@ -7,7 +7,8 @@
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
   import { useSessionStore } from '../../store/useSessionStore';
 
-  const PartialUnitInquiry = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiry.vue'))
+  const PartialUnitInquiryBillGroup = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBillGroup.vue'))
+  const PartialUnitInquiryBatch = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBatch.vue'))
 
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
@@ -29,10 +30,6 @@
   watch(
     () => sessionStore.authenticatedUser?.username,
     () => {
-      console.log(sessionStore.authenticatedUser?.username);
-      console.log(sessionStore.userHasPermissionForTabA);
-      console.log(sessionStore.userHasPermissionForTabB);
-      console.log(sessionStore.userHasPermissionForTabC);
       if (sessionStore.userHasPermissionForTabA) {
         selectedTab.value = 'A'
       } else if (sessionStore.userHasPermissionForTabB) {
@@ -51,15 +48,15 @@
   <div class="flex flex-col w-full h-full gap-3 pt-4">
     <Tabs v-model:value="selectedTab">
       <TabList>
-        <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease and VIP)</Tab>
+        <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease)</Tab>
         <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Run Per Batch (Short Term Lease)</Tab>
-        <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Water / Elec / Genset)</Tab>
+        <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Utilities)</Tab>
       </TabList>
     </Tabs>
 
     <!-- BATCH RUNNING - LONG TERM RENTAL CUSA / VIP-->
-    <div v-if="selectedTab === 'A'" class="flex flex-col items-center justify-start ">
-      <Fieldset legend="Batch Running" class="min-w-[600px] max-w-[600px]">
+    <div v-if="selectedTab === 'A'" class="flex flex-col items-center justify-start">
+      <Fieldset legend="Batch Running" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
           <div class="p-2 text-xs">
             Schedule of Batch Running
@@ -98,38 +95,71 @@
 
           <Divider />
 
-          <InputGroup>
-            <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
-              <label for="invoice_date" class="font-bold w-28">
-                Invoice Date
-              </label>
-            </InputGroupAddon>
-            <DatePicker
-              v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
-              dateFormat="yy/mm/dd"
-              :minDate="new Date()"
-              :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
-              placeholder="Select..."
-            />
-          </InputGroup>
+          <div v-focustrap class="flex flex-col gap-2">
+            <InputGroup>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="invoice_date" class="font-bold w-28">
+                  Invoice Date
+                </label>
+              </InputGroupAddon>
+              <DatePicker
+                v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
+                dateFormat="yy/mm/dd"
+                :minDate="new Date()"
+                :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
+                placeholder="Select..."
+              />
+            </InputGroup>
+            <InputGroup>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="batch_short" class="font-bold w-28">
+                  Bill Type
+                </label>
+              </InputGroupAddon>
+              <Select
+                v-model="perBatchRunStore.perBatchRunForm.billType"
+                :options="perBatchRunStore.BILL_TYPE_OPTIONS"
+                optionLabel="name"
+                option-value="value"
+                placeholder="Select..."
+              ></Select>
+            </InputGroup>
+            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
+            <InputGroup v-else>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="project_code" class="font-bold">
+                  Project Code
+                </label>
+              </InputGroupAddon>
+              <Select
+                ref="indexRef"
+                v-model="perBatchRunStore.perBatchRunForm.projectCode"
+                :options="mainStore.getProjectCodeOptions"
+                optionLabel="option_name"
+                placeholder="Select one"
+                class="w-full uppercase md:w-56"
+                editable
+              ></Select>
+            </InputGroup>
+          </div>
           <div class="p-2 text-xs">
             This option can only be executed on the first business day of each month.
           </div>
 
           <div class="flex justify-between w-full gap-3 mt-5">
-            <Button @click="issuanceStore.handleActionReset(2)"
+            <Button @click="issuanceStore.handleActionReset('A')"
               raised
               type="reset"
               label="Reset"
             />
-            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch(2)"
+            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('A')"
               raised
               type="submit"
               label="Find All"
               icon="pi pi-search"
             />
             <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
-              @wheel="perBatchRunStore.handleActionAdminBatchIssuance"
+              @wheel="perBatchRunStore.handleActionAdminBatchIssuance('A')"
               raised
               type="submit"
               label="Find All"
@@ -142,8 +172,8 @@
     </div>
 
     <!-- BATCH RUNNING - SHORT TERM RENTAL CUSA -->
-    <div v-else-if="selectedTab === 'B'" class="flex flex-col items-center justify-start ">
-      <Fieldset legend="Batch Running" class="min-w-[600px] max-w-[600px]">
+    <div v-else-if="selectedTab === 'B'" class="flex flex-col items-center justify-start">
+      <Fieldset legend="Batch Running" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
           <div class="p-2 text-xs">
             Schedule of Batch Running
@@ -182,38 +212,71 @@
 
           <Divider />
 
-          <InputGroup>
-            <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
-              <label for="invoice_date" class="font-bold w-28">
-                Invoice Date
-              </label>
-            </InputGroupAddon>
-            <DatePicker
-              v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
-              dateFormat="yy/mm/dd"
-              :minDate="new Date()"
-              :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
-              placeholder="Select..."
-            />
-          </InputGroup>
+          <div v-focustrap class="flex flex-col gap-2">
+            <InputGroup>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="invoice_date" class="font-bold w-28">
+                  Invoice Date
+                </label>
+              </InputGroupAddon>
+              <DatePicker
+                v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
+                dateFormat="yy/mm/dd"
+                :minDate="new Date()"
+                :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
+                placeholder="Select..."
+              />
+            </InputGroup>
+            <InputGroup>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="batch_short" class="font-bold w-28">
+                  Bill Type
+                </label>
+              </InputGroupAddon>
+              <Select
+                v-model="perBatchRunStore.perBatchRunForm.billType"
+                :options="perBatchRunStore.BILL_TYPE_OPTIONS"
+                optionLabel="name"
+                option-value="value"
+                placeholder="Select..."
+              ></Select>
+            </InputGroup>
+            <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
+            <InputGroup v-else>
+              <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
+                <label for="project_code" class="font-bold">
+                  Project Code
+                </label>
+              </InputGroupAddon>
+              <Select
+                ref="indexRef"
+                v-model="perBatchRunStore.perBatchRunForm.projectCode"
+                :options="mainStore.getProjectCodeOptions"
+                optionLabel="option_name"
+                placeholder="Select one"
+                class="w-full uppercase md:w-56"
+                editable
+              ></Select>
+            </InputGroup>
+          </div>
           <div class="p-2 text-xs">
             This option can only be executed on the first business day of each month.
           </div>
 
           <div class="flex justify-between w-full gap-3 mt-5">
-            <Button @click="issuanceStore.handleActionReset(2)"
+            <Button @click="issuanceStore.handleActionReset('B')"
               raised
               type="reset"
               label="Reset"
             />
-            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch(2)"
+            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('B')"
               raised
               type="submit"
               label="Find All"
               icon="pi pi-search"
             />
             <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
-              @wheel="perBatchRunStore.handleActionAdminBatchIssuance"
+              @wheel="perBatchRunStore.handleActionAdminBatchIssuance('B')"
               raised
               type="submit"
               label="Find All"
@@ -257,7 +320,7 @@
               placeholder="Select..."
             ></Select>
           </InputGroup>
-          <PartialUnitInquiry v-if="perBillTypeRunStore.isShowPBLForm" />
+          <PartialUnitInquiryBillGroup v-if="perBillTypeRunStore.isShowPBLForm" />
           <InputGroup v-else>
             <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
               <label for="project_code" class="font-bold">
@@ -276,12 +339,12 @@
           </InputGroup>
         </div>
         <div class="flex justify-between w-full gap-3 mt-3">
-          <Button @click="issuanceStore.handleActionReset(1)"
+          <Button @click="issuanceStore.handleActionReset('C')"
             raised
             type="reset"
             label="Reset"
           />
-          <Button @click="issuanceStore.handleActionSearch(1)"
+          <Button @click="issuanceStore.handleActionSearch('C')"
             raised
             type="submit"
             label="Search"

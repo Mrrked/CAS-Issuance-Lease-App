@@ -83,12 +83,13 @@ export interface User extends ExternalISeriesProfile {}
 
 export type InquiryType = 'Unit' | 'Client Name'
 export type PerBillTypeOption = 'Rental and CUSA' | 'Electricity and Generator Set' | 'Water'
+export type PerBatchTypeOption = 'Rental and CUSA' | 'Penalty on Rental' | 'Penalty on CUSA'
 
 export interface PerBillTypeRunForm {
   invoiceDate: Date
-  projectCode: ProjectRecord | null
   billType:    'A' | 'B' | 'C' | ''
 
+  projectCode: ProjectRecord | null
   PBL: {
     pcs_code: {
       1: string
@@ -115,6 +116,31 @@ export interface PerBillTypeRunForm {
 
 export interface PerBatchRunForm {
   invoiceDate: Date
+  billType:    'A' | 'B' | 'C' | ''
+
+  projectCode: ProjectRecord | null
+  PBL: {
+    pcs_code: {
+      1: string
+    }
+    phase: {
+      1: string
+    }
+    block: {
+      1: string
+      2: string
+    }
+    lot: {
+      1: string
+      2: string
+      3: string
+      4: string
+    }
+    unit_code: {
+      1: string
+      2: string
+    }
+  }
 }
 
 export interface UnitForm {

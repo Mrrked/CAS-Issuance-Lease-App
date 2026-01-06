@@ -24,15 +24,15 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   const issuanceStore = useIssuanceStore();
 
   const BILL_TYPE_OPTIONS: {value: 'A' | 'B' | 'C', name: PerBillTypeOption}[] = [
-    // { value: 'A', name: 'Rental and CUSA' },
     { value: 'B', name: 'Electricity and Generator Set' },
     { value: 'C', name: 'Water' },
   ]
 
   const perBillTypeRunForm = ref<PerBillTypeRunForm>({
     invoiceDate: new Date(),
-    projectCode: null,
     billType: '',
+
+    projectCode: null,
     PBL: {
       pcs_code: {
         1: '',

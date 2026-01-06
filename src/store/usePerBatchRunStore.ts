@@ -1,4 +1,4 @@
-import { FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceDetails, InvoiceRecord, LeaseBill, PerBatchRunForm } from './types';
+import { FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceDetails, InvoiceRecord, LeaseBill, PerBatchRunForm, PerBatchTypeOption } from './types';
 import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
 
 import { AxiosResponse } from 'axios';
@@ -28,8 +28,39 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const sessionStore = useSessionStore()
   const issuanceStore = useIssuanceStore()
 
+  const BILL_TYPE_OPTIONS: {value: 'A' | 'B' | 'C', name: PerBatchTypeOption}[] = [
+    { value: 'A', name: 'Rental and CUSA' },
+    { value: 'B', name: 'Penalty on Rental' },
+    { value: 'C', name: 'Penalty on CUSA' },
+  ]
+
   const perBatchRunForm = ref<PerBatchRunForm>({
-    invoiceDate: new Date()
+    invoiceDate: new Date(),
+    billType: '',
+
+    projectCode: null,
+    PBL: {
+      pcs_code: {
+        1: '',
+      },
+      phase: {
+        1: '',
+      },
+      block: {
+        1: '',
+        2: ''
+      },
+      lot: {
+        1: '',
+        2: '',
+        3: '',
+        4: ''
+      },
+      unit_code: {
+        1: '',
+        2: ''
+      }
+    }
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -56,6 +87,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
         return a.INVOICE_KEY.PROJCD.toLowerCase().localeCompare(b.INVOICE_KEY.PROJCD.toLowerCase())
       })
+  })
+
+  const isShowPBLForm = computed((): boolean => {
+    return perBatchRunForm.value.billType !== 'A'
   })
 
   const getCurrentYear = computed(() => {
@@ -379,17 +414,21 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     })
   }
 
-  const handleActionAdminBatchIssuance = () => {
+  const handleActionAdminBatchIssuance = (tab: 'A'|'B'|'C') => {
     sessionStore.handleActionVerifyUserAuthority("GENERAL_OVERRIDE", () => {
-      issuanceStore.handleActionSearch(2)
+      issuanceStore.handleActionSearch(tab)
     })
   }
 
   return {
+    BILL_TYPE_OPTIONS,
+
     perBatchRunForm,
     billings,
 
     invoice_records_data,
+
+    isShowPBLForm,
 
     getFirstBusinessDayPerMonth,
     getCurrentSchedule,

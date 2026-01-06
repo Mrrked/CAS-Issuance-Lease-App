@@ -3080,7 +3080,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     loading.close()
   }
 
-  const handleActionSearch = (tab: number ) => {
+  const handleActionSearch = (tab: 'A'|'B'|'C') => {
     const validateQueryUnitForm = () => {
       const validate1 = perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD
       const validate2 = (
@@ -3118,8 +3118,90 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
 
     switch (tab) {
+      // Per Batch - Long Term Lease
+      case 'A':
+        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          const loading = utilStore.startLoadingModal('Fetching ...')
+          const form = perBatchRunStore.perBatchRunForm
+          const data = {
+            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
+            billType: form.billType,
+            leaseType: 'Long Term Lease',
+            PROJCD: form.projectCode?.PROJCD,
+            PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+            PHASE: form.PBL?.phase['1'] || ' ',
+            BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+            LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+            UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+          };
+          axios.post(`issuance_lease/per_batch/`, data)
+            .then((response) => {
+              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              perBatchRunStore.billings = []
+              perBatchRunStore.billings = response.data.data as LeaseBill[];
+              perBatchRunStore.handleActionViewMainDialog()
+              perBatchRunStore.billings.forEach((bill) => {
+                console.log(bill.NOTICE_NUMBER || 'None');
+              })
+            })
+            .catch(utilStore.handleAxiosError)
+            .finally(() => {
+              loading.close()
+            })
+        } else {
+          toast.add({
+            severity: 'warn',
+            summary: 'Missing Invoice Date',
+            detail: 'Please enter a valid invoice date!',
+            life: 3000
+          })
+        }
+        break;
+
+      // Per Batch - Short Term Lease
+      case 'B':
+        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          const loading = utilStore.startLoadingModal('Fetching ...')
+          const form = perBatchRunStore.perBatchRunForm
+          const data = {
+            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
+            billType: form.billType,
+            leaseType: 'Short Term Lease',
+            PROJCD: form.projectCode?.PROJCD,
+            PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+            PHASE: form.PBL?.phase['1'] || ' ',
+            BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+            LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+            UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+          };
+          axios.post(`issuance_lease/per_batch/`, data)
+            .then((response) => {
+              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              perBatchRunStore.billings = []
+              perBatchRunStore.billings = response.data.data as LeaseBill[];
+              perBatchRunStore.handleActionViewMainDialog()
+              perBatchRunStore.billings.forEach((bill) => {
+                console.log(bill.NOTICE_NUMBER || 'None');
+              })
+            })
+            .catch(utilStore.handleAxiosError)
+            .finally(() => {
+              loading.close()
+            })
+        } else {
+          toast.add({
+            severity: 'warn',
+            summary: 'Missing Invoice Date',
+            detail: 'Please enter a valid invoice date!',
+            life: 3000
+          })
+        }
+        break;
+
       // Per Bill Type / PBL
-      case 1:
+      case 'C':
         if (
           perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString() &&
           perBillTypeRunStore.perBillTypeRunForm.billType &&
@@ -3144,15 +3226,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
 
           axios.post(`issuance_lease/per_bill_type/`, data)
-          .then((response) => {
-            // console.log('FETCHED OPEN BILLINGS', response.data.data);
-            perBillTypeRunStore.billings = response.data.data as LeaseBill[];
-            perBillTypeRunStore.handleActionViewMainDialog()
-          })
-          .catch(utilStore.handleAxiosError)
-          .finally(() => {
-            loading.close()
-          })
+            .then((response) => {
+              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              perBillTypeRunStore.billings = []
+              perBillTypeRunStore.billings = response.data.data as LeaseBill[];
+              perBillTypeRunStore.handleActionViewMainDialog()
+            })
+            .catch(utilStore.handleAxiosError)
+            .finally(() => {
+              loading.close()
+            })
         } else {
           toast.add({
             severity: 'warn',
@@ -3163,48 +3246,21 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
         break;
 
-      // Per Batch
-      case 2:
-        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-          const loading = utilStore.startLoadingModal('Fetching ...')
-          const data = {
-            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
-            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1
-          };
-          axios.post(`issuance_lease/per_batch/`, data)
-          .then((response) => {
-            // console.log('FETCHED OPEN BILLINGS', response.data.data);
-            perBatchRunStore.billings = response.data.data as LeaseBill[];
-            perBatchRunStore.handleActionViewMainDialog()
-          })
-          .catch(utilStore.handleAxiosError)
-          .finally(() => {
-            loading.close()
-          })
-        } else {
-          toast.add({
-            severity: 'warn',
-            summary: 'Missing Invoice Date',
-            detail: 'Please enter a valid invoice date!',
-            life: 3000
-          })
-        }
-        break;
-
       default:
         break;
     }
   }
 
-  const handleActionReset = (tab: number) => {
+  const handleActionReset = (tab: 'A'|'B'|'C') => {
     // CLEAR FORM FIELDS
     switch (tab) {
-      // Per Bill Type / PBL
-      case 1:
-        perBillTypeRunStore.perBillTypeRunForm = {
+      // Per Batch
+      case 'A':
+      case 'B':
+        perBatchRunStore.perBatchRunForm = {
           invoiceDate: new Date(),
-          projectCode: null,
           billType: '',
+          projectCode: null,
           PBL: {
             pcs_code: {
               1: '',
@@ -3230,10 +3286,37 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
         break;
 
-      // Per Batch
-      case 2:
-        perBatchRunStore.perBatchRunForm.invoiceDate = new Date()
+      // Per Bill Type / PBL
+      case 'C':
+        perBillTypeRunStore.perBillTypeRunForm = {
+          invoiceDate: new Date(),
+          billType: '',
+          projectCode: null,
+          PBL: {
+            pcs_code: {
+              1: '',
+            },
+            phase: {
+              1: '',
+            },
+            block: {
+              1: '',
+              2: ''
+            },
+            lot: {
+              1: '',
+              2: '',
+              3: '',
+              4: ''
+            },
+            unit_code: {
+              1: '',
+              2: ''
+            },
+          }
+        }
         break;
+
 
       default:
         break;

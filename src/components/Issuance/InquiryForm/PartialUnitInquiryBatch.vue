@@ -8,7 +8,7 @@
     type: 'A' | 'B' | 'C'
   }
 
-  const props = defineProps<Props>();
+  defineProps<Props>();
 
   const mainStore = useMainStore()
   const issuanceStore = useIssuanceStore()

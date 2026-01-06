@@ -23,8 +23,10 @@ declare module 'vue' {
     ForgotPasswordModal: typeof import('./src/components/Dialog/ForgotPasswordModal.vue')['default']
     HistoryOfIssuedDocumentsDataTable: typeof import('./src/components/Reprint/HistoryOfIssuedDocumentsDataTable.vue')['default']
     HistoryOfPaymentsTableModal: typeof import('./src/components/Dialog/Printing/HistoryOfPaymentsTableModal.vue')['default']
+    IconField: typeof import('primevue/iconfield')['default']
     InputGroup: typeof import('primevue/inputgroup')['default']
     InputGroupAddon: typeof import('primevue/inputgroupaddon')['default']
+    InputIcon: typeof import('primevue/inputicon')['default']
     InputText: typeof import('primevue/inputtext')['default']
     InvoiceReceiptDetailsModal: typeof import('./src/components/Dialog/Printing/InvoiceReceiptDetailsModal.vue')['default']
     LeaseBillTypesTableModal: typeof import('./src/components/Dialog/Printing/LeaseBillTypesTableModal.vue')['default']
@@ -35,6 +37,7 @@ declare module 'vue' {
     PartialUnitInquiryBatch: typeof import('./src/components/Issuance/InquiryForm/PartialUnitInquiryBatch.vue')['default']
     PartialUnitInquiryBillGroup: typeof import('./src/components/Issuance/InquiryForm/PartialUnitInquiryBillGroup.vue')['default']
     Popover: typeof import('primevue/popover')['default']
+    ProgressBar: typeof import('primevue/progressbar')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RemarksTableModal: typeof import('./src/components/Dialog/Printing/RemarksTableModal.vue')['default']
     ResetButton: typeof import('./src/components/Reprint/ResetButton.vue')['default']
@@ -43,10 +46,16 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     ScreenYLease: typeof import('./src/components/Reprint/ScreenYLease.vue')['default']
     Select: typeof import('primevue/select')['default']
+    SelectButton: typeof import('primevue/selectbutton')['default']
     SelectedBillsTableModal: typeof import('./src/components/Dialog/PerBatch/SelectedBillsTableModal.vue')['default']
     SelectedBillsTableModalFooter: typeof import('./src/components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue')['default']
     SelectInquiryType: typeof import('./src/components/Reprint/SelectInquiryType.vue')['default']
     SessionTimeoutModal: typeof import('./src/components/Dialog/General/SessionTimeoutModal.vue')['default']
+    Step: typeof import('primevue/step')['default']
+    StepList: typeof import('primevue/steplist')['default']
+    StepPanel: typeof import('primevue/steppanel')['default']
+    StepPanels: typeof import('primevue/steppanels')['default']
+    Stepper: typeof import('primevue/stepper')['default']
     Tab: typeof import('primevue/tab')['default']
     TabList: typeof import('primevue/tablist')['default']
     Tabs: typeof import('primevue/tabs')['default']
@@ -62,5 +71,6 @@ declare module 'vue' {
   }
   export interface ComponentCustomProperties {
     FocusTrap: typeof import('primevue/focustrap')['default']
+    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

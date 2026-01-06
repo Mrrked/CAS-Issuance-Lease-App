@@ -146,7 +146,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
         const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
         const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
-        const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [1, 11])
+        const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [5,6,7])
 
         var entry = INVOICE.ENTRY || undefined
         const invoice_date = INVOICE.CORFPF.DATVAL

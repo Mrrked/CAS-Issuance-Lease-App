@@ -3081,21 +3081,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const handleActionSearch = (tab: 'A'|'B'|'C') => {
-    const validateQueryUnitForm = () => {
-      const validate1 = perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD
-      const validate2 = (
-        perBillTypeRunStore.perBillTypeRunForm.PBL.pcs_code['1']  ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.phase['1']     ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.block['1']     ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.block['2']     ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['1']       ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['2']       ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['3']       ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.lot['4']       ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['1'] ||
-        perBillTypeRunStore.perBillTypeRunForm.PBL.unit_code['2']
-      )
-      if (!validate1) {
+    const hasProject_BillType = () => {
+      if (!perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD) {
         toast.add({
           severity: 'warn',
           summary: 'Error: Invalid Project',
@@ -3104,7 +3091,34 @@ export const useIssuanceStore = defineStore('issuance', () => {
         });
         return false
       }
-      if (!validate2) {
+      return true
+    }
+    const hasProject_Batch = () => {
+      if (!perBatchRunStore.perBatchRunForm.projectCode?.PROJCD) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Error: Invalid Project',
+          detail: 'Unable to recognize the selected project. Please check.',
+          life: 3000
+        });
+        return false
+      }
+      return true
+    }
+    const hasPBL_Batch = () => {
+      const pbl_checking = (
+        perBatchRunStore.perBatchRunForm.PBL.pcs_code['1'].trim()  ||
+        perBatchRunStore.perBatchRunForm.PBL.phase['1'].trim()     ||
+        perBatchRunStore.perBatchRunForm.PBL.block['1'].trim()     ||
+        perBatchRunStore.perBatchRunForm.PBL.block['2'].trim()     ||
+        perBatchRunStore.perBatchRunForm.PBL.lot['1'].trim()       ||
+        perBatchRunStore.perBatchRunForm.PBL.lot['2'].trim()       ||
+        perBatchRunStore.perBatchRunForm.PBL.lot['3'].trim()       ||
+        perBatchRunStore.perBatchRunForm.PBL.lot['4'].trim()       ||
+        perBatchRunStore.perBatchRunForm.PBL.unit_code['1'].trim() ||
+        perBatchRunStore.perBatchRunForm.PBL.unit_code['2'].trim()
+      )
+      if (!pbl_checking) {
         toast.add({
           severity: 'warn',
           summary: 'Error: Missing Unit Identifiers',
@@ -3113,14 +3127,19 @@ export const useIssuanceStore = defineStore('issuance', () => {
         });
         return false
       }
-
-      return validate1 && validate2
+      return true
     }
 
     switch (tab) {
       // Per Batch - Long Term Lease
       case 'A':
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
+            return
+          } else if (perBatchRunStore.perBatchRunForm.billType !== 'A' && (!hasProject_Batch() || !hasPBL_Batch())) {
+            return
+          }
+
           const loading = utilStore.startLoadingModal('Fetching ...')
           const form = perBatchRunStore.perBatchRunForm
           const data = {
@@ -3137,7 +3156,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
             .then((response) => {
-              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              console.log('FETCHED OPEN BILLINGS', response.data.data);
               perBatchRunStore.billings = []
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
@@ -3162,6 +3181,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // Per Batch - Short Term Lease
       case 'B':
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+          if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
+            return
+          } else if (perBatchRunStore.perBatchRunForm.billType !== 'A' && !hasProject_Batch() && !hasPBL_Batch()) {
+            return
+          }
+
           const loading = utilStore.startLoadingModal('Fetching ...')
           const form = perBatchRunStore.perBatchRunForm
           const data = {
@@ -3178,7 +3203,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           };
           axios.post(`issuance_lease/per_batch/`, data)
             .then((response) => {
-              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              console.log('FETCHED OPEN BILLINGS', response.data.data);
               perBatchRunStore.billings = []
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
@@ -3202,12 +3227,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       // Per Bill Type / PBL
       case 'C':
-        if (
-          perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString() &&
-          perBillTypeRunStore.perBillTypeRunForm.billType &&
-          perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD
-        ) {
-          if (perBillTypeRunStore.perBillTypeRunForm.billType === 'A' && !validateQueryUnitForm()) {
+        if (perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString()) {
+          if (perBillTypeRunStore.perBillTypeRunForm.billType === 'A') {
+            return
+          } else if (!hasProject_BillType()) {
             return
           }
 
@@ -3227,10 +3250,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           axios.post(`issuance_lease/per_bill_type/`, data)
             .then((response) => {
-              // console.log('FETCHED OPEN BILLINGS', response.data.data);
+              console.log('FETCHED OPEN BILLINGS', response.data.data);
               perBillTypeRunStore.billings = []
               perBillTypeRunStore.billings = response.data.data as LeaseBill[];
               perBillTypeRunStore.handleActionViewMainDialog()
+              perBillTypeRunStore.billings.forEach((bill) => {
+                console.log(bill.NOTICE_NUMBER || 'None');
+              })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -3259,7 +3285,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       case 'B':
         perBatchRunStore.perBatchRunForm = {
           invoiceDate: new Date(),
-          billType: '',
+          billType: 'A',
           projectCode: null,
           PBL: {
             pcs_code: {
@@ -3290,7 +3316,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       case 'C':
         perBillTypeRunStore.perBillTypeRunForm = {
           invoiceDate: new Date(),
-          billType: '',
+          billType: 'B',
           projectCode: null,
           PBL: {
             pcs_code: {

@@ -30,7 +30,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   const perBillTypeRunForm = ref<PerBillTypeRunForm>({
     invoiceDate: new Date(),
-    billType: '',
+    billType: 'B',
 
     projectCode: null,
     PBL: {
@@ -69,6 +69,12 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   const isShowPBLForm = computed((): boolean => {
     return perBillTypeRunForm.value.billType === 'A'
+  })
+
+  const canRunSingleIssuance = computed(() => {
+    const today = perBillTypeRunForm.value.invoiceDate.getDay()
+    // Monday = 1, ..., Friday = 5
+    return today >= 1 && today <= 5
   })
 
   const handleActionViewMainDialog = () => {
@@ -288,33 +294,30 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
 
   watch(
     () => perBillTypeRunForm.value.billType,
-    (newBillType) => {
-      if (newBillType !== 'A') {
-        perBillTypeRunForm.value.PBL = {
-          pcs_code: {
-            1: '',
-          },
-          phase: {
-            1: '',
-          },
-          block: {
-            1: '',
-            2: ''
-          },
-          lot: {
-            1: '',
-            2: '',
-            3: '',
-            4: ''
-          },
-          unit_code: {
-            1: '',
-            2: ''
-          }
-        }
+    () => {
+      perBillTypeRunForm.value.PBL = {
+        pcs_code: {
+          1: '',
+        },
+        phase: {
+          1: '',
+        },
+        block: {
+          1: '',
+          2: ''
+        },
+        lot: {
+          1: '',
+          2: '',
+          3: '',
+          4: ''
+        },
+        unit_code: {
+          1: '',
+          2: ''
+        },
       }
-    },
-    { deep: true }
+    }
   )
 
   return {
@@ -327,6 +330,8 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
     invoice_records_data,
 
     isShowPBLForm,
+
+    canRunSingleIssuance,
 
     handleActionViewMainDialog,
   }

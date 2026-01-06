@@ -1,5 +1,5 @@
 import { FAILED_INVOICE_RECORDS, INVOICE_PER_COMPANY_AND_PROJECT, InvoiceDetails, InvoiceRecord, LeaseBill, PerBatchRunForm, PerBatchTypeOption } from './types';
-import { computed, defineAsyncComponent, markRaw, ref } from 'vue';
+import { computed, defineAsyncComponent, markRaw, ref, watch } from 'vue';
 
 import { AxiosResponse } from 'axios';
 import { defineStore } from 'pinia';
@@ -36,7 +36,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const perBatchRunForm = ref<PerBatchRunForm>({
     invoiceDate: new Date(),
-    billType: '',
+    billType: 'A',
 
     projectCode: null,
     PBL: {
@@ -61,6 +61,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
         2: ''
       }
     }
+  })
+
+  const isBatchBillType = computed(() => {
+    return perBatchRunForm.value.billType === 'A'
   })
 
   const billings = ref<LeaseBill[]>([])
@@ -90,7 +94,10 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   })
 
   const isShowPBLForm = computed((): boolean => {
-    return perBatchRunForm.value.billType !== 'A'
+    return (
+      perBatchRunForm.value.billType === 'B' ||
+      perBatchRunForm.value.billType === 'C'
+    )
   })
 
   const getCurrentYear = computed(() => {
@@ -149,6 +156,13 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     const currentDate = new Date()
     return utilStore.convertDateObjToNumberYYYYMMDD(currentDate) === getCurrentSchedule.value?.EARLIEST_CWORK_DATE
   })
+
+  const canRunSingleIssuance = computed(() => {
+    const today = perBatchRunForm.value.invoiceDate.getDay()
+    // Monday = 1, ..., Friday = 5
+    return today >= 1 && today <= 5
+  })
+
 
   const handleActionViewMainDialog = () => {
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
@@ -420,10 +434,41 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     })
   }
 
+  watch(
+    () => perBatchRunForm.value.billType,
+    () => {
+      perBatchRunForm.value.PBL = {
+        pcs_code: {
+          1: '',
+        },
+        phase: {
+          1: '',
+        },
+        block: {
+          1: '',
+          2: ''
+        },
+        lot: {
+          1: '',
+          2: '',
+          3: '',
+          4: ''
+        },
+        unit_code: {
+          1: '',
+          2: ''
+        },
+      }
+    }
+  )
+
   return {
     BILL_TYPE_OPTIONS,
 
     perBatchRunForm,
+
+    isBatchBillType,
+
     billings,
 
     invoice_records_data,
@@ -437,6 +482,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     getCurrentMonth,
 
     canRunBatchIssuance,
+    canRunSingleIssuance,
 
     handleActionViewMainDialog,
     handleActionViewScheduleOfBatchIssuance,

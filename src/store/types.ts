@@ -87,7 +87,7 @@ export type PerBatchTypeOption = 'Rental and CUSA' | 'Penalty on Rental' | 'Pena
 
 export interface PerBillTypeRunForm {
   invoiceDate: Date
-  billType:    'A' | 'B' | 'C' | ''
+  billType:    'A' | 'B' | 'C'
 
   projectCode: ProjectRecord | null
   PBL: {
@@ -116,7 +116,7 @@ export interface PerBillTypeRunForm {
 
 export interface PerBatchRunForm {
   invoiceDate: Date
-  billType:    'A' | 'B' | 'C' | ''
+  billType:    'A' | 'B' | 'C'
 
   projectCode: ProjectRecord | null
   PBL: {

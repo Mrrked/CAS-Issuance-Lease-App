@@ -58,42 +58,44 @@
     <div v-if="selectedTab === 'A'" class="flex flex-col items-center justify-start">
       <Fieldset legend="Batch Running" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
-          <div class="p-2 text-xs">
-            Schedule of Batch Running
-          </div>
-          <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-9 gap-4">
-              <InputGroup class="col-span-4">
-                <InputGroupAddon>
-                  <label for="invoice_date" class="w-24 font-bold text-color">
-                    Current
-                  </label>
-                </InputGroupAddon>
-                <InputText
-                  readonly
-                  :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
-                />
-              </InputGroup>
-              <InputGroup class="col-span-4">
-                <InputGroupAddon>
-                  <label for="invoice_date" class="w-24 font-bold text-color">
-                    Next
-                  </label>
-                </InputGroupAddon>
-                <InputText
-                  readonly
-                  :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
-                />
-              </InputGroup>
-              <Button
-                @click="perBatchRunStore.handleActionViewScheduleOfBatchIssuance"
-                icon="pi pi-info-circle"
-                severity="info"
-              />
+          <template v-if="perBatchRunStore.isBatchBillType">
+            <div class="p-2 text-xs">
+              Schedule of Batch Running
             </div>
-          </div>
+            <div class="flex flex-col gap-4">
+              <div class="grid grid-cols-9 gap-4">
+                <InputGroup class="col-span-4">
+                  <InputGroupAddon>
+                    <label for="invoice_date" class="w-24 font-bold text-color">
+                      Current
+                    </label>
+                  </InputGroupAddon>
+                  <InputText
+                    readonly
+                    :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
+                  />
+                </InputGroup>
+                <InputGroup class="col-span-4">
+                  <InputGroupAddon>
+                    <label for="invoice_date" class="w-24 font-bold text-color">
+                      Next
+                    </label>
+                  </InputGroupAddon>
+                  <InputText
+                    readonly
+                    :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
+                  />
+                </InputGroup>
+                <Button
+                  @click="perBatchRunStore.handleActionViewScheduleOfBatchIssuance"
+                  icon="pi pi-info-circle"
+                  severity="info"
+                />
+              </div>
+            </div>
 
-          <Divider />
+            <Divider />
+          </template>
 
           <div v-focustrap class="flex flex-col gap-2">
             <InputGroup>
@@ -127,7 +129,7 @@
             <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
             <InputGroup v-else>
               <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
-                <label for="project_code" class="font-bold">
+                <label for="project_code" class="font-bold w-28">
                   Project Code
                 </label>
               </InputGroupAddon>
@@ -142,7 +144,7 @@
               ></Select>
             </InputGroup>
           </div>
-          <div class="p-2 text-xs">
+          <div class="p-2 text-xs" v-if="perBatchRunStore.isBatchBillType">
             This option can only be executed on the first business day of each month.
           </div>
 
@@ -152,19 +154,28 @@
               type="reset"
               label="Reset"
             />
-            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('A')"
+            <template v-if="perBatchRunStore.isBatchBillType">
+              <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('A')"
+                raised
+                type="submit"
+                label="Run Batch"
+                icon="pi pi-search"
+              />
+              <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
+                @wheel="perBatchRunStore.handleActionAdminBatchIssuance('A')"
+                raised
+                type="submit"
+                label="Run Batch"
+                icon="pi pi-search"
+                disabled
+              />
+            </template>
+            <Button v-else @click="issuanceStore.handleActionSearch('A')"
               raised
               type="submit"
-              label="Find All"
+              label="Search"
               icon="pi pi-search"
-            />
-            <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
-              @wheel="perBatchRunStore.handleActionAdminBatchIssuance('A')"
-              raised
-              type="submit"
-              label="Find All"
-              icon="pi pi-search"
-              disabled
+              :disabled="!perBatchRunStore.canRunSingleIssuance"
             />
           </div>
         </div>
@@ -175,42 +186,44 @@
     <div v-else-if="selectedTab === 'B'" class="flex flex-col items-center justify-start">
       <Fieldset legend="Batch Running" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
-          <div class="p-2 text-xs">
-            Schedule of Batch Running
-          </div>
-          <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-9 gap-4">
-              <InputGroup class="col-span-4">
-                <InputGroupAddon>
-                  <label for="invoice_date" class="w-24 font-bold text-color">
-                    Current
-                  </label>
-                </InputGroupAddon>
-                <InputText
-                  readonly
-                  :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
-                />
-              </InputGroup>
-              <InputGroup class="col-span-4">
-                <InputGroupAddon>
-                  <label for="invoice_date" class="w-24 font-bold text-color">
-                    Next
-                  </label>
-                </InputGroupAddon>
-                <InputText
-                  readonly
-                  :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
-                />
-              </InputGroup>
-              <Button
-                @click="perBatchRunStore.handleActionViewScheduleOfBatchIssuance"
-                icon="pi pi-info-circle"
-                severity="info"
-              />
+          <template v-if="perBatchRunStore.isBatchBillType">
+            <div class="p-2 text-xs">
+              Schedule of Batch Running
             </div>
-          </div>
+            <div class="flex flex-col gap-4">
+              <div class="grid grid-cols-9 gap-4">
+                <InputGroup class="col-span-4">
+                  <InputGroupAddon>
+                    <label for="invoice_date" class="w-24 font-bold text-color">
+                      Current
+                    </label>
+                  </InputGroupAddon>
+                  <InputText
+                    readonly
+                    :value="perBatchRunStore.getCurrentSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getCurrentSchedule.EARLIEST_CWORK_DATE) : ''"
+                  />
+                </InputGroup>
+                <InputGroup class="col-span-4">
+                  <InputGroupAddon>
+                    <label for="invoice_date" class="w-24 font-bold text-color">
+                      Next
+                    </label>
+                  </InputGroupAddon>
+                  <InputText
+                    readonly
+                    :value="perBatchRunStore.getNextSchedule?.EARLIEST_CWORK_DATE ? utilStore.formatDateNumberToStringYYYYMMDD(perBatchRunStore.getNextSchedule.EARLIEST_CWORK_DATE) : ''"
+                  />
+                </InputGroup>
+                <Button
+                  @click="perBatchRunStore.handleActionViewScheduleOfBatchIssuance"
+                  icon="pi pi-info-circle"
+                  severity="info"
+                />
+              </div>
+            </div>
 
-          <Divider />
+            <Divider />
+          </template>
 
           <div v-focustrap class="flex flex-col gap-2">
             <InputGroup>
@@ -244,7 +257,7 @@
             <PartialUnitInquiryBatch v-if="perBatchRunStore.isShowPBLForm" />
             <InputGroup v-else>
               <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
-                <label for="project_code" class="font-bold">
+                <label for="project_code" class="font-bold w-28">
                   Project Code
                 </label>
               </InputGroupAddon>
@@ -259,7 +272,7 @@
               ></Select>
             </InputGroup>
           </div>
-          <div class="p-2 text-xs">
+          <div class="p-2 text-xs" v-if="perBatchRunStore.isBatchBillType">
             This option can only be executed on the first business day of each month.
           </div>
 
@@ -269,19 +282,28 @@
               type="reset"
               label="Reset"
             />
-            <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('B')"
+            <template v-if="perBatchRunStore.isBatchBillType">
+              <Button v-if="perBatchRunStore.canRunBatchIssuance" @click="issuanceStore.handleActionSearch('B')"
+                raised
+                type="submit"
+                label="Run Batch"
+                icon="pi pi-search"
+              />
+              <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
+                @wheel="perBatchRunStore.handleActionAdminBatchIssuance('B')"
+                raised
+                type="submit"
+                label="Run Batch"
+                icon="pi pi-search"
+                disabled
+              />
+            </template>
+            <Button v-else @click="issuanceStore.handleActionSearch('B')"
               raised
               type="submit"
-              label="Find All"
+              label="Search"
               icon="pi pi-search"
-            />
-            <Button v-else-if="!perBatchRunStore.canRunBatchIssuance"
-              @wheel="perBatchRunStore.handleActionAdminBatchIssuance('B')"
-              raised
-              type="submit"
-              label="Find All"
-              icon="pi pi-search"
-              disabled
+              :disabled="!perBatchRunStore.canRunSingleIssuance"
             />
           </div>
         </div>
@@ -323,7 +345,7 @@
           <PartialUnitInquiryBillGroup v-if="perBillTypeRunStore.isShowPBLForm" />
           <InputGroup v-else>
             <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
-              <label for="project_code" class="font-bold">
+              <label for="project_code" class="font-bold w-28">
                 Project Code
               </label>
             </InputGroupAddon>
@@ -349,6 +371,7 @@
             type="submit"
             label="Search"
             icon="pi pi-search"
+            :disabled="!perBillTypeRunStore.canRunSingleIssuance"
           />
         </div>
       </Fieldset>

@@ -52,7 +52,7 @@ FOR CUSA:
     if with vat:
         ACCTCD = 2011PRJ0000015
         DEBIT = 0
-        CREDIT = vat amount    
+        CREDIT = vat amount
 
 
 ---------------------------------------------------------

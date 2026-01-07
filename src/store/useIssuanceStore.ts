@@ -230,8 +230,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
     var GFL2PF: GFL2PF[] = []
     var MAIN_PAR = ''
 
-    console.log(invoiceRecord);
-
     // RENTAL AND CUSA
     if (invoiceRecord.BILLINGS.some((bill) => RENTAL_CUSA_BT.includes(bill.BILL_TYPE))) {
 
@@ -258,13 +256,270 @@ export const useIssuanceStore = defineStore('issuance', () => {
       MAIN_PAR = 'RENT'
 
       // ENTRIES (1,4)
-      // const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+      const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
       // 1
-      var ELEC_VAT_SALES_SP_DEBIT = 0
-      var ELEC_VAT_SALES_DEBIT = 0
-      var ELEC_VAT_SALES_CREDIT = 0
+      var RENTAL_VAT_DEBIT = 0
+      var RENTAL_NVAT_DEBIT = 0
+      var RENTAL_ZERO_DEBIT = 0
+
+      var RENTAL_NET_VAT_CREDIT = 0
+      var RENTAL_VAT_CREDIT = 0
+
       // 4
-      var ELEC_VAT_CREDIT = 0
+      var CUSA_VAT_DEBIT = 0
+      var CUSA_ZERO_DEBIT = 0
+
+      var CUSA_NET_VAT_CREDIT = 0
+      var CUSA_VAT_CREDIT = 0
+
+      invoiceRecord.BILLINGS.forEach((bill) => {
+        if (bill.BILL_TYPE === 1) {
+          if (bill.SALTYP === 'VAT') {
+            RENTAL_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_DEBIT + bill.AMOUNT)
+          } else if (bill.SALTYP === 'NVAT') {
+            RENTAL_NVAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_NVAT_DEBIT + bill.AMOUNT)
+          } else if (bill.SALTYP === 'ZERO') {
+            RENTAL_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_ZERO_DEBIT + bill.AMOUNT)
+          }
+
+          RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+
+          if (bill.VAT) {
+            RENTAL_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_CREDIT + bill.VAT)
+          }
+        } else if (bill.BILL_TYPE === 4) {
+          if (bill.SALTYP === 'VAT') {
+            CUSA_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_DEBIT + bill.AMOUNT)
+          } else if (bill.SALTYP === 'ZERO') {
+            CUSA_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_ZERO_DEBIT + bill.AMOUNT)
+          }
+
+          CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+
+          if (bill.VAT) {
+            CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_CREDIT + bill.VAT)
+          }
+        }
+      })
+
+      if (RENTAL_VAT_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000006`,
+          DEBIT:  RENTAL_VAT_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (RENTAL_NVAT_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000007`,
+          DEBIT:  RENTAL_NVAT_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (RENTAL_ZERO_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000008`,
+          DEBIT:  RENTAL_ZERO_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (RENTAL_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `4006${PROJ}0000000`,
+          DEBIT:  0,
+          CREDIT: RENTAL_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (RENTAL_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000001`,
+          DEBIT:  0,
+          CREDIT: RENTAL_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      // CUSA
+
+      if (CUSA_VAT_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000003`,
+          DEBIT:  CUSA_VAT_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (CUSA_ZERO_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000004`,
+          DEBIT:  CUSA_ZERO_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (CUSA_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000010`,
+          DEBIT:  0,
+          CREDIT: CUSA_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (CUSA_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2011${PROJ}0000015`,
+          DEBIT:  0,
+          CREDIT: CUSA_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      GFL2PF = GFL2PF.map((entry, index) => {
+        if (index === 0) {
+          return {
+            ...entry,
+            PRNTCD: 'P',
+          }
+        }
+        return entry
+      })
     }
 
     // ELECTRICITY AND GENSET
@@ -1521,10 +1776,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
       })
 
+    console.log(result);
+
     return result
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
+
+    console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
+      'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
+    ])
+
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
     // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);

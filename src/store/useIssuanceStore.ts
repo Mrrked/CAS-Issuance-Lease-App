@@ -219,7 +219,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     const RENTAL_CUSA_BT = [1, 4, 11, 41]
     const ELEC_GENSET_BT = [5, 7, 51, 71]
 
-    const RENTAL_PEN_BT = [1, 11]
+    // const RENTAL_PEN_BT = [1, 11]
     const CUSA_PEN_BT   = [4, 41]
     // const ELEC_BT   = [5, 51]
     // const GENSET_BT = [7, 71]
@@ -257,8 +257,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // MAIN PARTICULAR
       MAIN_PAR = 'RENT'
 
-      // ENTRIES (51,53,54,55)
-      const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+      // ENTRIES (1,4)
+      // const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
       // 1
       var ELEC_VAT_SALES_SP_DEBIT = 0
       var ELEC_VAT_SALES_DEBIT = 0

@@ -34,6 +34,7 @@ declare module 'vue' {
     PartialUnitInquiryBatch: typeof import('./src/components/Issuance/InquiryForm/PartialUnitInquiryBatch.vue')['default']
     PartialUnitInquiryBillGroup: typeof import('./src/components/Issuance/InquiryForm/PartialUnitInquiryBillGroup.vue')['default']
     Popover: typeof import('primevue/popover')['default']
+    ProgressBar: typeof import('primevue/progressbar')['default']
     ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RemarksTableModal: typeof import('./src/components/Dialog/Printing/RemarksTableModal.vue')['default']
     ResetButton: typeof import('./src/components/Reprint/ResetButton.vue')['default']

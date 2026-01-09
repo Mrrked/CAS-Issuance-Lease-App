@@ -489,6 +489,8 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   WITHHOLDING_TAX: number
 
   TOTAL_AMOUNT: number
+
+  LOPDTF?: LOPDTF[]
 }
 
 export interface LedgerRemark {
@@ -782,6 +784,10 @@ export interface InvoiceRecord {
   CRMKPF: CRMKPF
   CORF4PF: CORF4PF[]
 
+  LOPHTF: LOPHTF
+  LOPDTF: LOPDTF[]
+  CORF3PF: CORF3PF
+
   // ENTRIES
   ENTRY?: ACCOUNTING_ENTRIES
 }
@@ -997,6 +1003,96 @@ interface CORF4PF {
   DATENT: number; // DATE ENTERED (ZONED 8,0)
   TIMENT: number; // TIME ENTERED (ZONED 6,0)
   USRENT: string; // USER NAME (CHAR 10)
+}
+
+interface LOPHTF { //Long Term Lease Header File
+  COMPCD: number;   // COMPANY CODE (ZONED 2,0)
+  BRANCH: number;   // BRANCH CODE (ZONED 1,0)
+  DEPTCD: number;   // DEPARTMENT CODE (ZONED 2,0)
+  ORCOD: string;    // O. R. CODE (CHAR 2)
+  ORNUM: number;    // O. R. NUMBER (ZONED 6,0)
+  PROJCD: string;   // PROJECT CODE
+  PCSCOD: string;   // PCS CODE
+  PHASE: string;    // PHASE
+  BLOCK: string;    // BLOCK
+  LOT: string;      // LOT/UNIT
+  UNITCD: string;   // UNIT
+  TCLTNO: number;   // TEMPORARY CLIENT NUMBER
+  CLBRAN: number;   // CLIENT BRANCH (ZONED 1,0)
+  CLTNUM: number;   // CLIENT KEY (ZONED 4,0)
+  PDSCOD: string;   // PARK, DRY, STORE CODE (CHAR 1)
+  PDSNUM: number;   // PARK, DRY, STORE NUMBER (ZONED 2,0)
+  DATOR: number;    // O. R. DATE (ZONED 8,0)
+  DATVAL: number;   // VALUE DATE (ZONED 8,0)
+  PAYTYP: string;   // PAYMENT TYPE (CHAR 1)
+  ORAMT: number;    // OR AMOUNT (PACKED 11,2)
+  BALANC: number;   // BALANCE (PACKED 13,2)
+  VATOR: number;    // VAT PER O.R. (PACKED 11,2)
+  PRPTAX: number;   // PREPAID TAX/WITHHOLDING TAX (PACKED 11,2)
+  USRUPD: string;   // USER NAME UPDATED (CHAR 10)
+  DATUPD: number;   // DATE UPDATED (ZONED 8,0)
+  TIMUPD: number;   // TIME UPDATED (ZONED 6,0)
+}
+
+interface LOPDTF { //Long Term Lease Payment Detail
+  COMPCD: number;    // COMPANY CODE (ZONED 2,0)
+  BRANCH: number;    // BRANCH CODE (ZONED 1,0)
+  DEPTCD: number;    // DEPARTMENT CODE (ZONED 2,0)
+  ORCOD: string;     // O. R. CODE (CHAR 2)
+  ORNUM: number;     // O. R. NUMBER (ZONED 6,0)
+  DATVAL: number;    // VALUE DATE (ZONED 8,0)
+  PROJCD: string;    // PROJECT CODE (CHAR 3)
+  PCSCOD: string;    // PCS CODE (CHAR 1)
+  PHASE: string;     // PHASE (CHAR 1)
+  BLOCK: string;     // BLOCK (CHAR 2)
+  LOT: string;       // LOT/UNIT (CHAR 4)
+  UNITCD: string;    // UNIT CODE (CHAR 2)
+  TCLTNO: number;    // TEMPORARY CLIENT NUMBER (ZONED 7,0)
+  CLBRAN: number;    // CLIENT BRANCH (ZONED 1,0)
+  CLTNUM: number;    // CLIENT KEY (ZONED 4,0)
+  PDSCOD: string;    // PARK, DRY, STORE CODE (CHAR 1)
+  PDSNUM: number;    // PARK, DRY, STORE NUMBER (ZONED 2,0)
+  PAYTYP: string;    // PAYMENT TYPE (CHAR 1)
+  BTYPE: number;     // BILL TYPE (ZONED 2,0)
+  YY: number;        // BILLING YEAR (ZONED 4,0)
+  MM: number;        // BILLING MONTH (ZONED 2,0)
+  BILAMT: number;    // BILL AMOUNT (PACKED 11,2)
+  AMTPD: number;     // AMOUNT PAID (PACKED 11,2)
+  PRPTAX: number;    // PREPAID TAX PER BILL TYPE (PACKED 11,2)
+  DATDUE: number;    // BILLING DUE DATE (ZONED 8,0)
+  PERIOD: string;    // BILLING PERIOD IN WORDS (CHAR 20)
+  FRBILL: number;    // BILLING PERIOD FROM DATE (ZONED 8,0)
+  TOBILL: number;    // BILLING PERIOD TO DATE (ZONED 8,0)
+  USRUPD: string;    // USER NAME UPDATED (CHAR 10)
+  DATUPD: number;    // DATE UPDATED (ZONED 8,0)
+  TIMUPD: number;    // TIME UPDATED (ZONED 6,0)
+}
+
+interface CORF3PF { //CD OR File 3 (VAT reflected on OR Issued)
+  COMPCD: number;   // COMPANY CODE (ZONED 2,0)
+  BRANCH: number;   // BRANCH CODE (ZONED 1,0)
+  DEPTCD: number;   // DEPARTMENT CODE (ZONED 2,0)
+  ORCOD: string;    // O. R. CODE (CHAR 2)
+  ORNUM: number;    // O. R. NUMBER (ZONED 6,0)
+  DATVAL: number;   // VALUE DATE (ZONED 8,0)
+  PROJCD: string;   // PROJECT CODE (CHAR 3)
+  PCSCOD: string;   // PCS CODE (CHAR 1)
+  PHASE: string;    // PHASE (CHAR 1)
+  BLOCK: string;    // BLOCK (CHAR 2)
+  LOT: string;      // LOT/UNIT (CHAR 4)
+  UNITCD: string;   // UNIT CODE (CHAR 2)
+  PAYTYP: string;   // PAYMENT TYPE (CHAR 1)
+  ORAMT: number;    // OR AMOUNT (PACKED 11,2)
+  VATAMT: number;   // VAT AMOUNT (PACKED 11,2)
+  RATIO: number;    // RATIO OF ZV/NET SP (ZONED 5,4)
+  ZONVAL: number;   // ZONAL VALUE USED (PACKED 13,2)
+  NETSP: number;    // NET SELLING PRICE USED (PACKED 13,2)
+  PRPTAX: number;   // PREPAID TAX OF LEASE CLIENTS (PACKED 13,2)
+  VATCOD: string;   // VAT/NON VAT CODE (CHAR 1)
+  VATDES: string;   // VAT DESCRIPTION (CHAR 30)
+  DATENT: number;   // DATE ENTERED (ZONED 8,0)
+  TIMENT: number;   // TIME ENTERED (ZONED 6,0)
+  USRENT: string;   // USER NAME (CHAR 10)
 }
 
 interface FAILED_INVOICE_RECORD {

@@ -28,6 +28,8 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   const sessionStore = useSessionStore()
   const issuanceStore = useIssuanceStore()
 
+  const leaseType = ref<'Short Term Lease' | 'Long Term Lease' | ''>('')
+
   const BILL_TYPE_OPTIONS: {value: 'A' | 'B' | 'C', name: PerBatchTypeOption}[] = [
     { value: 'A', name: 'Rental and CUSA' },
     { value: 'B', name: 'Penalty on Rental' },
@@ -163,7 +165,6 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
     return today >= 1 && today <= 5
   })
 
-
   const handleActionViewMainDialog = () => {
     const Footer = defineAsyncComponent(() => import('../components/Dialog/PerBatch/SelectedBillsTableModalFooter.vue'));
     const PerBatchRunDialog = dialog.open(SelectedBillsTableModal, {
@@ -293,6 +294,25 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
                 TIMENT: stampTime,
               }
             }),
+          LOPHTF: {
+            ...INVOICE.LOPHTF,
+            DATOR: stampDate,
+            DATUPD: stampDate,
+            TIMUPD: stampTime,
+          },
+          LOPDTF: INVOICE.LOPDTF
+            .map((record) => {
+              return {
+                ...record,
+                DATUPD: stampDate,
+                TIMUPD: stampTime,
+              }
+            }),
+          CORF3PF: {
+            ...INVOICE.CORF3PF,
+            DATENT: stampDate,
+            TIMENT: stampTime,
+          },
           ENTRY: entry
         }
       })
@@ -304,7 +324,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),
       month: perBatchRunForm.value.invoiceDate.getMonth() + 1,
       day: perBatchRunForm.value.invoiceDate.getDate(),
-      type: 'Batch',
+      type: 'Batch ' + leaseType.value,
       invoices: SELECTED_INVOICES as InvoiceRecord[],
     }
 

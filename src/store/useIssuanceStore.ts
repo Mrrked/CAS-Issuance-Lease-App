@@ -1235,7 +1235,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (mergedMap[key]) {
           mergedMap[key].BALAMT += bill.BALAMT;
           mergedMap[key].BILAMT += bill.BILAMT;
-          mergedMap[key].AMTPD += bill.AMTPD;
+          mergedMap[key].AMTPD  += bill.AMTPD;
           mergedMap[key].PRPTAX += bill.PRPTAX;
         } else if(!mergedMap[key]) {
           mergedMap[key] = {
@@ -1271,6 +1271,43 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].VAT_SALES += bill.BALAMT
             mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_SALES
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT - WHTAX_VAT_SALES
+
+            mergedMap[key].LOPDTF = [
+              ...(mergedMap[key].LOPDTF || []),
+              {
+                COMPCD:         bill.INVOICE_KEY.COMPCD,
+                BRANCH:         bill.INVOICE_KEY.BRANCH,
+                DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+                ORCOD:          bill.INVOICE_KEY.ORCOD,
+                ORNUM:          bill.INVOICE_KEY.ORNUM,
+                DATVAL:         0,
+                PROJCD:         bill.PROJCD,
+                PCSCOD:         bill.PCSCOD,
+                PHASE:          bill.PHASE,
+                BLOCK:          bill.BLOCK,
+                LOT:            bill.LOT,
+                UNITCD:         bill.UNITCD,
+                TCLTNO:         bill.TCLTNO,
+                CLBRAN:         bill.BRANCH,
+                CLTNUM:         bill.CLTNUM,
+                PDSCOD:         bill.PDSCOD,
+                PDSNUM:         bill.PDSNUM,
+                PAYTYP:         bill.PAYTYP,
+                BTYPE:          bill.OLD_BILL_TYPE,
+                YY:             bill.YY,
+                MM:             bill.MM,
+                BILAMT:         bill.BALAMT,
+                AMTPD:          bill.BALAMT,
+                PRPTAX:         WHTAX_VAT_SALES,
+                DATDUE:         bill.DATDUE,
+                PERIOD:         bill.PERIOD,
+                FRBILL:         bill.FRBILL,
+                TOBILL:         bill.TOBILL,
+                USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+                DATUPD:         0,
+                TIMUPD:         0,
+              }
+            ]
           }
 
           // VAT EXEMPT
@@ -1284,6 +1321,42 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_EXEMPT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT - WHTAX_VAT_EXEMPT
 
+            mergedMap[key].LOPDTF = [
+              ...(mergedMap[key].LOPDTF || []),
+              {
+                COMPCD:         bill.INVOICE_KEY.COMPCD,
+                BRANCH:         bill.INVOICE_KEY.BRANCH,
+                DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+                ORCOD:          bill.INVOICE_KEY.ORCOD,
+                ORNUM:          bill.INVOICE_KEY.ORNUM,
+                DATVAL:         0,
+                PROJCD:         bill.PROJCD,
+                PCSCOD:         bill.PCSCOD,
+                PHASE:          bill.PHASE,
+                BLOCK:          bill.BLOCK,
+                LOT:            bill.LOT,
+                UNITCD:         bill.UNITCD,
+                TCLTNO:         bill.TCLTNO,
+                CLBRAN:         bill.BRANCH,
+                CLTNUM:         bill.CLTNUM,
+                PDSCOD:         bill.PDSCOD,
+                PDSNUM:         bill.PDSNUM,
+                PAYTYP:         bill.PAYTYP,
+                BTYPE:          bill.OLD_BILL_TYPE,
+                YY:             bill.YY,
+                MM:             bill.MM,
+                BILAMT:         bill.BALAMT,
+                AMTPD:          bill.BALAMT,
+                PRPTAX:         WHTAX_VAT_EXEMPT,
+                DATDUE:         bill.DATDUE,
+                PERIOD:         bill.PERIOD,
+                FRBILL:         bill.FRBILL,
+                TOBILL:         bill.TOBILL,
+                USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+                DATUPD:         0,
+                TIMUPD:         0,
+              }
+            ]
           }
 
           // VAT
@@ -1293,6 +1366,43 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
             mergedMap[key].VAT += bill.BALAMT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT
+
+            mergedMap[key].LOPDTF = [
+              ...(mergedMap[key].LOPDTF || []),
+              {
+                COMPCD:         bill.INVOICE_KEY.COMPCD,
+                BRANCH:         bill.INVOICE_KEY.BRANCH,
+                DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+                ORCOD:          bill.INVOICE_KEY.ORCOD,
+                ORNUM:          bill.INVOICE_KEY.ORNUM,
+                DATVAL:         0,
+                PROJCD:         bill.PROJCD,
+                PCSCOD:         bill.PCSCOD,
+                PHASE:          bill.PHASE,
+                BLOCK:          bill.BLOCK,
+                LOT:            bill.LOT,
+                UNITCD:         bill.UNITCD,
+                TCLTNO:         bill.TCLTNO,
+                CLBRAN:         bill.BRANCH,
+                CLTNUM:         bill.CLTNUM,
+                PDSCOD:         bill.PDSCOD,
+                PDSNUM:         bill.PDSNUM,
+                PAYTYP:         bill.PAYTYP,
+                BTYPE:          bill.OLD_BILL_TYPE,
+                YY:             bill.YY,
+                MM:             bill.MM,
+                BILAMT:         bill.BALAMT,
+                AMTPD:          bill.BALAMT,
+                PRPTAX:         0,
+                DATDUE:         bill.DATDUE,
+                PERIOD:         bill.PERIOD,
+                FRBILL:         bill.FRBILL,
+                TOBILL:         bill.TOBILL,
+                USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+                DATUPD:         0,
+                TIMUPD:         0,
+              }
+            ]
           }
 
           // GOVT TAX
@@ -1302,6 +1412,43 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
             mergedMap[key].GOVT_TAX += bill.BALAMT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT
+
+            mergedMap[key].LOPDTF = [
+              ...(mergedMap[key].LOPDTF || []),
+              {
+                COMPCD:         bill.INVOICE_KEY.COMPCD,
+                BRANCH:         bill.INVOICE_KEY.BRANCH,
+                DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+                ORCOD:          bill.INVOICE_KEY.ORCOD,
+                ORNUM:          bill.INVOICE_KEY.ORNUM,
+                DATVAL:         0,
+                PROJCD:         bill.PROJCD,
+                PCSCOD:         bill.PCSCOD,
+                PHASE:          bill.PHASE,
+                BLOCK:          bill.BLOCK,
+                LOT:            bill.LOT,
+                UNITCD:         bill.UNITCD,
+                TCLTNO:         bill.TCLTNO,
+                CLBRAN:         bill.BRANCH,
+                CLTNUM:         bill.CLTNUM,
+                PDSCOD:         bill.PDSCOD,
+                PDSNUM:         bill.PDSNUM,
+                PAYTYP:         bill.PAYTYP,
+                BTYPE:          bill.OLD_BILL_TYPE,
+                YY:             bill.YY,
+                MM:             bill.MM,
+                BILAMT:         bill.BALAMT,
+                AMTPD:          bill.BALAMT,
+                PRPTAX:         0,
+                DATDUE:         bill.DATDUE,
+                PERIOD:         bill.PERIOD,
+                FRBILL:         bill.FRBILL,
+                TOBILL:         bill.TOBILL,
+                USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+                DATUPD:         0,
+                TIMUPD:         0,
+              }
+            ]
           }
         }
         if (idx + 1 < billings.length && bill.BILL_TYPE !== billings[idx + 1].BILL_TYPE && bill.YYYYMM !== billings[idx + 1].YYYYMM) {
@@ -1370,6 +1517,42 @@ export const useIssuanceStore = defineStore('issuance', () => {
           TOTAL_AMOUNT: TOTAL_AMOUNT, //SALE + VAT - WTHTAX
         }
 
+        mergedMap[key].LOPDTF = [
+          ...(mergedMap[key].LOPDTF || []),
+          {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            DATVAL:         0,
+            PROJCD:         bill.PROJCD,
+            PCSCOD:         bill.PCSCOD,
+            PHASE:          bill.PHASE,
+            BLOCK:          bill.BLOCK,
+            LOT:            bill.LOT,
+            UNITCD:         bill.UNITCD,
+            TCLTNO:         bill.TCLTNO,
+            CLBRAN:         bill.BRANCH,
+            CLTNUM:         bill.CLTNUM,
+            PDSCOD:         bill.PDSCOD,
+            PDSNUM:         bill.PDSNUM,
+            PAYTYP:         bill.PAYTYP,
+            BTYPE:          bill.OLD_BILL_TYPE,
+            YY:             bill.YY,
+            MM:             bill.MM,
+            BILAMT:         bill.BALAMT,
+            AMTPD:          bill.BALAMT,
+            PRPTAX:         WHTAX,
+            DATDUE:         bill.DATDUE,
+            PERIOD:         bill.PERIOD,
+            FRBILL:         bill.FRBILL,
+            TOBILL:         bill.TOBILL,
+            USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+            DATUPD:         0,
+            TIMUPD:         0,
+          }
+        ]
       }
     })
 
@@ -1514,7 +1697,31 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RMARK4:         remarks4 === '' ? mergedMap[key].CRMKPF.RMARK4 : remarks4,
           },
 
-          CORF4PF: mergedCORF4PF
+          CORF4PF: mergedCORF4PF,
+
+          LOPHTF: {
+            ...mergedMap[key].LOPHTF,
+            ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.ORAMT + bill.TOTAL_AMOUNT),
+            VATOR:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.VATOR + bill.VAT),
+            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.PRPTAX + bill.PRPTAX)
+          },
+
+          LOPDTF: [
+            ...mergedMap[key].LOPDTF,
+            ...(bill.LOPDTF || []).map((record) => {
+              return {
+                ...record,
+                DATVAL: invoiceDate
+              }
+            })
+          ],
+
+          CORF3PF: {
+            ...mergedMap[key].CORF3PF,
+            ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.ORAMT + bill.TOTAL_AMOUNT),
+            VATAMT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.VATAMT + bill.VAT),
+            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.PRPTAX + bill.PRPTAX)
+          }
         }
       }
 
@@ -1756,7 +1963,67 @@ export const useIssuanceStore = defineStore('issuance', () => {
               TIMENT:       0,
               USRENT:       sessionStore.authenticatedUser?.username.toUpperCase() || '',
             }
-          ]
+          ],
+          LOPHTF: {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            PROJCD:         bill.PROJCD,
+            PCSCOD:         bill.PCSCOD,
+            PHASE:          bill.PHASE,
+            BLOCK:          bill.BLOCK,
+            LOT:            bill.LOT,
+            UNITCD:         bill.UNITCD,
+            TCLTNO:         bill.TCLTNO,
+            CLBRAN:         bill.BRANCH,
+            CLTNUM:         bill.CLTNUM,
+            PDSCOD:         bill.PDSCOD,
+            PDSNUM:         bill.PDSNUM,
+            DATOR:          0,
+            DATVAL:         invoiceDate,
+            PAYTYP:         'Y',
+            ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
+            BALANC:         0,
+            VATOR:          bill.VAT,
+            PRPTAX:         bill.WITHHOLDING_TAX,
+            USRUPD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+            DATUPD:         0,
+            TIMUPD:         0,
+          },
+          LOPDTF: (bill.LOPDTF || []).map((record) => {
+            return {
+              ...record,
+              DATVAL: invoiceDate
+            }
+          }),
+          CORF3PF: {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            DATVAL:         invoiceDate,
+            PROJCD:         bill.PROJCD,
+            PCSCOD:         bill.PCSCOD,
+            PHASE:          bill.PHASE,
+            BLOCK:          bill.BLOCK,
+            LOT:            bill.LOT,
+            UNITCD:         bill.UNITCD,
+            PAYTYP:         bill.PAYTYP,
+            ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
+            VATAMT:         bill.VAT, //UPDATE ON FINAL
+            RATIO:          0,
+            ZONVAL:         0,
+            NETSP:          0,
+            PRPTAX:         bill.WITHHOLDING_TAX,
+            VATCOD:         bill.CLIENT_PIBIG,
+            VATDES:         '',
+            DATENT:         0,
+            TIMENT:         0,
+            USRENT:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
+          },
         }
       }
     })
@@ -3442,9 +3709,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBatchRunStore.billings = []
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
-              perBatchRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              })
+              // perBatchRunStore.billings.forEach((bill) => {
+              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
+              // })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -3489,9 +3756,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBatchRunStore.billings = []
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
-              perBatchRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              })
+              // perBatchRunStore.billings.forEach((bill) => {
+              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
+              // })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -3536,9 +3803,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBillTypeRunStore.billings = []
               perBillTypeRunStore.billings = response.data.data as LeaseBill[];
               perBillTypeRunStore.handleActionViewMainDialog()
-              perBillTypeRunStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              })
+              // perBillTypeRunStore.billings.forEach((bill) => {
+              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
+              // })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -3639,7 +3906,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     callback: Function,
     closeLoading: Function
   ) => {
-    // console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
+    console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
     .then(async (response) => {
       // console.log(response.data.data);

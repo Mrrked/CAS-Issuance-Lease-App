@@ -205,6 +205,25 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
                 TIMENT: stampTime,
               }
             }),
+          LOPHTF: {
+            ...INVOICE.LOPHTF,
+            DATOR: stampDate,
+            DATUPD: stampDate,
+            TIMUPD: stampTime,
+          },
+          LOPDTF: INVOICE.LOPDTF
+            .map((record) => {
+              return {
+                ...record,
+                DATUPD: stampDate,
+                TIMUPD: stampTime,
+              }
+            }),
+          CORF3PF: {
+            ...INVOICE.CORF3PF,
+            DATENT: stampDate,
+            TIMENT: stampTime,
+          },
           ENTRY: entry
         }
       })

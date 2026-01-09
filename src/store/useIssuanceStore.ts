@@ -2043,7 +2043,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
       })
 
-    console.log(result);
+    // console.log(result);
 
     return result
   }

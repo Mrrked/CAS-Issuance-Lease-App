@@ -326,7 +326,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
       year: perBatchRunForm.value.invoiceDate.getFullYear(),
       month: perBatchRunForm.value.invoiceDate.getMonth() + 1,
       day: perBatchRunForm.value.invoiceDate.getDate(),
-      type: 'Batch ' + leaseType.value,
+      type: `Batch (${leaseType.value}) (${perBatchRunForm.value.billType})`,
       invoices: SELECTED_INVOICES as InvoiceRecord[],
     }
 
@@ -487,6 +487,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   return {
     BILL_TYPE_OPTIONS,
 
+    leaseType,
     perBatchRunForm,
 
     isBatchBillType,

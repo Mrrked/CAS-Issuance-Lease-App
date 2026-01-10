@@ -32,12 +32,16 @@
     () => {
       if (sessionStore.userHasPermissionForTabA) {
         selectedTab.value = 'A'
+        perBatchRunStore.leaseType = 'Long Term Lease'
       } else if (sessionStore.userHasPermissionForTabB) {
         selectedTab.value = 'B'
+        perBatchRunStore.leaseType = 'Short Term Lease'
       } else if (sessionStore.userHasPermissionForTabC) {
         selectedTab.value = 'C'
+        perBatchRunStore.leaseType = ''
       } else {
         selectedTab.value = ''
+        perBatchRunStore.leaseType = ''
       }
     },
     { immediate: true }

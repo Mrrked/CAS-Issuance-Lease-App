@@ -429,6 +429,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
           },
           showHeader: false,
           modal: true,
+          closeOnEscape: false,
         },
       })
     }

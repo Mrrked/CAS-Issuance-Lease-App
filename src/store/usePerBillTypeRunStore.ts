@@ -305,6 +305,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
           },
           showHeader: false,
           modal: true,
+          closeOnEscape: false,
         },
       })
     }

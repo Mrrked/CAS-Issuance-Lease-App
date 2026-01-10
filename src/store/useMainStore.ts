@@ -4,6 +4,8 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import { useCompanyHeaderStore } from './useCompanyHeaderStore';
+import { usePerBatchRunStore } from './usePerBatchRunStore';
+import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 import { useSessionStore } from './useSessionStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
@@ -11,6 +13,8 @@ export const useMainStore = defineStore('main', () => {
 
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
+  const perBatchRunStore = usePerBatchRunStore()
+  const perBillTypeRunStore = usePerBillTypeRunStore()
   const companyHeaderStore = useCompanyHeaderStore()
 
   const allowReloadExitPage = ref<boolean>(true);
@@ -20,6 +24,8 @@ export const useMainStore = defineStore('main', () => {
   const lease_bill_types = ref<LeaseBillTypeRecord[]>([])
   const mother_lease_bill_types = ref<MotherLeaseBillTypeRecord[]>([])
   const first_business_days = ref<BusinessDay[]>([])
+
+  const currentValueDate = ref<Date | null>()
 
   const PAYMENT_TYPES: PaymentType[] = [
     { initial: 'A', name: 'Amortization'},
@@ -97,6 +103,12 @@ export const useMainStore = defineStore('main', () => {
         .then((response) => {
           first_business_days.value = response.data.data as BusinessDay[];
         }),
+      axios.get('issuance_lease/value_date/')
+        .then((response) => {
+          currentValueDate.value = new Date(response.data.date);
+          perBatchRunStore.perBatchRunForm.invoiceDate = new Date(response.data.date);
+          perBillTypeRunStore.perBillTypeRunForm.invoiceDate = new Date(response.data.date);
+        }),
       companyHeaderStore.fetchAllCompanyHeaderDetails(),
     ])
     .catch(utilStore.handleAxiosError)
@@ -128,6 +140,8 @@ export const useMainStore = defineStore('main', () => {
     lease_bill_types,
     mother_lease_bill_types,
     first_business_days,
+
+    currentValueDate,
 
     PAYMENT_TYPES,
 

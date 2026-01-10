@@ -4043,62 +4043,66 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // Per Batch
       case 'A':
       case 'B':
-        perBatchRunStore.perBatchRunForm = {
-          invoiceDate: new Date(),
-          billType: 'A',
-          projectCode: null,
-          PBL: {
-            pcs_code: {
-              1: '',
-            },
-            phase: {
-              1: '',
-            },
-            block: {
-              1: '',
-              2: ''
-            },
-            lot: {
-              1: '',
-              2: '',
-              3: '',
-              4: ''
-            },
-            unit_code: {
-              1: '',
-              2: ''
-            },
+        if (mainStore.currentValueDate) {
+          perBatchRunStore.perBatchRunForm = {
+            invoiceDate: mainStore.currentValueDate,
+            billType: 'A',
+            projectCode: null,
+            PBL: {
+              pcs_code: {
+                1: '',
+              },
+              phase: {
+                1: '',
+              },
+              block: {
+                1: '',
+                2: ''
+              },
+              lot: {
+                1: '',
+                2: '',
+                3: '',
+                4: ''
+              },
+              unit_code: {
+                1: '',
+                2: ''
+              },
+            }
           }
         }
         break;
 
       // Per Bill Type / PBL
       case 'C':
-        perBillTypeRunStore.perBillTypeRunForm = {
-          invoiceDate: new Date(),
-          billType: 'B',
-          projectCode: null,
-          PBL: {
-            pcs_code: {
-              1: '',
-            },
-            phase: {
-              1: '',
-            },
-            block: {
-              1: '',
-              2: ''
-            },
-            lot: {
-              1: '',
-              2: '',
-              3: '',
-              4: ''
-            },
-            unit_code: {
-              1: '',
-              2: ''
-            },
+        if (mainStore.currentValueDate) {
+          perBillTypeRunStore.perBillTypeRunForm = {
+            invoiceDate: mainStore.currentValueDate,
+            billType: 'B',
+            projectCode: null,
+            PBL: {
+              pcs_code: {
+                1: '',
+              },
+              phase: {
+                1: '',
+              },
+              block: {
+                1: '',
+                2: ''
+              },
+              lot: {
+                1: '',
+                2: '',
+                3: '',
+                4: ''
+              },
+              unit_code: {
+                1: '',
+                2: ''
+              },
+            }
           }
         }
         break;

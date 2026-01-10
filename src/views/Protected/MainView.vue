@@ -12,6 +12,7 @@
 
   const mainStore = useMainStore()
   const utilStore = useUtilitiesStore()
+  const sessionStore = useSessionStore()
   const issuanceStore = useIssuanceStore()
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
@@ -20,8 +21,6 @@
   const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
 
   const selectedTab = ref<'A'|'B'|'C'|''>('')
-
-  const sessionStore = useSessionStore()
 
   onMounted(() => {
     mainStore.fetchAllData()
@@ -50,13 +49,23 @@
 
 <template>
   <div class="flex flex-col w-full h-full gap-3 pt-4">
-    <Tabs v-model:value="selectedTab">
-      <TabList>
-        <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease)</Tab>
-        <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Run Per Batch (Short Term Lease)</Tab>
-        <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Utilities)</Tab>
-      </TabList>
-    </Tabs>
+    <div class="flex justify-between">
+      <Tabs v-model:value="selectedTab">
+        <TabList>
+          <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease)</Tab>
+          <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Run Per Batch (Short Term Lease)</Tab>
+          <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Utilities)</Tab>
+        </TabList>
+      </Tabs>
+      <div class="flex flex-col items-center w-48 p-1 border rounded bg-opacity-5 border-primary bg-primary">
+        <div v-if="mainStore.currentValueDate" class="font-bold text-primary">
+          VALUE DATE
+        </div>
+        <div v-if="mainStore.currentValueDate" class="py-1 text-primary">
+          {{ utilStore.convertDateObjToStringMONDDYYYY(mainStore.currentValueDate.toString()) }}
+        </div>
+      </div>
+    </div>
 
     <!-- BATCH RUNNING - LONG TERM RENTAL CUSA / VIP-->
     <div v-if="selectedTab === 'A'" class="flex flex-col items-center justify-start">
@@ -109,11 +118,14 @@
                 </label>
               </InputGroupAddon>
               <DatePicker
+                v-if="mainStore.currentValueDate"
                 v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
-                dateFormat="yy/mm/dd"
-                :minDate="new Date()"
-                :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
+                dateFormat="yy/mm/dd (DD)"
                 placeholder="Select..."
+                :minDate="mainStore.currentValueDate"
+                :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
+                :readonly="ALLOW_ADVANCE_BATCH !== 'TRUE'"
+                :disabledDays="[0, 6]"
               />
             </InputGroup>
             <InputGroup>
@@ -237,11 +249,13 @@
                 </label>
               </InputGroupAddon>
               <DatePicker
+                v-if="mainStore.currentValueDate"
                 v-model="perBatchRunStore.perBatchRunForm.invoiceDate"
-                dateFormat="yy/mm/dd"
-                :minDate="new Date()"
-                :maxDate="ALLOW_ADVANCE_BATCH === 'TRUE' ? undefined : new Date()"
+                dateFormat="yy/mm/dd (DD)"
                 placeholder="Select..."
+                :minDate="mainStore.currentValueDate"
+                :readonly="ALLOW_ADVANCE_BATCH !== 'TRUE'"
+                :disabledDays="[0, 6]"
               />
             </InputGroup>
             <InputGroup>
@@ -325,11 +339,13 @@
               </label>
             </InputGroupAddon>
             <DatePicker
+              v-if="mainStore.currentValueDate"
               v-model="perBillTypeRunStore.perBillTypeRunForm.invoiceDate"
-              dateFormat="yy/mm/dd"
-              :minDate="new Date()"
-              :maxDate="ALLOW_ADVANCE_SINGLE === 'TRUE' ? undefined : new Date()"
+              dateFormat="yy/mm/dd (DD)"
               placeholder="Select..."
+              :minDate="mainStore.currentValueDate"
+              :readonly="ALLOW_ADVANCE_SINGLE !== 'TRUE'"
+              :disabledDays="[0, 6]"
             />
           </InputGroup>
           <InputGroup>

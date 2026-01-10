@@ -9,32 +9,107 @@ NOTES:
     note:
         for first record, set PRNTCD to 'P'
 ---------------------------------------------------------
-FOR RENTAL:
-    if unit SALTYP in LEASEPF is VAT:
-        ACCTCD = 1028PRJ0000006
+FOR RENTAL (01):
+    entry 1028:
+        if unit SALTYP in LEASEPF is VAT:
+            ACCTCD = 1028PRJ0000006
+
+        if unit SALTYP in LEASEPF is NVAT:
+            ACCTCD = 1028PRJ0000007
+
+        if unit SALTYP in LEASEPF is ZERO:
+            ACCTCD = 1028PRJ0000008
+
         DEBIT = gross rental amount
         CREDIT = 0
 
-    if unit SALTYP in LEASEPF is NVAT:
-        ACCTCD = 1028PRJ0000007
-        DEBIT = gross rental amount
-        CREDIT = 0
+    entry 2001:
+        if with vat:
+            ACCTCD = 2001PRJ0000001
+            DEBIT = 0
+            CREDIT = vat amount
 
-    if unit SALTYP in LEASEPF is ZERO:
-        ACCTCD = 1028PRJ0000008
-        DEBIT = gross rental amount
-        CREDIT = 0
+    entry 4006:
+        if PROJCD is 'CL%':
 
-    ACCTCD = 4006PRJ0000000
-    DEBIT = 0
-    CREDIT = gross rental amount - vat
+            if parking for lease
+            (CODEA in INV7PF is in 'LP' or 'LM' or
+            CODEE in INV7PF is in 'P' or 'B'):
 
-    if with vat:
-        ACCTCD = 2001PRJ0000001
+                if SALTYP is VAT:
+                    ACCTCD = 4006PRJ00020 consider as 0000020
+
+                if SALTYP is ZERO:
+                    ACCTCD = 4006PRJ00021
+
+            elif signage for lease
+            (CODEA in INV7PF is in 'LC' or 'LB' or
+            CODEE in INV7PF is 'C'):
+
+                if SALTYP is VAT:
+                    ACCTCD = 4006PRJ00030
+
+                if SALTYP is ZERO:
+                    ACCTCD = 4006PRJ00031
+
+            else:
+
+                if SALTYP is VAT:
+                    ACCTCD = 4006PRJ00010
+
+                if SALTYP is ZERO:
+                    ACCTCD = 4006PRJ00011
+
+            (no NVAT units in CLx projects)
+
+        else:
+
+            if PROJCD = 'O16':
+                if SALTYP is VAT:
+                    if CODEE in INV7PF is 'P':
+                        ACCTCD = 4006PRJ00001
+                    else:
+                        ACCTCD = 4006PRJ00000
+
+                if SALTYP is NVAT:
+                    ACCTCD = 4006PRJ00002
+
+            elif PROJCD <> 'O16' and PROJCD like 'O%':
+                if SALTYP is VAT:
+                    ACCTCD = 4006PRJ00010
+                if SALTYP is ZERO:
+                    ACCTCD = 4006PRJ00011
+
+            elif PROJCD is in 'C60', 'C65':
+                if CODEE in INV7PF is 'P' or 'B':
+                    if SALTYP is VAT:
+                        ACCTCD = 4006PRJ00020
+                    if SALTYP is ZERO:
+                        ACCTCD = 4006PRJ00021
+
+                elif CODEE in INV7PF is 'C':
+                    if SALTYP is VAT:
+                        ACCTCD = 4006PRJ00030
+                    if SALTYP is ZERO:
+                        ACCTCD = 4006PRJ00031
+
+                else:
+                    if SALTYP is VAT:
+                        ACCTCD = 4006PRJ00010
+                    if SALTYP is ZERO:
+                        ACCTCD = 4006PRJ00011
+
+            else:
+                if SALTYP is VAT:
+                    ACCTCD = 4006PRJ00000
+                if SALTYP is ZERO:
+                    ACCTCD = 4006PRJ00002
+
         DEBIT = 0
-        CREDIT = vat amount
+        CREDIT = gross rental amount - vat
 
-FOR CUSA:
+
+FOR CUSA (04):
     if unit SALTYP in LEASEPF is VAT:
         ACCTCD = 1028PRJ0000003
         DEBIT = gross cusa amount
@@ -54,6 +129,19 @@ FOR CUSA:
         DEBIT = 0
         CREDIT = vat amount
 
+FOR CUSA PENALTY (41):
+    ACCTCD = 1028PRJ0000005
+    DEBIT = gross cusa penalty amount
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000015
+    DEBIT = 0
+    CREDIT = cusa penalty vat amount
+
+    ACCTCD = 6010PRJ0000003
+    DEBIT = 0
+    CREDIT = gross cusa penalty amount - cusa penalty vat amount
+
 
 ---------------------------------------------------------
     FOR GPARPF
@@ -62,7 +150,7 @@ first particular:
     for rental and no cusa:
         'RENTAL AND PEN BILLING ' || PRJ
     for rental with cusa:
-        'RENTAL, CUSA, AND PEN BILLING ' || PRJ 
+        'RENTAL, CUSA, AND PEN BILLING ' || PRJ
 
 second particular:
     client name - trim to 35 chars

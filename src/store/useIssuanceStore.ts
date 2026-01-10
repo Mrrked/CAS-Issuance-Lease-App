@@ -262,8 +262,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       var RENTAL_NVAT_DEBIT = 0
       var RENTAL_ZERO_DEBIT = 0
 
-      var RENTAL_NET_VAT_CREDIT = 0
       var RENTAL_VAT_CREDIT = 0
+      var RENTAL_NET_VAT_CREDIT = 0
 
       // 4
       var CUSA_VAT_DEBIT = 0
@@ -272,7 +272,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
       var CUSA_NET_VAT_CREDIT = 0
       var CUSA_VAT_CREDIT = 0
 
+      // 41
+      var PENALTY_CUSA_DEBIT = 0
+      var PENALTY_CUSA_VAT_CREDIT = 0
+      var PENALTY_CUSA_NET_VAT_CREDIT = 0
+
       invoiceRecord.BILLINGS.forEach((bill) => {
+        // RENTAL
         if (bill.BILL_TYPE === 1) {
           if (bill.SALTYP === 'VAT') {
             RENTAL_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_DEBIT + bill.AMOUNT)
@@ -282,12 +288,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RENTAL_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_ZERO_DEBIT + bill.AMOUNT)
           }
 
-          RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
-
           if (bill.VAT) {
             RENTAL_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_CREDIT + bill.VAT)
           }
-        } else if (bill.BILL_TYPE === 4) {
+
+          RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
+
+        // PENALTY ON RENTAL [NONE]
+
+        // CUSA
+        else if (bill.BILL_TYPE === 4) {
           if (bill.SALTYP === 'VAT') {
             CUSA_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_DEBIT + bill.AMOUNT)
           } else if (bill.SALTYP === 'ZERO') {
@@ -299,6 +310,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
           if (bill.VAT) {
             CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_CREDIT + bill.VAT)
           }
+        }
+
+        // PENALTY ON CUSA
+        else if (bill.BILL_TYPE === 41) {
+          PENALTY_CUSA_DEBIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_DEBIT + bill.AMOUNT)
+          PENALTY_CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_VAT_CREDIT + bill.VAT)
+          PENALTY_CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
         }
       })
 
@@ -371,29 +389,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
         })
       }
 
-      if (RENTAL_NET_VAT_CREDIT > 0) {
-        GFL2PF.push({
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `4006${PROJ}0000000`,
-          DEBIT:  0,
-          CREDIT: RENTAL_NET_VAT_CREDIT,
-          CHKNUM: 0,
-          PRNTCD: '',
-          MCCODE: '',
-          DATTRN: 0,
-          ORCOD:  '',
-          ORNUM:  0
-        })
-      }
-
       if (RENTAL_VAT_CREDIT > 0) {
         GFL2PF.push({
           VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
@@ -408,6 +403,124 @@ export const useIssuanceStore = defineStore('issuance', () => {
           ACCTCD: `2001${PROJ}0000001`,
           DEBIT:  0,
           CREDIT: RENTAL_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (RENTAL_NET_VAT_CREDIT > 0) {
+        var account_code = `4006${PROJ}`
+
+        if (PROJ.startsWith('CL')) {
+          // IF PARKING FOR LEASE
+          if (
+            ['LP', 'LM'].includes(invoiceRecord.CODEA) ||
+            ['P',  'B'].includes(invoiceRecord.CODEE)
+          ) {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              account_code += '0000020'
+            } else if (invoiceRecord.SALTYP === 'ZERO') {
+              account_code += '0000021'
+            }
+          }
+
+          // IF SIGNAGE FOR LEASE
+          else if (
+            ['LC', 'LB'].includes(invoiceRecord.CODEA) ||
+            ['C'].includes(invoiceRecord.CODEE)
+          ) {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              account_code += '0000030'
+            } else if (invoiceRecord.SALTYP === 'ZERO') {
+              account_code += '0000031'
+            }
+          }
+
+          else {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              account_code += '0000010'
+            } else if (invoiceRecord.SALTYP === 'ZERO') {
+              account_code += '0000011'
+            }
+          }
+
+        } else {
+          // 1
+          if (PROJ === 'O16') {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              if (invoiceRecord.CODEE === 'P') {
+                account_code += '0000001'
+              } else {
+                account_code += '0000000'
+              }
+            } else if (invoiceRecord.SALTYP === 'NVAT') {
+              account_code += '0000002'
+            }
+          }
+
+          // 2
+          else if (PROJ !== 'O16' && PROJ.startsWith('O')) {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              account_code += '0000010'
+            } else if (invoiceRecord.SALTYP === 'ZERO') {
+              account_code += '0000011'
+            }
+          }
+
+          // 3
+          else if (['C60', 'C65'].includes(PROJ)) {
+            if (['P','B'].includes(invoiceRecord.CODEE)) {
+              if (invoiceRecord.SALTYP === 'VAT') {
+                account_code += '0000020'
+              } else if (invoiceRecord.SALTYP === 'ZERO') {
+                account_code += '0000021'
+              }
+            }
+
+            else if (['C'].includes(invoiceRecord.CODEE)) {
+              if (invoiceRecord.SALTYP === 'VAT') {
+                account_code += '0000030'
+              } else if (invoiceRecord.SALTYP === 'ZERO') {
+                account_code += '0000031'
+              }
+            }
+
+            else {
+              if (invoiceRecord.SALTYP === 'VAT') {
+                account_code += '0000010'
+              } else if (invoiceRecord.SALTYP === 'ZERO') {
+                account_code += '0000011'
+              }
+            }
+          }
+
+          // 4
+          else {
+            if (invoiceRecord.SALTYP === 'VAT') {
+              account_code += '0000000'
+            } else if (invoiceRecord.SALTYP === 'ZERO') {
+              account_code += '0000002'
+            }
+          }
+        }
+
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: account_code,
+          DEBIT:  0,
+          CREDIT: RENTAL_NET_VAT_CREDIT,
           CHKNUM: 0,
           PRNTCD: '',
           MCCODE: '',
@@ -510,6 +623,79 @@ export const useIssuanceStore = defineStore('issuance', () => {
           ORNUM:  0
         })
       }
+
+      // PENALTY ON CUSA
+
+      if (PENALTY_CUSA_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000005`,
+          DEBIT:  PENALTY_CUSA_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PENALTY_CUSA_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000015`,
+          DEBIT:  0,
+          CREDIT: PENALTY_CUSA_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PENALTY_CUSA_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6010${PROJ}0000003`,
+          DEBIT:  0,
+          CREDIT: PENALTY_CUSA_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      // SET FIRST ENTRY TO PRNTCD = 'P'
 
       GFL2PF = GFL2PF.map((entry, index) => {
         if (index === 0) {
@@ -1738,6 +1924,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
           TCLTNO:           bill.TCLTNO || 0,
           CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW || '',
           NOTICE_NUMBER:    bill.NOTICE_NUMBER,
+          CODEA:            bill.CODEA,
+          CODEE:            bill.CODEE,
+          SALTYP:           bill.SALTYP,
 
           BILLINGS:         [ bill ],
 
@@ -2049,11 +2238,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
-
+    console.log(
+      selectedInvoiceRecord.SALTYP,
+      selectedInvoiceRecord.CODEA,
+      selectedInvoiceRecord.CODEE
+    )
     console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
       'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
     ])
-
+    console.table(selectedInvoiceRecord.ENTRY?.GPARPF, [
+      'PARTNO', 'PARCLR'
+    ])
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
     // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);
@@ -3717,9 +3912,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               perBatchRunStore.billings = []
               perBatchRunStore.billings = response.data.data as LeaseBill[];
               perBatchRunStore.handleActionViewMainDialog()
-              // perBatchRunStore.billings.forEach((bill) => {
-              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              // })
+              perBatchRunStore.billings.forEach((bill) => {
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
+              })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {

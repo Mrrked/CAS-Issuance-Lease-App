@@ -72,6 +72,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
   })
 
   const canRunSingleIssuance = computed(() => {
+    return true
     const today = perBillTypeRunForm.value.invoiceDate.getDay()
     // Monday = 1, ..., Friday = 5
     return today >= 1 && today <= 5

@@ -443,6 +443,8 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
 
   ID: string
   PBL_KEY: string
+  CODEA: string
+  CODEE: string
   TCLTNO: number
   CLIENT_NAME: string
   CLIENT_ADDRESS: string
@@ -768,6 +770,9 @@ export interface InvoiceRecord {
   TCLTNO: number
   CLIENT_KEY_RAW?: string
   NOTICE_NUMBER: string
+  CODEA: string  //FOR ENTRY RENTAL CUSA
+  CODEE: string  //FOR ENTRY RENTAL CUSA
+  SALTYP: string //FOR ENTRY RENTAL CUSA
 
   BILLINGS: LeaseBill[]
 

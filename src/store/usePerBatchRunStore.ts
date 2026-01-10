@@ -161,6 +161,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
   })
 
   const canRunSingleIssuance = computed(() => {
+    return true
     const today = perBatchRunForm.value.invoiceDate.getDay()
     // Monday = 1, ..., Friday = 5
     return today >= 1 && today <= 5

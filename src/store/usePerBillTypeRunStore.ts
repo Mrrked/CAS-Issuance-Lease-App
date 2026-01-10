@@ -188,7 +188,7 @@ export const usePerBillTypeRunStore = defineStore('1_PerBillTypeRun', () => {
             ...INVOICE.CORFPF,
 
             DATOR: stampDate,
-            ORAMT: INVOICE.TOTAL_BREAKDOWN.AMTDUE,
+            ORAMT: 0,
             NOACCT: NO_OF_MONTHS,
             DATPRT: Number.parseInt(`${stampTime}` + (INVOICE.TOTAL_BREAKDOWN.VATAMT > 0 ? '01' : '00')),
             NOMOS: NO_OF_MONTHS,

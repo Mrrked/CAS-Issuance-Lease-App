@@ -2050,7 +2050,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             DATOR:          0, //UPDATE ON FINAL
             CASHCD:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
             COLSTF:         '',
-            ORAMT:          bill.TOTAL_AMOUNT, //UPDATE ON FINAL
+            ORAMT:          0, //UPDATE ON FINAL
             NOACCT:         0, //UPDATE ON FINAL no of months
             PAYTYP:         bill.PAYTYP,
             INTRST:         0,

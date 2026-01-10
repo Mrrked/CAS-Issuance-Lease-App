@@ -83,7 +83,11 @@ export interface User extends ExternalISeriesProfile {}
 
 export type InquiryType = 'Unit' | 'Client Name'
 export type PerBillTypeOption = 'Rental and CUSA' | 'Electricity and Generator Set' | 'Water'
-export type PerBatchTypeOption = 'Rental and CUSA' | 'Penalty on Rental' | 'Penalty on CUSA'
+export type PerBatchTypeOption = 'Rental and CUSA' |
+  'Rental Only' |
+  'CUSA Only'   |
+  'Penalty on Rental Only' |
+  'Penalty on CUSA Only'
 
 export interface PerBillTypeRunForm {
   invoiceDate: Date
@@ -116,7 +120,7 @@ export interface PerBillTypeRunForm {
 
 export interface PerBatchRunForm {
   invoiceDate: Date
-  billType:    'A' | 'B' | 'C'
+  billType:    'A' | 'B' | 'C' | 'D' | 'E'
 
   projectCode: ProjectRecord | null
   PBL: {

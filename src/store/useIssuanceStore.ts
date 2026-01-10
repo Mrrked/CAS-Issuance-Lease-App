@@ -3685,7 +3685,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
           if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
             return
-          } else if (perBatchRunStore.perBatchRunForm.billType !== 'A' && (!hasProject_Batch() || !hasPBL_Batch())) {
+          } else if (
+            (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
+            && !hasProject_Batch()
+          ) {
+            return
+          } else if (
+            (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
+            && (!hasProject_Batch() || !hasPBL_Batch())
+          ) {
             return
           }
 
@@ -3732,7 +3740,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
           if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
             return
-          } else if (perBatchRunStore.perBatchRunForm.billType !== 'A' && !hasProject_Batch() && !hasPBL_Batch()) {
+          } else if (
+            (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
+            && !hasProject_Batch()
+          ) {
+            return
+          } else if (
+            (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
+            && (!hasProject_Batch() || !hasPBL_Batch())
+          ) {
             return
           }
 

@@ -30,10 +30,12 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const leaseType = ref<'Short Term Lease' | 'Long Term Lease' | ''>('')
 
-  const BILL_TYPE_OPTIONS: {value: 'A' | 'B' | 'C', name: PerBatchTypeOption}[] = [
+  const BILL_TYPE_OPTIONS: {value: 'A' | 'B' | 'C' | 'D' | 'E', name: PerBatchTypeOption}[] = [
     { value: 'A', name: 'Rental and CUSA' },
-    { value: 'B', name: 'Penalty on Rental' },
-    { value: 'C', name: 'Penalty on CUSA' },
+    { value: 'B', name: 'Rental Only' },
+    { value: 'C', name: 'CUSA Only' },
+    { value: 'D', name: 'Penalty on Rental Only' },
+    { value: 'E', name: 'Penalty on CUSA Only' },
   ]
 
   const perBatchRunForm = ref<PerBatchRunForm>({
@@ -97,8 +99,7 @@ export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const isShowPBLForm = computed((): boolean => {
     return (
-      perBatchRunForm.value.billType === 'B' ||
-      perBatchRunForm.value.billType === 'C'
+      perBatchRunForm.value.billType !== 'A'
     )
   })
 

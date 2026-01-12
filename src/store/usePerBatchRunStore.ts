@@ -19,8 +19,8 @@ const ViewScheduleBatchIssuanceModal = defineAsyncComponent(() => import('../com
 export const usePerBatchRunStore = defineStore('2_PerBatchRun', () => {
 
   const toast = useToast()
-  const dialog = useDialog();
-  const confirm = useConfirm();
+  const dialog = useDialog()
+  const confirm = useConfirm()
 
   const fileStore = useFileStore()
   const mainStore = useMainStore()

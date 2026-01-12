@@ -7,6 +7,7 @@
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
   import { useSessionStore } from '../../store/useSessionStore';
 
+  const VerificationTableForIssuance = defineAsyncComponent(() => import('../../components/Issuance/Verification/VerificationTableForIssuance.vue'))
   const PartialUnitInquiryBillGroup = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBillGroup.vue'))
   const PartialUnitInquiryBatch = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBatch.vue'))
 
@@ -20,7 +21,7 @@
   const ALLOW_ADVANCE_BATCH = import.meta.env.VITE_ALLOW_ADVANCE_BATCH || 'FALSE';
   const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
 
-  const selectedTab = ref<'A'|'B'|'C'|''>('')
+  const selectedTab = ref<'A'|'B'|'C'|'D'|''>('')
 
   onMounted(() => {
     mainStore.fetchAllData()
@@ -55,6 +56,7 @@
           <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease)</Tab>
           <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Run Per Batch (Short Term Lease)</Tab>
           <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Utilities)</Tab>
+          <Tab :value="'D'" v-if="sessionStore.userHasPermissionForTabA">Run Per Verification</Tab>
         </TabList>
       </Tabs>
       <div class="flex flex-col items-center w-48 p-1 border rounded bg-opacity-5 border-primary bg-primary">
@@ -328,7 +330,7 @@
       </Fieldset>
     </div>
 
-    <!-- OK PER BILL TYPE RUNNING - UTILITIES -->
+    <!-- PER BILL TYPE RUNNING - UTILITIES -->
     <div v-else-if="selectedTab === 'C'" class="flex flex-col items-center justify-start">
       <Fieldset legend="Bill Type Group Running" class="min-w-[700px] max-w-[700px]">
         <div v-focustrap class="flex flex-col gap-2">
@@ -396,5 +398,8 @@
         </div>
       </Fieldset>
     </div>
+
+    <!-- PER VERIFICATION -->
+    <VerificationTableForIssuance v-else-if="selectedTab === 'D'"/>
   </div>
 </template>

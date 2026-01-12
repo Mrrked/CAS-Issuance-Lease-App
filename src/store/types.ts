@@ -147,6 +147,10 @@ export interface PerBatchRunForm {
   }
 }
 
+export interface PerVerificationRunForm {
+  invoiceDate: Date
+}
+
 export interface UnitForm {
   project_code: ProjectRecord | null
   pcs_code: {
@@ -497,6 +501,7 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   TOTAL_AMOUNT: number
 
   LOPDTF?: LOPDTF[]
+  VERIFICATION?: VerificationOfPayment
 }
 
 export interface LedgerRemark {
@@ -615,6 +620,91 @@ export interface CheckDetails {
   CASHCD: string;        // USER ID CODE (CHAR, 10)
   TIMEUP: number;        // TIME UPDATED (ZONED, 6, 0)
   DELCHK: string;        // DELETE CHECK (CHAR, 1)
+}
+
+export type VerificationType = 'VS' | 'NR'
+export type Truth = 'Y' | 'N' | ''
+
+export interface VerificationOfPayment {
+  VER_KEY: string;         //
+  // CLIENT_KEY: string;      //
+  // CLIENT_NAME: string;     //
+  // PBL_KEY: string;         //
+  // IS_ISSUED: boolean;
+  // STATUS: VerificationStatus;
+  // ISSUED_DOCUMENTS: IssuedDocument[]
+
+
+  ROWID: number;           //
+  VERTYP: VerificationType // Verification Type
+  COMPCD: number;          // Company Code (Zoned, 2 digits)
+  VERCOD: string;          // Verification Code (Char, 2 characters)
+  VERNUM: number;          // Verification Number (Zoned, 8 digits)
+
+  PROJCD: string;          // Project Code (Char, 3 characters)
+  PCSCOD: string;          // PCS Code (Char, 1 character)
+  PHASE: string;           // Phase (Char, 1 character)
+  BLOCK: string;           // Block (Char, 2 characters)
+  LOT: string;             // Lot (Char, 4 characters)
+  UNITCD: string;          // Unit Code (Char, 2 characters)
+  TCLTNO: number;          // Temp. Client Number (Zoned, 7 digits)
+
+  VATCOD: string;          // Vat Code (Char, 1 character)
+  PAYTYP: string;          // Payment Type (Char, 1 character)
+  PAYNUM: number;          // Payment Number (Zoned, 3 digits)
+  PAYDAT: number;          // Payment Date (Zoned, 8 digits)
+  NOMOS: number;           // Number of Months (Zoned, 3 digits)
+
+  INSTNO: number;          // Installment Number (Zoned, 3 digits)
+  DATINS: number;          // Installment Date (Zoned, 8 digits)
+  SCHEDB: number;          // Schedule Balance (Zoned, 13.2)
+  ACTBAL: number;          // Actual Balance (Zoned, 13.2)
+  RUNBAL: number;          // Running Balance (Zoned, 13.2)
+
+  INSTDP: Truth;           // Instalment DP? Y/N
+  TRMTOCSH: Truth;         // Term to Cash? Y/N
+
+  BILTYP: number;          // Bill Type (Zoned, 2 digits)
+  FRBILL: number;          // Bill From-Date (Zoned, 8 digits)
+  TOBILL: number;          // Bill To-Date (Zoned, 8 digits)
+
+  PRNPAL: number;          // Principal (Zoned, 13.2)
+  INTRST: number;          // Interest (Zoned, 13.2)
+  PNALTY: number;          // Penalty (Zoned, 13.2)
+  OTHERS: number;          // Others (Zoned, 13.2)
+  GROSSRET: number;        // Gross RET (Zoned, 13.2)
+  NETRET: number;          // Net RET (Zoned, 13.2)
+  DISCOUNT: number;        // Discount Availed (Zoned, 13.2)
+  YRQTR: string;           // Year/Quarter (Char, 1 character)
+  THRESH: number;          // Threshold (Zoned, 13.2)
+  ADVANCE: number;         // Advance Payment (Zoned, 13.2)
+  ADVBT: number;           // Advance Payment-Bill Type (Zoned, 2 digits)
+  OVRPAY: number;          // Over Payment (Zoned, 13.2)
+  UNDPAY: number;          // Under Payment (Zoned, 13.2)
+  PROCFEE: number;         // Processing Fee (Zoned, 13.2)
+  ZERORT: number;          // Zero Rated (Zoned, 13.2)
+  VATSAL: number;          // Vat Sales (Zoned, 13.2)
+  VATEXM: number;          // Vat Exempt (Zoned, 13.2)
+  VATAMT: number;          // Vat Amount (Zoned, 13.2)
+  GOVTAX: number;          // Government Tax (Zoned, 13.2)
+  PRPTAX: number;          // Prepaid Tax (Zoned, 13.2)
+  TRNAMT: number;          // Transaction Amount (Zoned, 13.2)
+
+  RMARK1: string;          // Remarks 1 (Char, 50 characters)
+  RMARK2: string;          // Remarks 2 (Char, 50 characters)
+  RMARK3: string;          // Remarks 3 (Char, 50 characters)
+  RMARK4: string;          // Remarks 4 (Char, 50 characters)
+  COLLID: string;          // Collection Staff (Char, 10 characters)
+
+  DATVER: number;          // Verification Date (Zoned, 8 digits)
+  TIMVER: number;          // Verification Time (Zoned, 6 digits)
+
+  DOCTYP: string;          // Ref. Doc. Type (Char, 2 characters)
+
+  DELETE: string;
+  USRDEL: string;
+  DATDEL: number;
+  TIMDEL: number;
 }
 
 export type IssuedDocumentType = 'Sales Invoice' | 'Service Invoice' | 'Billing Invoice' | 'Collection Receipt' | 'Acknowledgement Receipt' | 'Old Official Receipt'
@@ -775,6 +865,8 @@ export interface InvoiceRecord {
   SALTYP: string //FOR ENTRY RENTAL CUSA
 
   BILLINGS: LeaseBill[]
+  VER_KEY: string
+  VERIFICATION?: VerificationOfPayment
 
   INVOICE_KEY: InvoiceKey
 

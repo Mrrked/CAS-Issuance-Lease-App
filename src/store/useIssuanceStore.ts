@@ -12,6 +12,7 @@ import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+import { usePerVerificationRunStore } from './usePerVerificationStore';
 
 export const useIssuanceStore = defineStore('issuance', () => {
 
@@ -25,6 +26,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
+  const perVerificationStore = usePerVerificationRunStore()
 
   const BILL_TYPES_WITH_PENALTY_TYPE  = [1, 2, 3, 4, 5, 6, 7]
   const PENALTY_BILL_TYPES            = [11, 21, 31, 41, 51, 61, 71]
@@ -1930,7 +1932,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           BILLINGS:         [ bill ],
 
+          VER_KEY:          bill.VERIFICATION?.VER_KEY || '',
           INVOICE_KEY:      bill.INVOICE_KEY,
+
+          VERIFICATION:     bill.VERIFICATION || undefined,
 
           // CIRCLTPF
           DETAILS: {
@@ -3824,7 +3829,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     loading.close()
   }
 
-  const handleActionSearch = (tab: 'A'|'B'|'C') => {
+  const handleActionSearch = (tab: 'A'|'B'|'C'|'D') => {
     const hasProject_BillType = () => {
       if (!perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD) {
         toast.add({
@@ -4030,6 +4035,27 @@ export const useIssuanceStore = defineStore('issuance', () => {
             life: 3000
           })
         }
+        break;
+
+      // Per Verification Run
+      case 'D':
+        const loading = utilStore.startLoadingModal('Fetching ...')
+        const form = perVerificationStore.perVerificationRunForm
+        const data = {
+          year: form.invoiceDate.getFullYear(),
+          month: form.invoiceDate.getMonth() + 1,
+        };
+
+        axios.post(`issuance_lease/per_verification/`, data)
+          .then((response) => {
+            console.log('FETCHED OPEN BILLINGS', response.data.data);
+            perVerificationStore.billings = []
+            perVerificationStore.billings = response.data.data as LeaseBill[];
+          })
+          .catch(utilStore.handleAxiosError)
+          .finally(() => {
+            loading.close()
+          })
         break;
 
       default:

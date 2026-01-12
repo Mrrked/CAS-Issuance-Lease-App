@@ -8,6 +8,7 @@ import { usePerBatchRunStore } from './usePerBatchRunStore';
 import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 import { useSessionStore } from './useSessionStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
+import { usePerVerificationRunStore } from './usePerVerificationStore';
 
 export const useMainStore = defineStore('main', () => {
 
@@ -15,6 +16,7 @@ export const useMainStore = defineStore('main', () => {
   const sessionStore = useSessionStore()
   const perBatchRunStore = usePerBatchRunStore()
   const perBillTypeRunStore = usePerBillTypeRunStore()
+  const perVerificationStore = usePerVerificationRunStore()
   const companyHeaderStore = useCompanyHeaderStore()
 
   const allowReloadExitPage = ref<boolean>(true);
@@ -108,6 +110,7 @@ export const useMainStore = defineStore('main', () => {
           currentValueDate.value = new Date(response.data.date);
           perBatchRunStore.perBatchRunForm.invoiceDate = new Date(response.data.date);
           perBillTypeRunStore.perBillTypeRunForm.invoiceDate = new Date(response.data.date);
+          perVerificationStore.perVerificationRunForm.invoiceDate = new Date(response.data.date);
         }),
       companyHeaderStore.fetchAllCompanyHeaderDetails(),
     ])

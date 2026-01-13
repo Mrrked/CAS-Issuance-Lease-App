@@ -54,7 +54,7 @@
       paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
       currentPageReportTemplate="{first} to {last} of {totalRecords}"
     >
-      <template #empty> No bill found. </template>
+      <template #empty> No verification found. </template>
 
       <template #header>
         <div class="flex justify-between gap-2">

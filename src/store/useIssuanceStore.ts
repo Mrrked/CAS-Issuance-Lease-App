@@ -227,7 +227,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
     // const GENSET_BT = [7, 71]
     const WATER_BT  = [6, 61]
 
-
     var GPARPF: GPARPF[] = []
     var GFL2PF: GFL2PF[] = []
     var MAIN_PAR = ''
@@ -1282,6 +1281,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       //     ACCTCD = '2001PRJ0000002'
       //     DEBIT = 0
       //     CREDIT = vat amount
+    } else {
+      return undefined
     }
 
 

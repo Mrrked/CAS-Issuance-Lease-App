@@ -39,6 +39,9 @@
       } else if (sessionStore.userHasPermissionForTabC) {
         selectedTab.value = 'C'
         perBatchRunStore.leaseType = ''
+      } else if (sessionStore.userHasPermissionForTabD) {
+        selectedTab.value = 'D'
+        perBatchRunStore.leaseType = ''
       } else {
         selectedTab.value = ''
         perBatchRunStore.leaseType = ''
@@ -56,7 +59,7 @@
           <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Run Per Batch (Long Term Lease)</Tab>
           <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Run Per Batch (Short Term Lease)</Tab>
           <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Bill Type (Utilities)</Tab>
-          <Tab :value="'D'" v-if="sessionStore.userHasPermissionForTabA">Run Per Verification</Tab>
+          <Tab :value="'D'" v-if="sessionStore.userHasPermissionForTabD">Run Per Verification</Tab>
         </TabList>
       </Tabs>
       <div class="flex flex-col items-center w-48 p-1 border rounded bg-opacity-5 border-primary bg-primary">

@@ -1229,7 +1229,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           VRCOD:  '',
           'VOUCH#': 0,
           'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `6012${PROJ}0000006`,
+          ACCTCD: `6010${PROJ}0000006`,
           DEBIT:  0,
           CREDIT: WATER_PENALTY_CREDIT,
           CHKNUM: 0,

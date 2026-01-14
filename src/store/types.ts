@@ -89,6 +89,36 @@ export type PerBatchTypeOption = 'Rental and CUSA' |
   'Penalty on Rental Only' |
   'Penalty on CUSA Only'
 
+export type ForBillingGroupOptionLabel =
+  '(A) Electricity and Generator Set' |
+  '(B) Water' |
+  '(C) Rental and CUSA' |
+  '(D) Rental Only' |
+  '(E) CUSA Only'   |
+  '(F) Penalty on Rental Only' |
+  '(G) Penalty on CUSA Only'
+
+export type ForRecordingGroupOptionLabel =
+  '(A) Electricity and Generator Set' |
+  '(B) Water' |
+  '(C) Rental and CUSA' |
+  '(D) Rental Only' |
+  '(E) CUSA Only'   |
+  '(F) Penalty on Rental Only' |
+  '(G) Penalty on CUSA Only'
+
+export type ForBillingGroupOption = {
+  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+  name: ForBillingGroupOptionLabel
+  billTypes: number[]
+}
+
+export type ForRecordingGroupOption = {
+  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+  name: ForRecordingGroupOptionLabel
+  billTypes: number[]
+}
+
 export interface PerBillTypeRunForm {
   invoiceDate: Date
   billType:    'A' | 'B' | 'C'
@@ -121,6 +151,64 @@ export interface PerBillTypeRunForm {
 export interface PerBatchRunForm {
   invoiceDate: Date
   billType:    'A' | 'B' | 'C' | 'D' | 'E'
+
+  projectCode: ProjectRecord | null
+  PBL: {
+    pcs_code: {
+      1: string
+    }
+    phase: {
+      1: string
+    }
+    block: {
+      1: string
+      2: string
+    }
+    lot: {
+      1: string
+      2: string
+      3: string
+      4: string
+    }
+    unit_code: {
+      1: string
+      2: string
+    }
+  }
+}
+
+export interface ForBillingGroupForm {
+  invoiceDate: Date
+  billType:    ForBillingGroupOption
+
+  projectCode: ProjectRecord | null
+  PBL: {
+    pcs_code: {
+      1: string
+    }
+    phase: {
+      1: string
+    }
+    block: {
+      1: string
+      2: string
+    }
+    lot: {
+      1: string
+      2: string
+      3: string
+      4: string
+    }
+    unit_code: {
+      1: string
+      2: string
+    }
+  }
+}
+
+export interface ForRecordingGroupForm {
+  invoiceDate: Date
+  billType:    ForRecordingGroupOption
 
   projectCode: ProjectRecord | null
   PBL: {

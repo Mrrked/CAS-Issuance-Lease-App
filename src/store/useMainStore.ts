@@ -4,18 +4,23 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import axios from '../axios'
 import { defineStore } from 'pinia'
 import { useCompanyHeaderStore } from './useCompanyHeaderStore';
-import { usePerBatchRunStore } from './usePerBatchRunStore';
-import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
+import { useForBillingGroupStore } from './useForBillingGroupStore';
+import { useForRecordingGroupStore } from './useForRecordingGroupStore';
+import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
-import { usePerVerificationRunStore } from './usePerVerificationStore';
+
+// import { usePerBatchRunStore } from './usePerBatchRunStore';
+// import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 
 export const useMainStore = defineStore('main', () => {
 
   const utilStore = useUtilitiesStore()
   const sessionStore = useSessionStore()
-  const perBatchRunStore = usePerBatchRunStore()
-  const perBillTypeRunStore = usePerBillTypeRunStore()
+  // const perBatchRunStore = usePerBatchRunStore()
+  // const perBillTypeRunStore = usePerBillTypeRunStore()
+  const forBillingGroupStore = useForBillingGroupStore()
+  const forRecordingGroupStore = useForRecordingGroupStore()
   const perVerificationStore = usePerVerificationRunStore()
   const companyHeaderStore = useCompanyHeaderStore()
 
@@ -108,9 +113,11 @@ export const useMainStore = defineStore('main', () => {
       axios.get('issuance_lease/value_date/')
         .then((response) => {
           currentValueDate.value = new Date(response.data.date);
-          perBatchRunStore.perBatchRunForm.invoiceDate = new Date(response.data.date);
-          perBillTypeRunStore.perBillTypeRunForm.invoiceDate = new Date(response.data.date);
+          // perBatchRunStore.perBatchRunForm.invoiceDate = new Date(response.data.date);
+          // perBillTypeRunStore.perBillTypeRunForm.invoiceDate = new Date(response.data.date);
           perVerificationStore.perVerificationRunForm.invoiceDate = new Date(response.data.date);
+          forBillingGroupStore.forBillingGroupForm.invoiceDate = new Date(response.data.date);
+          forRecordingGroupStore.forRecordingGroupForm.invoiceDate = new Date(response.data.date);
         }),
       companyHeaderStore.fetchAllCompanyHeaderDetails(),
     ])

@@ -25,7 +25,7 @@
 
   onMounted(() => {
     perVerificationRunStore.selectedInvoiceRecord = undefined
-    issuanceStore.handleActionSearch('D')
+    issuanceStore.handleActionSearch('C')
   })
 </script>
 
@@ -63,7 +63,7 @@
           </div>
           <div class="flex justify-between gap-5">
             <Button
-              @click="issuanceStore.handleActionSearch('D')"
+              @click="issuanceStore.handleActionSearch('C')"
               raised
               label="Refresh"
               icon="pi pi-refresh"

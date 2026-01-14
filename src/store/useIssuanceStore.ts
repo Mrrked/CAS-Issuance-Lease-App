@@ -6,13 +6,16 @@ import axios from '../axios'
 import { defineStore } from 'pinia'
 import { useCompanyHeaderStore } from './useCompanyHeaderStore';
 import { useFileStore } from './useFileStore';
+import { useForBillingGroupStore } from './useForBillingGroupStore';
+import { useForRecordingGroupStore } from './useForRecordingGroupStore';
 import { useMainStore } from './useMainStore';
-import { usePerBatchRunStore } from './usePerBatchRunStore';
-import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
+import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
-import { usePerVerificationRunStore } from './usePerVerificationStore';
+
+// import { usePerBatchRunStore } from './usePerBatchRunStore';
+// import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
 
 export const useIssuanceStore = defineStore('issuance', () => {
 
@@ -24,8 +27,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
   const sessionStore = useSessionStore()
   const companyHeaderStore = useCompanyHeaderStore()
 
-  const perBatchRunStore = usePerBatchRunStore()
-  const perBillTypeRunStore = usePerBillTypeRunStore()
+  // const perBatchRunStore = usePerBatchRunStore()
+  // const perBillTypeRunStore = usePerBillTypeRunStore()
+  const forBillingGroupStore = useForBillingGroupStore()
+  const forRecordingGroupStore = useForRecordingGroupStore()
   const perVerificationStore = usePerVerificationRunStore()
 
   const BILL_TYPES_WITH_PENALTY_TYPE  = [1, 2, 3, 4, 5, 6, 7]
@@ -3830,9 +3835,293 @@ export const useIssuanceStore = defineStore('issuance', () => {
     loading.close()
   }
 
-  const handleActionSearch = (tab: 'A'|'B'|'C'|'D') => {
-    const hasProject_BillType = () => {
-      if (!perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD) {
+  // OLD
+  // const handleActionSearch = (tab: 'A'|'B'|'C'|'D') => {
+  //   const hasProject_BillType = () => {
+  //     if (!perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD) {
+  //       toast.add({
+  //         severity: 'warn',
+  //         summary: 'Error: Invalid Project',
+  //         detail: 'Unable to recognize the selected project. Please check.',
+  //         life: 3000
+  //       });
+  //       return false
+  //     }
+  //     return true
+  //   }
+  //   const hasProject_Batch = () => {
+  //     if (!perBatchRunStore.perBatchRunForm.projectCode?.PROJCD) {
+  //       toast.add({
+  //         severity: 'warn',
+  //         summary: 'Error: Invalid Project',
+  //         detail: 'Unable to recognize the selected project. Please check.',
+  //         life: 3000
+  //       });
+  //       return false
+  //     }
+  //     return true
+  //   }
+  //   const hasPBL_Batch = () => {
+  //     const pbl_checking = (
+  //       perBatchRunStore.perBatchRunForm.PBL.pcs_code['1'].trim()  ||
+  //       perBatchRunStore.perBatchRunForm.PBL.phase['1'].trim()     ||
+  //       perBatchRunStore.perBatchRunForm.PBL.block['1'].trim()     ||
+  //       perBatchRunStore.perBatchRunForm.PBL.block['2'].trim()     ||
+  //       perBatchRunStore.perBatchRunForm.PBL.lot['1'].trim()       ||
+  //       perBatchRunStore.perBatchRunForm.PBL.lot['2'].trim()       ||
+  //       perBatchRunStore.perBatchRunForm.PBL.lot['3'].trim()       ||
+  //       perBatchRunStore.perBatchRunForm.PBL.lot['4'].trim()       ||
+  //       perBatchRunStore.perBatchRunForm.PBL.unit_code['1'].trim() ||
+  //       perBatchRunStore.perBatchRunForm.PBL.unit_code['2'].trim()
+  //     )
+  //     if (!pbl_checking) {
+  //       toast.add({
+  //         severity: 'warn',
+  //         summary: 'Error: Missing Unit Identifiers',
+  //         detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+  //         life: 3000
+  //       });
+  //       return false
+  //     }
+  //     return true
+  //   }
+
+  //   switch (tab) {
+  //     // Per Batch - Long Term Lease
+  //     case 'A':
+  //       if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+  //         if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
+  //           return
+  //         } else if (
+  //           (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
+  //           && !hasProject_Batch()
+  //         ) {
+  //           return
+  //         } else if (
+  //           (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
+  //           && (!hasProject_Batch() || !hasPBL_Batch())
+  //         ) {
+  //           return
+  //         }
+
+  //         const loading = utilStore.startLoadingModal('Fetching ...')
+  //         const form = perBatchRunStore.perBatchRunForm
+  //         const data = {
+  //           year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+  //           month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
+  //           billType: form.billType,
+  //           leaseType: 'Long Term Lease',
+  //           PROJCD: form.projectCode?.PROJCD,
+  //           PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+  //           PHASE: form.PBL?.phase['1'] || ' ',
+  //           BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+  //           LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+  //           UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+  //         };
+  //         axios.post(`issuance_lease/per_batch/`, data)
+  //           .then((response) => {
+  //             console.log('FETCHED OPEN BILLINGS', response.data.data);
+  //             perBatchRunStore.billings = []
+  //             perBatchRunStore.billings = response.data.data as LeaseBill[];
+  //             perBatchRunStore.handleActionViewMainDialog()
+  //             perBatchRunStore.billings.forEach((bill) => {
+  //               console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
+  //             })
+  //           })
+  //           .catch(utilStore.handleAxiosError)
+  //           .finally(() => {
+  //             loading.close()
+  //           })
+  //       } else {
+  //         toast.add({
+  //           severity: 'warn',
+  //           summary: 'Missing Invoice Date',
+  //           detail: 'Please enter a valid invoice date!',
+  //           life: 3000
+  //         })
+  //       }
+  //       break;
+
+  //     // Per Batch - Short Term Lease
+  //     case 'B':
+  //       if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
+  //         if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
+  //           return
+  //         } else if (
+  //           (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
+  //           && !hasProject_Batch()
+  //         ) {
+  //           return
+  //         } else if (
+  //           (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
+  //           && (!hasProject_Batch() || !hasPBL_Batch())
+  //         ) {
+  //           return
+  //         }
+
+  //         const loading = utilStore.startLoadingModal('Fetching ...')
+  //         const form = perBatchRunStore.perBatchRunForm
+  //         const data = {
+  //           year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
+  //           month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
+  //           billType: form.billType,
+  //           leaseType: 'Short Term Lease',
+  //           PROJCD: form.projectCode?.PROJCD,
+  //           PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+  //           PHASE: form.PBL?.phase['1'] || ' ',
+  //           BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+  //           LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+  //           UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+  //         };
+  //         axios.post(`issuance_lease/per_batch/`, data)
+  //           .then((response) => {
+  //             console.log('FETCHED OPEN BILLINGS', response.data.data);
+  //             perBatchRunStore.billings = []
+  //             perBatchRunStore.billings = response.data.data as LeaseBill[];
+  //             perBatchRunStore.handleActionViewMainDialog()
+  //             // perBatchRunStore.billings.forEach((bill) => {
+  //             //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
+  //             // })
+  //           })
+  //           .catch(utilStore.handleAxiosError)
+  //           .finally(() => {
+  //             loading.close()
+  //           })
+  //       } else {
+  //         toast.add({
+  //           severity: 'warn',
+  //           summary: 'Missing Invoice Date',
+  //           detail: 'Please enter a valid invoice date!',
+  //           life: 3000
+  //         })
+  //       }
+  //       break;
+
+  //     // Per Bill Type / PBL
+  //     case 'C':
+  //       if (perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString()) {
+  //         if (perBillTypeRunStore.perBillTypeRunForm.billType === 'A') {
+  //           return
+  //         } else if (!hasProject_BillType()) {
+  //           return
+  //         }
+
+  //         const loading = utilStore.startLoadingModal('Fetching ...')
+  //         const form = perBillTypeRunStore.perBillTypeRunForm
+  //         const data = {
+  //           year: form.invoiceDate.getFullYear(),
+  //           month: form.invoiceDate.getMonth() + 1,
+  //           billType: form.billType,
+  //           PROJCD: form.projectCode?.PROJCD,
+  //           PCSCOD: form.PBL?.pcs_code['1'] || ' ',
+  //           PHASE: form.PBL?.phase['1'] || ' ',
+  //           BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
+  //           LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
+  //           UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
+  //         };
+
+  //         axios.post(`issuance_lease/per_bill_type/`, data)
+  //           .then((response) => {
+  //             console.log('FETCHED OPEN BILLINGS', response.data.data);
+  //             perBillTypeRunStore.billings = []
+  //             perBillTypeRunStore.billings = response.data.data as LeaseBill[];
+  //             perBillTypeRunStore.handleActionViewMainDialog()
+  //             // perBillTypeRunStore.billings.forEach((bill) => {
+  //             //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
+  //             // })
+  //           })
+  //           .catch(utilStore.handleAxiosError)
+  //           .finally(() => {
+  //             loading.close()
+  //           })
+  //       } else {
+  //         toast.add({
+  //           severity: 'warn',
+  //           summary: 'Missing Required Fields',
+  //           detail: 'Please select a valid invoice date, bill type, and project!',
+  //           life: 3000
+  //         })
+  //       }
+  //       break;
+
+  //     // Per Verification Run
+  //     case 'D':
+  //       const loading = utilStore.startLoadingModal('Fetching ...')
+  //       const form = perVerificationStore.perVerificationRunForm
+  //       const data = {
+  //         year: form.invoiceDate.getFullYear(),
+  //         month: form.invoiceDate.getMonth() + 1,
+  //       };
+
+  //       axios.post(`issuance_lease/per_verification/`, data)
+  //         .then((response) => {
+  //           console.log('FETCHED OPEN BILLINGS', response.data.data);
+  //           perVerificationStore.billings = []
+  //           perVerificationStore.billings = response.data.data as LeaseBill[];
+  //         })
+  //         .catch(utilStore.handleAxiosError)
+  //         .finally(() => {
+  //           loading.close()
+  //         })
+  //       break;
+
+  //     default:
+  //       break;
+  //   }
+  // }
+
+  // NEW
+  const handleActionSearch = (tab: 'A'|'B'|'C') => {
+    // const hasProject_BillType = () => {
+    //   if (!perBillTypeRunStore.perBillTypeRunForm.projectCode?.PROJCD) {
+    //     toast.add({
+    //       severity: 'warn',
+    //       summary: 'Error: Invalid Project',
+    //       detail: 'Unable to recognize the selected project. Please check.',
+    //       life: 3000
+    //     });
+    //     return false
+    //   }
+    //   return true
+    // }
+    // const hasProject_Batch = () => {
+    //   if (!perBatchRunStore.perBatchRunForm.projectCode?.PROJCD) {
+    //     toast.add({
+    //       severity: 'warn',
+    //       summary: 'Error: Invalid Project',
+    //       detail: 'Unable to recognize the selected project. Please check.',
+    //       life: 3000
+    //     });
+    //     return false
+    //   }
+    //   return true
+    // }
+    // const hasPBL_Batch = () => {
+    //   const pbl_checking = (
+    //     perBatchRunStore.perBatchRunForm.PBL.pcs_code['1'].trim()  ||
+    //     perBatchRunStore.perBatchRunForm.PBL.phase['1'].trim()     ||
+    //     perBatchRunStore.perBatchRunForm.PBL.block['1'].trim()     ||
+    //     perBatchRunStore.perBatchRunForm.PBL.block['2'].trim()     ||
+    //     perBatchRunStore.perBatchRunForm.PBL.lot['1'].trim()       ||
+    //     perBatchRunStore.perBatchRunForm.PBL.lot['2'].trim()       ||
+    //     perBatchRunStore.perBatchRunForm.PBL.lot['3'].trim()       ||
+    //     perBatchRunStore.perBatchRunForm.PBL.lot['4'].trim()       ||
+    //     perBatchRunStore.perBatchRunForm.PBL.unit_code['1'].trim() ||
+    //     perBatchRunStore.perBatchRunForm.PBL.unit_code['2'].trim()
+    //   )
+    //   if (!pbl_checking) {
+    //     toast.add({
+    //       severity: 'warn',
+    //       summary: 'Error: Missing Unit Identifiers',
+    //       detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+    //       life: 3000
+    //     });
+    //     return false
+    //   }
+    //   return true
+    // }
+    const hasProject_ForBillingGroup = () => {
+      if (!forBillingGroupStore.forBillingGroupForm.projectCode?.PROJCD) {
         toast.add({
           severity: 'warn',
           summary: 'Error: Invalid Project',
@@ -3843,8 +4132,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
       return true
     }
-    const hasProject_Batch = () => {
-      if (!perBatchRunStore.perBatchRunForm.projectCode?.PROJCD) {
+    const hasProject_ForRecordingGroup = () => {
+      if (!forRecordingGroupStore.forRecordingGroupForm.projectCode?.PROJCD) {
         toast.add({
           severity: 'warn',
           summary: 'Error: Invalid Project',
@@ -3855,56 +4144,69 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
       return true
     }
-    const hasPBL_Batch = () => {
-      const pbl_checking = (
-        perBatchRunStore.perBatchRunForm.PBL.pcs_code['1'].trim()  ||
-        perBatchRunStore.perBatchRunForm.PBL.phase['1'].trim()     ||
-        perBatchRunStore.perBatchRunForm.PBL.block['1'].trim()     ||
-        perBatchRunStore.perBatchRunForm.PBL.block['2'].trim()     ||
-        perBatchRunStore.perBatchRunForm.PBL.lot['1'].trim()       ||
-        perBatchRunStore.perBatchRunForm.PBL.lot['2'].trim()       ||
-        perBatchRunStore.perBatchRunForm.PBL.lot['3'].trim()       ||
-        perBatchRunStore.perBatchRunForm.PBL.lot['4'].trim()       ||
-        perBatchRunStore.perBatchRunForm.PBL.unit_code['1'].trim() ||
-        perBatchRunStore.perBatchRunForm.PBL.unit_code['2'].trim()
-      )
-      if (!pbl_checking) {
-        toast.add({
-          severity: 'warn',
-          summary: 'Error: Missing Unit Identifiers',
-          detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
-          life: 3000
-        });
-        return false
-      }
-      return true
-    }
+    // const hasPBL_ForBillingGroup = () => {
+    //   const pbl_checking = (
+    //     forBillingGroupStore.forBillingGroupForm.PBL.pcs_code['1'].trim()  ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.phase['1'].trim()     ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.block['1'].trim()     ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.block['2'].trim()     ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.lot['1'].trim()       ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.lot['2'].trim()       ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.lot['3'].trim()       ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.lot['4'].trim()       ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.unit_code['1'].trim() ||
+    //     forBillingGroupStore.forBillingGroupForm.PBL.unit_code['2'].trim()
+    //   )
+    //   if (!pbl_checking) {
+    //     toast.add({
+    //       severity: 'warn',
+    //       summary: 'Error: Missing Unit Identifiers',
+    //       detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+    //       life: 3000
+    //     });
+    //     return false
+    //   }
+    //   return true
+    // }
+    // const hasPBL_ForRecordingGroup = () => {
+    //   const pbl_checking = (
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.pcs_code['1'].trim()  ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.phase['1'].trim()     ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.block['1'].trim()     ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.block['2'].trim()     ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.lot['1'].trim()       ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.lot['2'].trim()       ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.lot['3'].trim()       ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.lot['4'].trim()       ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.unit_code['1'].trim() ||
+    //     forRecordingGroupStore.forRecordingGroupForm.PBL.unit_code['2'].trim()
+    //   )
+    //   if (!pbl_checking) {
+    //     toast.add({
+    //       severity: 'warn',
+    //       summary: 'Error: Missing Unit Identifiers',
+    //       detail: 'No PCS Code, Phase, Block, Lot or Unit Code was entered. Please check.',
+    //       life: 3000
+    //     });
+    //     return false
+    //   }
+    //   return true
+    // }
 
     switch (tab) {
-      // Per Batch - Long Term Lease
+      // For Billing Group
       case 'A':
-        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-          if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
-            return
-          } else if (
-            (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
-            && !hasProject_Batch()
-          ) {
-            return
-          } else if (
-            (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
-            && (!hasProject_Batch() || !hasPBL_Batch())
-          ) {
+        if (forBillingGroupStore.forBillingGroupForm.invoiceDate?.toISOString()) {
+          if (!hasProject_ForBillingGroup()) {
             return
           }
 
           const loading = utilStore.startLoadingModal('Fetching ...')
-          const form = perBatchRunStore.perBatchRunForm
+          const form = forBillingGroupStore.forBillingGroupForm
           const data = {
-            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
-            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
-            billType: form.billType,
-            leaseType: 'Long Term Lease',
+            year: forBillingGroupStore.forBillingGroupForm.invoiceDate.getFullYear(),
+            month: forBillingGroupStore.forBillingGroupForm.invoiceDate.getMonth() + 1,
+            selectedBillTypes: form.billType.billTypes,
             PROJCD: form.projectCode?.PROJCD,
             PCSCOD: form.PBL?.pcs_code['1'] || ' ',
             PHASE: form.PBL?.phase['1'] || ' ',
@@ -3912,13 +4214,13 @@ export const useIssuanceStore = defineStore('issuance', () => {
             LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
             UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
           };
-          axios.post(`issuance_lease/per_batch/`, data)
+          axios.post(`issuance_lease/for_billing_group/`, data)
             .then((response) => {
               console.log('FETCHED OPEN BILLINGS', response.data.data);
-              perBatchRunStore.billings = []
-              perBatchRunStore.billings = response.data.data as LeaseBill[];
-              perBatchRunStore.handleActionViewMainDialog()
-              perBatchRunStore.billings.forEach((bill) => {
+              forBillingGroupStore.billings = []
+              forBillingGroupStore.billings = response.data.data as LeaseBill[];
+              forBillingGroupStore.handleActionViewMainDialog()
+              forBillingGroupStore.billings.forEach((bill) => {
                 console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
               })
             })
@@ -3936,30 +4238,19 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
         break;
 
-      // Per Batch - Short Term Lease
+      // For Recording Group
       case 'B':
-        if (perBatchRunStore.perBatchRunForm.invoiceDate?.toISOString()) {
-          if (perBatchRunStore.perBatchRunForm.billType === 'A' && !hasProject_Batch()) {
-            return
-          } else if (
-            (perBatchRunStore.perBatchRunForm.billType === 'B' || perBatchRunStore.perBatchRunForm.billType === 'C')
-            && !hasProject_Batch()
-          ) {
-            return
-          } else if (
-            (perBatchRunStore.perBatchRunForm.billType === 'D' || perBatchRunStore.perBatchRunForm.billType === 'E')
-            && (!hasProject_Batch() || !hasPBL_Batch())
-          ) {
+        if (forRecordingGroupStore.forRecordingGroupForm.invoiceDate?.toISOString()) {
+          if (!hasProject_ForRecordingGroup()) {
             return
           }
 
           const loading = utilStore.startLoadingModal('Fetching ...')
-          const form = perBatchRunStore.perBatchRunForm
+          const form = forRecordingGroupStore.forRecordingGroupForm
           const data = {
-            year: perBatchRunStore.perBatchRunForm.invoiceDate.getFullYear(),
-            month: perBatchRunStore.perBatchRunForm.invoiceDate.getMonth() + 1,
-            billType: form.billType,
-            leaseType: 'Short Term Lease',
+            year: forRecordingGroupStore.forRecordingGroupForm.invoiceDate.getFullYear(),
+            month: forRecordingGroupStore.forRecordingGroupForm.invoiceDate.getMonth() + 1,
+            selectedBillTypes: form.billType.billTypes,
             PROJCD: form.projectCode?.PROJCD,
             PCSCOD: form.PBL?.pcs_code['1'] || ' ',
             PHASE: form.PBL?.phase['1'] || ' ',
@@ -3967,15 +4258,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
             LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
             UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
           };
-          axios.post(`issuance_lease/per_batch/`, data)
+          axios.post(`issuance_lease/for_recording_group/`, data)
             .then((response) => {
               console.log('FETCHED OPEN BILLINGS', response.data.data);
-              perBatchRunStore.billings = []
-              perBatchRunStore.billings = response.data.data as LeaseBill[];
-              perBatchRunStore.handleActionViewMainDialog()
-              // perBatchRunStore.billings.forEach((bill) => {
-              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              // })
+              forRecordingGroupStore.billings = []
+              forRecordingGroupStore.billings = response.data.data as LeaseBill[];
+              forRecordingGroupStore.handleActionViewMainDialog()
+              forRecordingGroupStore.billings.forEach((bill) => {
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
+              })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -3991,55 +4282,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
         }
         break;
 
-      // Per Bill Type / PBL
-      case 'C':
-        if (perBillTypeRunStore.perBillTypeRunForm.invoiceDate?.toISOString()) {
-          if (perBillTypeRunStore.perBillTypeRunForm.billType === 'A') {
-            return
-          } else if (!hasProject_BillType()) {
-            return
-          }
-
-          const loading = utilStore.startLoadingModal('Fetching ...')
-          const form = perBillTypeRunStore.perBillTypeRunForm
-          const data = {
-            year: form.invoiceDate.getFullYear(),
-            month: form.invoiceDate.getMonth() + 1,
-            billType: form.billType,
-            PROJCD: form.projectCode?.PROJCD,
-            PCSCOD: form.PBL?.pcs_code['1'] || ' ',
-            PHASE: form.PBL?.phase['1'] || ' ',
-            BLOCK: `${form.PBL?.block['1'] || ' '}${form.PBL?.block['2'] || ' '}`,
-            LOT: `${form.PBL?.lot['1'] || ' '}${form.PBL?.lot['2'] || ' '}${form.PBL?.lot['3'] || ' '}${form.PBL?.lot['4'] || ' '}`,
-            UNITCD: `${form.PBL?.unit_code['1'] || ' '}${form.PBL?.unit_code['2'] || ' '}`,
-          };
-
-          axios.post(`issuance_lease/per_bill_type/`, data)
-            .then((response) => {
-              console.log('FETCHED OPEN BILLINGS', response.data.data);
-              perBillTypeRunStore.billings = []
-              perBillTypeRunStore.billings = response.data.data as LeaseBill[];
-              perBillTypeRunStore.handleActionViewMainDialog()
-              // perBillTypeRunStore.billings.forEach((bill) => {
-              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP);
-              // })
-            })
-            .catch(utilStore.handleAxiosError)
-            .finally(() => {
-              loading.close()
-            })
-        } else {
-          toast.add({
-            severity: 'warn',
-            summary: 'Missing Required Fields',
-            detail: 'Please select a valid invoice date, bill type, and project!',
-            life: 3000
-          })
-        }
-        break;
-
       // Per Verification Run
-      case 'D':
+      case 'C':
         const loading = utilStore.startLoadingModal('Fetching ...')
         const form = perVerificationStore.perVerificationRunForm
         const data = {
@@ -4067,13 +4311,45 @@ export const useIssuanceStore = defineStore('issuance', () => {
   const handleActionReset = (tab: 'A'|'B'|'C') => {
     // CLEAR FORM FIELDS
     switch (tab) {
-      // Per Batch
+      // For Billing Group
       case 'A':
+        if (mainStore.currentValueDate) {
+          forBillingGroupStore.forBillingGroupForm = {
+            invoiceDate: mainStore.currentValueDate,
+            billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7]},
+            projectCode: null,
+            PBL: {
+              pcs_code: {
+                1: '',
+              },
+              phase: {
+                1: '',
+              },
+              block: {
+                1: '',
+                2: ''
+              },
+              lot: {
+                1: '',
+                2: '',
+                3: '',
+                4: ''
+              },
+              unit_code: {
+                1: '',
+                2: ''
+              },
+            }
+          }
+        }
+        break;
+
+      // For Recording Group
       case 'B':
         if (mainStore.currentValueDate) {
-          perBatchRunStore.perBatchRunForm = {
+          forRecordingGroupStore.forRecordingGroupForm = {
             invoiceDate: mainStore.currentValueDate,
-            billType: 'A',
+            billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7]},
             projectCode: null,
             PBL: {
               pcs_code: {
@@ -4100,40 +4376,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
           }
         }
         break;
-
-      // Per Bill Type / PBL
-      case 'C':
-        if (mainStore.currentValueDate) {
-          perBillTypeRunStore.perBillTypeRunForm = {
-            invoiceDate: mainStore.currentValueDate,
-            billType: 'B',
-            projectCode: null,
-            PBL: {
-              pcs_code: {
-                1: '',
-              },
-              phase: {
-                1: '',
-              },
-              block: {
-                1: '',
-                2: ''
-              },
-              lot: {
-                1: '',
-                2: '',
-                3: '',
-                4: ''
-              },
-              unit_code: {
-                1: '',
-                2: ''
-              },
-            }
-          }
-        }
-        break;
-
 
       default:
         break;

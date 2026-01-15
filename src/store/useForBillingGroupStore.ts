@@ -178,7 +178,7 @@ export const useForBillingGroupStore = defineStore('ForBillingGroup', () => {
         const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
         const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
-        const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, [1,4])
+        const NO_OF_MONTHS = issuanceStore.getNOMOS(INVOICE, forBillingGroupForm.value.billType.billTypes)
 
         var entry = INVOICE.ENTRY || undefined
         const invoice_date = INVOICE.CORFPF.DATVAL
@@ -190,10 +190,12 @@ export const useForBillingGroupStore = defineStore('ForBillingGroup', () => {
               ...entry.GFL1PF,
                 DATTRN: invoice_date,
                 DATECR: invoice_date,
-                PAYCOD: '9999',
-                PAYEE: INVOICE.DETAILS.CLTKEY + '/' +
-                  INVOICE.PBL_KEY + '/' +
-                  INVOICE.TCLTNO
+                PAYCOD: ['A','B'].includes(forBillingGroupForm.value.billType.value) ?
+                  '8888' :
+                  '9999',
+                PAYEE: ['A','B'].includes(forBillingGroupForm.value.billType.value) ?
+                  'N.A.' :
+                  INVOICE.DETAILS.CLTKEY + '/' + INVOICE.PBL_KEY + '/' + INVOICE.TCLTNO
             },
             GFL2PF: entry.GFL2PF.map((acc_entry) => {
               return {

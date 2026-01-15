@@ -69,7 +69,29 @@ export const usePerVerificationRunStore = defineStore('3_PerVerificationRun', ()
           const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
           const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
-          const NO_OF_MONTHS = selectedInvoiceRecord.value?.BILLINGS[0].VERIFICATION?.NOMOS || 0
+          const NO_OF_MONTHS = selectedInvoiceRecord.value?.BILLINGS.length || 0
+
+          var entry = INVOICE.ENTRY || undefined
+          const invoice_date = INVOICE.CORFPF.DATVAL
+
+          if (entry) {
+            entry = {
+              ...entry,
+              GFL1PF: {
+                ...entry.GFL1PF,
+                DATTRN: invoice_date,
+                DATECR: invoice_date,
+                PAYCOD: '9999',
+                PAYEE: INVOICE.DETAILS.CLTKEY + '/' + INVOICE.PBL_KEY + '/' + INVOICE.TCLTNO
+              },
+              GFL2PF: entry.GFL2PF.map((acc_entry) => {
+                return {
+                  ...acc_entry,
+                  DATTRN: invoice_date
+                }
+              })
+            }
+          }
 
           const SELECTED_INVOICE: InvoiceRecord = {
             ...INVOICE,

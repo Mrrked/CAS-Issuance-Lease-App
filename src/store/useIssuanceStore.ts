@@ -1982,7 +1982,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             RUNBY:          sessionStore.authenticatedUser?.username.toUpperCase() || '',
 
             // FOOTER
-            AUTHSG:         sessionStore.authenticatedUser?.user.full_name.toUpperCase() || '',
+            AUTHSG:         sessionStore.authenticatedUser?.username === 'CTLREC' ? sessionStore.authenticatedUser?.username : sessionStore.authenticatedUser?.user.full_name.toUpperCase() || '',
             ACNUM:          selectedCompanyHeader?.ACN || bill.ACDAT,
             ACDAT:          selectedCompanyHeader?.DATE_ISSUED || bill.ACDAT,
             STRRNG:         bill.INVOICE_KEY.SERIES_RANGE,
@@ -4349,7 +4349,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         if (mainStore.currentValueDate) {
           forRecordingGroupStore.forRecordingGroupForm = {
             invoiceDate: mainStore.currentValueDate,
-            billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7]},
+            billType: { value: 'C', name: '(C) Rental and CUSA', billTypes: [1, 4, 2, 10, 11, 41]},
             projectCode: null,
             PBL: {
               pcs_code: {

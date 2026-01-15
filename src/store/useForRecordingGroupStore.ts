@@ -37,7 +37,7 @@ export const useForRecordingGroupStore = defineStore('ForRecordingGroup', () => 
 
   const forRecordingGroupForm = ref<ForRecordingGroupForm>({
     invoiceDate: new Date(),
-    billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7]},
+    billType: { value: 'C', name: '(C) Rental and CUSA', billTypes: [1, 4, 2, 10, 11, 41]},
 
     projectCode: null,
     PBL: {

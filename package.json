@@ -15,6 +15,7 @@
     "axios": "^1.7.4",
     "html2pdf.js": "^0.10.2",
     "jspdf-autotable": "^5.0.2",
+    "jszip": "^3.10.1",
     "jwt-decode": "^4.0.0",
     "pdf-lib": "^1.17.1",
     "pinia": "^2.2.1",

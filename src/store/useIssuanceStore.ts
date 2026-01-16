@@ -1,6 +1,6 @@
 import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
 import jsPDF, { jsPDFOptions } from 'jspdf';
-
+import JSZip from 'jszip'
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -3831,6 +3831,27 @@ export const useIssuanceStore = defineStore('issuance', () => {
       () => {}
     )
     fileStore.handleActionDownloadFileBlob(PDF_BLOB, `${name}.pdf`)
+
+    // 4. ZIP individual invoices ✅
+    const zip = new JSZip()
+
+    invoicePDFDataS.forEach((invoicePDFData, index) => {
+      const fileName =
+        `${invoicePDFData.header.clientKey.slice(0, 4)}` +
+        `${invoicePDFData.header.unit} - ` +
+        `${invoicePDFData.header.controlNumber}.pdf`
+
+      zip.file(fileName, PDF_BLOBS[index])
+    })
+
+    // 5. Generate ZIP blob
+    const ZIP_BLOB = await zip.generateAsync({ type: 'blob' })
+
+    // 6. Download ZIP (single browser download → no limit)
+    fileStore.handleActionDownloadFileBlob(
+      ZIP_BLOB,
+      `${name} (Individual Invoices).zip`
+    )
 
     loading.close()
   }

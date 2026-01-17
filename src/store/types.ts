@@ -588,7 +588,7 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
 
   TOTAL_AMOUNT: number
 
-  LOPDTF?: LOPDTF[]
+  LOPD2PF?: LOPD2PF[]
   VERIFICATION?: VerificationOfPayment
 }
 
@@ -973,8 +973,8 @@ export interface InvoiceRecord {
   CRMKPF: CRMKPF
   CORF4PF: CORF4PF[]
 
-  LOPHTF: LOPHTF
-  LOPDTF: LOPDTF[]
+  LOPH2PF: LOPH2PF
+  LOPD2PF: LOPD2PF[]
   CORF3PF: CORF3PF
 
   // ENTRIES
@@ -1194,7 +1194,7 @@ interface CORF4PF {
   USRENT: string; // USER NAME (CHAR 10)
 }
 
-interface LOPHTF { //Long Term Lease Header File
+interface LOPH2PF { //Long Term Lease Header File
   COMPCD: number;   // COMPANY CODE (ZONED 2,0)
   BRANCH: number;   // BRANCH CODE (ZONED 1,0)
   DEPTCD: number;   // DEPARTMENT CODE (ZONED 2,0)
@@ -1223,7 +1223,7 @@ interface LOPHTF { //Long Term Lease Header File
   TIMUPD: number;   // TIME UPDATED (ZONED 6,0)
 }
 
-interface LOPDTF { //Long Term Lease Payment Detail
+interface LOPD2PF { //Long Term Lease Payment Detail
   COMPCD: number;    // COMPANY CODE (ZONED 2,0)
   BRANCH: number;    // BRANCH CODE (ZONED 1,0)
   DEPTCD: number;    // DEPARTMENT CODE (ZONED 2,0)

@@ -37,7 +37,7 @@ export const useForBillingGroupStore = defineStore('ForBillingGroup', () => {
 
   const forBillingGroupForm = ref<ForBillingGroupForm>({
     invoiceDate: new Date(),
-    billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7]},
+    billType: { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7, 51, 71]},
 
     projectCode: null,
     PBL: {
@@ -241,13 +241,13 @@ export const useForBillingGroupStore = defineStore('ForBillingGroup', () => {
                 TIMENT: stampTime,
               }
             }),
-          LOPHTF: {
-            ...INVOICE.LOPHTF,
+          LOPH2PF: {
+            ...INVOICE.LOPH2PF,
             DATOR: stampDate,
             DATUPD: stampDate,
             TIMUPD: stampTime,
           },
-          LOPDTF: INVOICE.LOPDTF
+          LOPD2PF: INVOICE.LOPD2PF
             .map((record) => {
               return {
                 ...record,

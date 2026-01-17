@@ -1,5 +1,6 @@
 import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
 import jsPDF, { jsPDFOptions } from 'jspdf';
+
 import JSZip from 'jszip'
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
@@ -1466,8 +1467,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_SALES
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT - WHTAX_VAT_SALES
 
-            mergedMap[key].LOPDTF = [
-              ...(mergedMap[key].LOPDTF || []),
+            mergedMap[key].LOPD2PF = [
+              ...(mergedMap[key].LOPD2PF || []),
               {
                 COMPCD:         bill.INVOICE_KEY.COMPCD,
                 BRANCH:         bill.INVOICE_KEY.BRANCH,
@@ -1515,8 +1516,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].WITHHOLDING_TAX += WHTAX_VAT_EXEMPT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT - WHTAX_VAT_EXEMPT
 
-            mergedMap[key].LOPDTF = [
-              ...(mergedMap[key].LOPDTF || []),
+            mergedMap[key].LOPD2PF = [
+              ...(mergedMap[key].LOPD2PF || []),
               {
                 COMPCD:         bill.INVOICE_KEY.COMPCD,
                 BRANCH:         bill.INVOICE_KEY.BRANCH,
@@ -1561,8 +1562,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].VAT += bill.BALAMT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT
 
-            mergedMap[key].LOPDTF = [
-              ...(mergedMap[key].LOPDTF || []),
+            mergedMap[key].LOPD2PF = [
+              ...(mergedMap[key].LOPD2PF || []),
               {
                 COMPCD:         bill.INVOICE_KEY.COMPCD,
                 BRANCH:         bill.INVOICE_KEY.BRANCH,
@@ -1607,8 +1608,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
             mergedMap[key].GOVT_TAX += bill.BALAMT
             mergedMap[key].TOTAL_AMOUNT += bill.BALAMT
 
-            mergedMap[key].LOPDTF = [
-              ...(mergedMap[key].LOPDTF || []),
+            mergedMap[key].LOPD2PF = [
+              ...(mergedMap[key].LOPD2PF || []),
               {
                 COMPCD:         bill.INVOICE_KEY.COMPCD,
                 BRANCH:         bill.INVOICE_KEY.BRANCH,
@@ -1711,8 +1712,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
           TOTAL_AMOUNT: TOTAL_AMOUNT, //SALE + VAT - WTHTAX
         }
 
-        mergedMap[key].LOPDTF = [
-          ...(mergedMap[key].LOPDTF || []),
+        mergedMap[key].LOPD2PF = [
+          ...(mergedMap[key].LOPD2PF || []),
           {
             COMPCD:         bill.INVOICE_KEY.COMPCD,
             BRANCH:         bill.INVOICE_KEY.BRANCH,
@@ -1893,16 +1894,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           CORF4PF: mergedCORF4PF,
 
-          LOPHTF: {
-            ...mergedMap[key].LOPHTF,
-            ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.ORAMT + bill.TOTAL_AMOUNT),
-            VATOR:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.VATOR + bill.VAT),
-            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPHTF.PRPTAX + bill.PRPTAX)
+          LOPH2PF: {
+            ...mergedMap[key].LOPH2PF,
+            ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.ORAMT + bill.TOTAL_AMOUNT),
+            VATOR:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.VATOR + bill.VAT),
+            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.PRPTAX + bill.PRPTAX)
           },
 
-          LOPDTF: [
-            ...mergedMap[key].LOPDTF,
-            ...(bill.LOPDTF || []).map((record) => {
+          LOPD2PF: [
+            ...mergedMap[key].LOPD2PF,
+            ...(bill.LOPD2PF || []).map((record) => {
               return {
                 ...record,
                 DATVAL: invoiceDate
@@ -2164,7 +2165,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               USRENT:       sessionStore.authenticatedUser?.username.toUpperCase() || '',
             }
           ],
-          LOPHTF: {
+          LOPH2PF: {
             COMPCD:         bill.INVOICE_KEY.COMPCD,
             BRANCH:         bill.INVOICE_KEY.BRANCH,
             DEPTCD:         bill.INVOICE_KEY.DEPTCD,
@@ -2192,7 +2193,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             DATUPD:         0,
             TIMUPD:         0,
           },
-          LOPDTF: (bill.LOPDTF || []).map((record) => {
+          LOPD2PF: (bill.LOPD2PF || []).map((record) => {
             return {
               ...record,
               DATVAL: invoiceDate

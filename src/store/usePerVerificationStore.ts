@@ -150,7 +150,7 @@ export const usePerVerificationRunStore = defineStore('3_PerVerificationRun', ()
             ENTRY: undefined
           }
 
-          console.log("FOR ISSUANCE", SELECTED_INVOICE);
+          // console.log("FOR ISSUANCE", SELECTED_INVOICE);
 
           const data = {
             year: perVerificationRunForm.value.invoiceDate.getFullYear(),

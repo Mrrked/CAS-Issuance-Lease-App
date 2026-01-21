@@ -2250,11 +2250,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
-    console.log(
-      selectedInvoiceRecord.SALTYP,
-      selectedInvoiceRecord.CODEA,
-      selectedInvoiceRecord.CODEE
-    )
+    // console.log(
+    //   selectedInvoiceRecord.SALTYP,
+    //   selectedInvoiceRecord.CODEA,
+    //   selectedInvoiceRecord.CODEE
+    // )
     console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
       'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
     ])

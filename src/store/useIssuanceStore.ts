@@ -760,7 +760,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
           ELEC_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_CREDIT + bill.VAT)
         } else if (bill.BILL_TYPE === 5) {
-          if (bill.PBL_KEY === 'O25 L  W-01  ') {
+          if (PROJ === 'O25') {
             ELEC_VAT_SALES_SP_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_SALES_SP_DEBIT + bill.VAT_SALES + bill.VAT)
             ELEC_VAT_EXEMPT_SP_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_EXEMPT_SP_DEBIT + bill.VAT_EXEMPT)
           } else {

@@ -210,6 +210,7 @@ export interface ForRecordingGroupForm {
   invoiceDate: Date
   billType:    ForRecordingGroupOption
 
+  company: CompanyRecord | null
   projectCode: ProjectRecord | null
   PBL: {
     pcs_code: {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
   import { ref, nextTick, Ref } from "vue";
-  import { useMainStore } from "../../../store/useMainStore";
+  // import { useMainStore } from "../../../store/useMainStore";
   import { useIssuanceStore } from "../../../store/useIssuanceStore";
   import { useForRecordingGroupStore } from "../../../store/useForRecordingGroupStore";
 
-  const mainStore = useMainStore()
+  // const mainStore = useMainStore()
   const issuanceStore = useIssuanceStore()
   const forRecordingGroupStore = useForRecordingGroupStore()
 
@@ -107,8 +107,8 @@
 
 
 <template>
-  <form @submit.prevent="issuanceStore.handleActionSearch('A')" class="flex flex-col gap-5">
-    <InputGroup>
+  <form @submit.prevent="issuanceStore.handleActionSearch('B')" class="flex flex-col gap-5">
+    <!-- <InputGroup>
       <InputGroupAddon class="!bg-primary !text-primary-contrast !border-0">
         <label for="project_code" class="font-bold">
           Project Code
@@ -123,7 +123,7 @@
         class="w-full uppercase md:w-56"
         editable
       ></Select>
-    </InputGroup>
+    </InputGroup> -->
     <div class="grid grid-cols-23 gap-4 max-w-[50rem] h-20">
       <div class="flex flex-col items-center justify-center col-span-3 gap-2">
         <label class="font-bold text-center">PCS Code</label>

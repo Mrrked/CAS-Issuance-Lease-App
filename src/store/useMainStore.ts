@@ -85,6 +85,20 @@ export const useMainStore = defineStore('main', () => {
       .sort((a,b) => a.option_name.toLowerCase().localeCompare(b.option_name.toLowerCase()))
   })
 
+  const getCompanyCodeOptions = computed(() => {
+    return company_codes.value
+      .filter((company_code) => {
+        return [1,2,12].includes(company_code.COMPCD)
+      })
+      .map((company_code) => {
+        return {
+          ...company_code,
+          option_name: company_code.COMPCD + ' - ' + company_code.CONAME
+        }
+      })
+      .sort((a,b) => a.option_name.toLowerCase().localeCompare(b.option_name.toLowerCase()))
+  })
+
   const fetchAllData = () => {
     const loading = utilStore.startLoadingModal('System Loading ...')
 
@@ -157,6 +171,7 @@ export const useMainStore = defineStore('main', () => {
 
     getPaymentTypeOptions,
     getProjectCodeOptions,
+    getCompanyCodeOptions,
 
     fetchAllData,
   }

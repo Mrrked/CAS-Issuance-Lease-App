@@ -39,6 +39,7 @@ export const useForRecordingGroupStore = defineStore('ForRecordingGroup', () => 
     invoiceDate: new Date(),
     billType: { value: 'C', name: '(C) Rental and CUSA', billTypes: [1, 4, 2, 10, 11, 41]},
 
+    company: null,
     projectCode: null,
     PBL: {
       pcs_code: {

@@ -4154,12 +4154,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
       }
       return true
     }
-    const hasProject_ForRecordingGroup = () => {
-      if (!forRecordingGroupStore.forRecordingGroupForm.projectCode?.PROJCD) {
+    const hasProject_Company_ForRecordingGroup = () => {
+      if (!forRecordingGroupStore.forRecordingGroupForm.projectCode?.PROJCD && !forRecordingGroupStore.forRecordingGroupForm.company?.COMPCD) {
         toast.add({
           severity: 'warn',
-          summary: 'Error: Invalid Project',
-          detail: 'Unable to recognize the selected project. Please check.',
+          summary: 'Error: Invalid Project / Company',
+          detail: 'Unable to recognize the selected project / company. Please check.',
           life: 3000
         });
         return false
@@ -4263,7 +4263,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // For Recording Group
       case 'B':
         if (forRecordingGroupStore.forRecordingGroupForm.invoiceDate?.toISOString()) {
-          if (!hasProject_ForRecordingGroup()) {
+          if (!hasProject_Company_ForRecordingGroup()) {
             return
           }
 
@@ -4273,6 +4273,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             year: forRecordingGroupStore.forRecordingGroupForm.invoiceDate.getFullYear(),
             month: forRecordingGroupStore.forRecordingGroupForm.invoiceDate.getMonth() + 1,
             selectedBillTypes: form.billType.billTypes,
+            COMPCD: form.company?.COMPCD,
             PROJCD: form.projectCode?.PROJCD,
             PCSCOD: form.PBL?.pcs_code['1'] || ' ',
             PHASE: form.PBL?.phase['1'] || ' ',
@@ -4372,6 +4373,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           forRecordingGroupStore.forRecordingGroupForm = {
             invoiceDate: mainStore.currentValueDate,
             billType: { value: 'C', name: '(C) Rental and CUSA', billTypes: [1, 4, 2, 10, 11, 41]},
+            company: null,
             projectCode: null,
             PBL: {
               pcs_code: {

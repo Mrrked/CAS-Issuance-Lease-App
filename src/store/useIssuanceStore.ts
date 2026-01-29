@@ -518,7 +518,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         // NEW
         if(invoiceRecord.SALTYP === 'VAT'){
-          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD)) {
+          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
             account_code += '0000000'
           } else {
             if (['R'].includes(invoiceRecord.CODEE.trim())) {

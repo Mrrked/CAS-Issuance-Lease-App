@@ -564,6 +564,7 @@ export interface LeaseBill extends OutstandingBill, LeaseBillTypeRecord {
   VAT_RATE: number
   WHTAX_RATE: number
   SALTYP: string
+  LTYPCD: string
 
   YYYYMM: string
   BILL_TYPE: number

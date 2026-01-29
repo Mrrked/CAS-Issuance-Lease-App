@@ -422,96 +422,126 @@ export const useIssuanceStore = defineStore('issuance', () => {
       if (RENTAL_NET_VAT_CREDIT > 0) {
         var account_code = `4006${PROJ}`
 
-        if (PROJ.startsWith('CL')) {
-          // IF PARKING FOR LEASE
-          if (
-            ['LP', 'LM'].includes(invoiceRecord.CODEA) ||
-            ['P',  'B'].includes(invoiceRecord.CODEE)
-          ) {
-            if (invoiceRecord.SALTYP === 'VAT') {
+        // OLD
+        // if (PROJ.startsWith('CL')) {
+        //   // IF PARKING FOR LEASE
+        //   if (
+        //     ['LP', 'LM'].includes(invoiceRecord.CODEA) ||
+        //     ['P',  'B'].includes(invoiceRecord.CODEE.trim())
+        //   ) {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       account_code += '0000020'
+        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //       account_code += '0000021'
+        //     }
+        //   }
+
+        //   // IF SIGNAGE FOR LEASE
+        //   else if (
+        //     ['LC', 'LB'].includes(invoiceRecord.CODEA) ||
+        //     ['C'].includes(invoiceRecord.CODEE.trim())
+        //   ) {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       account_code += '0000030'
+        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //       account_code += '0000031'
+        //     }
+        //   }
+
+        //   else {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       account_code += '0000010'
+        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //       account_code += '0000011'
+        //     }
+        //   }
+
+        // } else {
+        //   // 1
+        //   if (PROJ === 'O16') {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       if (invoiceRecord.CODEE.trim() === 'P') {
+        //         account_code += '0000001'
+        //       } else {
+        //         account_code += '0000000'
+        //       }
+        //     } else if (invoiceRecord.SALTYP === 'NVAT') {
+        //       account_code += '0000002'
+        //     }
+        //   }
+
+        //   // 2
+        //   else if (PROJ !== 'O16' && PROJ.startsWith('O')) {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       account_code += '0000010'
+        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //       account_code += '0000011'
+        //     }
+        //   }
+
+        //   // 3
+        //   else if (['C60', 'C65'].includes(PROJ)) {
+        //     if (['P','B'].includes(invoiceRecord.CODEE.trim())) {
+        //       if (invoiceRecord.SALTYP === 'VAT') {
+        //         account_code += '0000020'
+        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //         account_code += '0000021'
+        //       }
+        //     }
+
+        //     else if (['C'].includes(invoiceRecord.CODEE.trim())) {
+        //       if (invoiceRecord.SALTYP === 'VAT') {
+        //         account_code += '0000030'
+        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //         account_code += '0000031'
+        //       }
+        //     }
+
+        //     else {
+        //       if (invoiceRecord.SALTYP === 'VAT') {
+        //         account_code += '0000010'
+        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //         account_code += '0000011'
+        //       }
+        //     }
+        //   }
+
+        //   // 4
+        //   else {
+        //     if (invoiceRecord.SALTYP === 'VAT') {
+        //       account_code += '0000000'
+        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+        //       account_code += '0000002'
+        //     }
+        //   }
+        // }
+
+        // NEW
+        if(invoiceRecord.SALTYP === 'VAT'){
+          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD)) {
+            account_code += '0000000'
+          } else {
+            if (['R'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000010'
+            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
               account_code += '0000020'
-            } else if (invoiceRecord.SALTYP === 'ZERO') {
-              account_code += '0000021'
-            }
-          }
-
-          // IF SIGNAGE FOR LEASE
-          else if (
-            ['LC', 'LB'].includes(invoiceRecord.CODEA) ||
-            ['C'].includes(invoiceRecord.CODEE)
-          ) {
-            if (invoiceRecord.SALTYP === 'VAT') {
+            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
               account_code += '0000030'
-            } else if (invoiceRecord.SALTYP === 'ZERO') {
-              account_code += '0000031'
-            }
-          }
-
-          else {
-            if (invoiceRecord.SALTYP === 'VAT') {
-              account_code += '0000010'
-            } else if (invoiceRecord.SALTYP === 'ZERO') {
-              account_code += '0000011'
-            }
-          }
-
-        } else {
-          // 1
-          if (PROJ === 'O16') {
-            if (invoiceRecord.SALTYP === 'VAT') {
-              if (invoiceRecord.CODEE === 'P') {
-                account_code += '0000001'
-              } else {
-                account_code += '0000000'
-              }
-            } else if (invoiceRecord.SALTYP === 'NVAT') {
-              account_code += '0000002'
-            }
-          }
-
-          // 2
-          else if (PROJ !== 'O16' && PROJ.startsWith('O')) {
-            if (invoiceRecord.SALTYP === 'VAT') {
-              account_code += '0000010'
-            } else if (invoiceRecord.SALTYP === 'ZERO') {
-              account_code += '0000011'
-            }
-          }
-
-          // 3
-          else if (['C60', 'C65'].includes(PROJ)) {
-            if (['P','B'].includes(invoiceRecord.CODEE)) {
-              if (invoiceRecord.SALTYP === 'VAT') {
-                account_code += '0000020'
-              } else if (invoiceRecord.SALTYP === 'ZERO') {
-                account_code += '0000021'
-              }
-            }
-
-            else if (['C'].includes(invoiceRecord.CODEE)) {
-              if (invoiceRecord.SALTYP === 'VAT') {
-                account_code += '0000030'
-              } else if (invoiceRecord.SALTYP === 'ZERO') {
-                account_code += '0000031'
-              }
-            }
-
-            else {
-              if (invoiceRecord.SALTYP === 'VAT') {
-                account_code += '0000010'
-              } else if (invoiceRecord.SALTYP === 'ZERO') {
-                account_code += '0000011'
-              }
-            }
-          }
-
-          // 4
-          else {
-            if (invoiceRecord.SALTYP === 'VAT') {
+            } else {
               account_code += '0000000'
-            } else if (invoiceRecord.SALTYP === 'ZERO') {
-              account_code += '0000002'
             }
+          }
+        }
+
+        else if(invoiceRecord.SALTYP === 'NVAT'){
+          account_code += '0000002'
+        }
+
+        else if(invoiceRecord.SALTYP === 'ZERO'){
+          if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+            account_code += '0000021'
+          } else {
+            account_code += '0000011'
           }
         }
 
@@ -2250,11 +2280,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
-    // console.log(
-    //   selectedInvoiceRecord.SALTYP,
-    //   selectedInvoiceRecord.CODEA,
-    //   selectedInvoiceRecord.CODEE
-    // )
+    console.log(
+      selectedInvoiceRecord.SALTYP,
+      selectedInvoiceRecord.BILLINGS[0].LTYPCD,
+      selectedInvoiceRecord.CODEA,
+      selectedInvoiceRecord.CODEE
+    )
     console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
       'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
     ])
@@ -3057,7 +3088,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
                 { label: 'Amount: Net of VAT',    amount: invoicePDFData.body.breakdowns.section2.netOfVAT,           isShow: true},
                 { label: 'Add: VAT',              amount: invoicePDFData.body.breakdowns.section2.addVAT,             isShow: true},
                 { label: 'Add: Government Taxes', amount: invoicePDFData.body.breakdowns.section2.addGovernmentTaxes, isShow: isBillingInvoice},
-                { label: 'Less: Witholding Tax',  amount: invoicePDFData.body.breakdowns.section2.lessWithholdingTax, isShow: true},
+                { label: 'Less: Withholding Tax',  amount: invoicePDFData.body.breakdowns.section2.lessWithholdingTax, isShow: true},
                 { label: 'TOTAL AMOUNT DUE',      amount: invoicePDFData.body.breakdowns.section2.totalAmountDue,     isShow: true},
               ]
 
@@ -4243,7 +4274,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               forBillingGroupStore.billings = response.data.data as LeaseBill[];
               forBillingGroupStore.handleActionViewMainDialog()
               forBillingGroupStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
               })
             })
             .catch(utilStore.handleAxiosError)
@@ -4288,7 +4319,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               forRecordingGroupStore.billings = response.data.data as LeaseBill[];
               forRecordingGroupStore.handleActionViewMainDialog()
               forRecordingGroupStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE);
+                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
               })
             })
             .catch(utilStore.handleAxiosError)

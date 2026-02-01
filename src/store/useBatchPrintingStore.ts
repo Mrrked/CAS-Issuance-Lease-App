@@ -138,7 +138,7 @@ export const useBatchPrintingStore = defineStore('BatchPrinting', () => {
 
     axios.post(`issuance_lease/batch_reprint/`, data)
       .then((response) => {
-        console.log('ISSUED DOCUMENTS FOR REPRINTING ', response);
+        // console.log('ISSUED DOCUMENTS FOR REPRINTING ', response.data.data);
         issuedDocuments.value = response.data.data
       })
       .catch(utilStore.handleAxiosError)

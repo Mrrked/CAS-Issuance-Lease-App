@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BatchReprinting: typeof import('./src/components/Reprint/BatchReprinting.vue')['default']
     Button: typeof import('primevue/button')['default']
     CheckDetailsModal: typeof import('./src/components/Dialog/Printing/CheckDetailsModal.vue')['default']
     ClientDataTable: typeof import('./src/components/Reprint/ClientDataTable.vue')['default']

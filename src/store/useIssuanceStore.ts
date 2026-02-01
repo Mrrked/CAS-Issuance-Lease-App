@@ -2280,18 +2280,18 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
-    console.log(
-      selectedInvoiceRecord.SALTYP,
-      selectedInvoiceRecord.BILLINGS[0].LTYPCD,
-      selectedInvoiceRecord.CODEA,
-      selectedInvoiceRecord.CODEE
-    )
-    console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
-      'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
-    ])
-    console.table(selectedInvoiceRecord.ENTRY?.GPARPF, [
-      'PARTNO', 'PARCLR'
-    ])
+    // console.log(
+    //   selectedInvoiceRecord.SALTYP,
+    //   selectedInvoiceRecord.BILLINGS[0].LTYPCD,
+    //   selectedInvoiceRecord.CODEA,
+    //   selectedInvoiceRecord.CODEE
+    // )
+    // console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
+    //   'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
+    // ])
+    // console.table(selectedInvoiceRecord.ENTRY?.GPARPF, [
+    //   'PARTNO', 'PARCLR'
+    // ])
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
     // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);

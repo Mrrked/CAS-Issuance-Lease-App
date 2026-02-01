@@ -12,6 +12,7 @@ import { useUtilitiesStore } from './useUtilitiesStore';
 const GROUP_A_USERNAMES: string[] = import.meta.env.VITE_GROUP_A_USERNAMES.split(',')
 const GROUP_B_USERNAMES: string[] = import.meta.env.VITE_GROUP_B_USERNAMES.split(',')
 const GROUP_C_USERNAMES: string[] = import.meta.env.VITE_GROUP_C_USERNAMES.split(',')
+const GROUP_REPRINT_USERNAMES: string[] = import.meta.env.VITE_REPRINT_USERNAMES.split(',')
 
 const SessionTimeoutModal = defineAsyncComponent(() => import('../components/Dialog/General/SessionTimeoutModal.vue'));
 const VerifyUserAuthorityModal = defineAsyncComponent(() => import('../components/Dialog/General/VerifyUserAuthorityModal.vue'));
@@ -62,6 +63,12 @@ export const useSessionStore = defineStore('session', () => {
   // TAB 3 = Verification
   const userHasPermissionForTabC = computed((): boolean => {
     if (authenticatedUser.value?.username) return GROUP_C_USERNAMES.includes(authenticatedUser.value.username)
+    return false
+  })
+
+  // TAB 4 = Batch Reprinting
+  const userHasPermissionForTabD = computed((): boolean => {
+    if (authenticatedUser.value?.username) return GROUP_REPRINT_USERNAMES.includes(authenticatedUser.value.username)
     return false
   })
 
@@ -200,6 +207,7 @@ export const useSessionStore = defineStore('session', () => {
     userHasPermissionForTabA,
     userHasPermissionForTabB,
     userHasPermissionForTabC,
+    userHasPermissionForTabD,
 
     fetchAuthenticatedUser,
 

@@ -96,7 +96,7 @@ export const useMainStore = defineStore('main', () => {
           option_name: company_code.COMPCD + ' - ' + company_code.CONAME
         }
       })
-      .sort((a,b) => a.option_name.toLowerCase().localeCompare(b.option_name.toLowerCase()))
+      .sort((a,b) => a.COMPCD - b.COMPCD)
   })
 
   const fetchAllData = () => {

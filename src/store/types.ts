@@ -119,6 +119,8 @@ export type ForRecordingGroupOption = {
   billTypes: number[]
 }
 
+export type BatchPrintingOption = 'All' | 'Billing Group' | 'Recording Group'
+
 export interface PerBillTypeRunForm {
   invoiceDate: Date
   billType:    'A' | 'B' | 'C'
@@ -234,6 +236,11 @@ export interface ForRecordingGroupForm {
       2: string
     }
   }
+}
+
+export interface BatchPrintingForm {
+  group: BatchPrintingOption
+  company: CompanyRecord | null
 }
 
 export interface PerVerificationRunForm {

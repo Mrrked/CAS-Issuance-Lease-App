@@ -80,16 +80,70 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
   }
 
+  // const getItemName = (bill: LeaseBill) => {
+  //   let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
+
+  //   let dateObj = new Date(extractYear, extractMonth - 1, 1);
+
+  //   const [bill_desc, month, year] = [
+  //     bill.BDESC,
+  //     dateObj.toLocaleString('default', { month: 'long' }),
+  //     dateObj.getFullYear(),
+  //   ]
+
+  //   if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE)) {
+  //     const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
+  //     bill.SALTYP === 'VAT'  ? 'V' :
+  //     bill.SALTYP === 'NVAT' ? 'N' : ''
+
+  //     let type = BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'Z' ?
+  //       '(Zero-Rated)' :
+  //       BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE) && SALES_TYPE === 'N' ?
+  //         '(VAT-Exempt)' :
+  //         '(VATable)'
+
+  //     return `${bill_desc} (${month} ${year}) ${type}`
+
+  //   } else {
+  //     let type = ''
+  //     if (bill.VAT_SALES !== 0) {
+  //       type = '(VATable)'
+  //     } else if (bill.VAT_EXEMPT !== 0) {
+  //       type = '(VAT-Exempt)'
+  //     } else if (bill.ZERO_RATE !== 0) {
+  //       type = '(Zero-Rated)'
+  //     } else if (bill.GOVT_TAX !== 0) {
+  //       type = "(Gov't-Taxes)"
+  //     }
+
+  //     return `${bill_desc} (${month} ${year}) ${type}`
+  //   }
+
+  // }
+
   const getItemName = (bill: LeaseBill) => {
-    let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
+    // let [extractYear, extractMonth] = bill.YYYYMM.split("/").map(Number);
 
-    let dateObj = new Date(extractYear, extractMonth - 1, 1);
+    // let dateObj = new Date(extractYear, extractMonth - 1, 1);
 
-    const [bill_desc, month, year] = [
+    const [bill_desc, date] = [
       bill.BDESC,
-      dateObj.toLocaleString('default', { month: 'long' }),
-      dateObj.getFullYear(),
-    ]
+      // ${dateObj.toLocaleString('default', { month: 'long' })} ${dateObj.getFullYear()},
+      (() => {
+        // Trim and normalize the dash spacing (handles: " - ", "-", "  -   ", etc.)
+        const period = bill.PERIOD.trim().replace(/\s*-\s*/, " - ");
+        const [start, end] = period.split(" - ");
+
+        // Safely extract years (support both "04/30/26" and "04/30/2026")
+        const startYear = start.split("/")[2];
+        const endYear = end.split("/")[2];
+
+        // Return formatted period
+        return startYear === endYear
+          ? `${start.slice(0, 5)} - ${end}`
+          : period;
+      })(),
+    ];
 
     if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE)) {
       const SALES_TYPE = bill.SALTYP === 'ZERO' ? 'Z' :
@@ -102,7 +156,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           '(VAT-Exempt)' :
           '(VATable)'
 
-      return `${bill_desc} (${month} ${year}) ${type}`
+      return `${bill_desc} (${date}) ${type}`
 
     } else {
       let type = ''
@@ -116,7 +170,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
         type = "(Gov't-Taxes)"
       }
 
-      return `${bill_desc} (${month} ${year}) ${type}`
+      return `${bill_desc} (${date}) ${type}`
     }
 
   }

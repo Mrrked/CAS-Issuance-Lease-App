@@ -239,6 +239,7 @@ export interface ForRecordingGroupForm {
 }
 
 export interface BatchPrintingForm {
+  valueDate: Date
   group: BatchPrintingOption
   company: CompanyRecord | null
 }

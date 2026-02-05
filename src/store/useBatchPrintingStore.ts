@@ -24,6 +24,7 @@ export const useBatchPrintingStore = defineStore('BatchPrinting', () => {
   ]
 
   const batchPrintingForm = ref<BatchPrintingForm>({
+    valueDate: new Date(),
     company: null,
     group: 'All'
   })
@@ -132,6 +133,8 @@ export const useBatchPrintingStore = defineStore('BatchPrinting', () => {
     const loading = utilStore.startLoadingModal('Fetching invoices...')
 
     const data = {
+      year: batchPrintingForm.value.valueDate.getFullYear(),
+      month: batchPrintingForm.value.valueDate.getMonth() + 1,
       group: batchPrintingForm.value.group,
       company: batchPrintingForm.value.company?.COMPCD || null,
     }
@@ -149,6 +152,7 @@ export const useBatchPrintingStore = defineStore('BatchPrinting', () => {
 
   const handleActionReset = () => {
     batchPrintingForm.value = {
+      valueDate: new Date(),
       company: null,
       group: 'All'
     }

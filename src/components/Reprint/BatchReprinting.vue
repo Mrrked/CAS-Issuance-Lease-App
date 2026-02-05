@@ -55,37 +55,53 @@
       <!-- HEADER -->
       <template #header>
         <div class="flex items-center justify-between gap-4">
-          <div class="flex gap-4">
+          <div class="flex gap-4 !text-xs items-center">
+            <DatePicker
+              v-model="batchPrintingStore.batchPrintingForm.valueDate"
+              view="month"
+              dateFormat="MM yy"
+              size="small"
+              placeholder="Month and Year"
+              fluid
+              class="w-48"
+              :pt="{
+                root: { class: 'h-8' },
+                input: { class: 'text-xs py-1 px-2 h-8' },
+                inputWrapper: { class: 'h-8' }
+              }"
+            />
             <Select
               v-model="batchPrintingStore.batchPrintingForm.group"
               :options="batchPrintingStore.GROUP_OPTIONS"
               placeholder="Select Group"
-              class="min-w-40"
-            ></Select>
+              class="min-w-48"
+              size="small"
+            />
             <Select
               ref="indexRef"
               v-model="batchPrintingStore.batchPrintingForm.company"
               :options="mainStore.getCompanyCodeOptions"
               optionLabel="option_name"
               placeholder="Select Company"
-              class="min-w-40 w-60"
+              class="w-48 min-w-48"
+              size="small"
               showClear
-            ></Select>
+            />
             <Button
               @click="batchPrintingStore.handleActionSearch"
               icon="pi pi-search"
-              size="small"
               type="button"
               severity="primary"
               label="SEARCH"
+              class="!py-[7px]"
             />
             <Button
               @click="batchPrintingStore.handleActionReset"
               icon="pi pi-times"
-              size="small"
               type="button"
               severity="warn"
               label="RESET"
+              class="!py-[7px]"
               v-if="batchPrintingStore.issued_documents_data.length > 0"
             />
           </div>
@@ -97,7 +113,7 @@
             severity="primary"
             :label="'PRINT (' + batchPrintingStore.selectedIssuedDocuments.length + ')'"
             :disabled="!batchPrintingStore.selectedIssuedDocuments.length"
-            class="w-44"
+            class="h-8 w-44"
           />
         </div>
       </template>

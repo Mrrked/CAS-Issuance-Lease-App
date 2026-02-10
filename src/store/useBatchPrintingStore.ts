@@ -100,8 +100,17 @@ export const useBatchPrintingStore = defineStore('BatchPrinting', () => {
           const zip = new JSZip()
 
           invoicePDFDataS.forEach((invoicePDFData, index) => {
+            const invoiceName = invoicePDFData.header.invoiceTypeName === 'SERVICE' ? 'Service Invoice' :
+              invoicePDFData.header.invoiceTypeName === 'BILLING' ? 'Billing Invoice' :
+                ''
+
+            const [m, d, y] = invoicePDFData.header.dateValue.split('/');
+            const valueDate = `${y}${m.padStart(2, '0')}${d.padStart(2, '0')}`;
+
+
             const fileName =
-              `${invoicePDFData.header.dateValue.replace(/\//g, '-')} ` +
+              `${invoiceName}/` +
+              `${valueDate}/` +
               `${invoicePDFData.header.clientKey.slice(0, 4)}` +
               `${invoicePDFData.header.unit} - ` +
               `${invoicePDFData.header.controlNumber}.pdf`

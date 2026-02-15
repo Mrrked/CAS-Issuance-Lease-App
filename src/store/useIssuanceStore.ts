@@ -1502,7 +1502,8 @@ export const useIssuanceStore = defineStore('issuance', () => {
       const VAT_RATE = bill.VAT_RATE ? bill.VAT_RATE / 100 : 0
       const WHTAX_RATE = bill.WHTAX_RATE ? bill.WHTAX_RATE / 100 : 0
 
-      const GROSS = bill.BALAMT
+      // const GROSS = bill.BALAMT
+      const GROSS = bill.BILAMT
       const GROSS_VAT_RATE = 1 + VAT_RATE
 
       // console.log(bill.BILL_TYPE, bill.OLD_BILL_TYPE);

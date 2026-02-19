@@ -47,9 +47,7 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
 
           await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const currentDate = new Date()
-          const stampDate = utilStore.getCurrentDateNumberYYYYMMDD(currentDate)
-          const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
+          const formData = new FormData()
 
           const ORIGINAL_INVOICES: InvoiceRecord[] = selectedIssuedDocuments.value
             .map((selected) => {
@@ -68,12 +66,16 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
               return a.DETAILS.ORNUM.localeCompare(b.DETAILS.ORNUM);
             });
 
-          const invoicePDFDataS: InvoicePDF[] = ORIGINAL_INVOICES.map((invoiceRecord) => issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord))
-          const PDF_BLOBS = invoicePDFDataS.map((invoicePDFData) =>
-            issuanceStore.generateInvoicePDFBlob(invoicePDFData)
+          const invoicePDFDataS: InvoicePDF[] = ORIGINAL_INVOICES.map((invoiceRecord) =>
+            issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord)
           )
 
-          // loading.close()
+          invoicePDFDataS.forEach((invoicePDFData) => {
+            const PDF_BLOB = issuanceStore.generateInvoicePDFBlob(invoicePDFData)
+            formData.append(`files`, PDF_BLOB, invoicePDFData.header.controlNumber);
+          })
+
+          loading.close()
         },
         reject: () => {
         }

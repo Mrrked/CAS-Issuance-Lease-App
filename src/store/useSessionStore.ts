@@ -72,6 +72,12 @@ export const useSessionStore = defineStore('session', () => {
     return false
   })
 
+  // TAB 5 = Batch Saving of PDF
+  const userHasPermissionForTabE = computed((): boolean => {
+    if (authenticatedUser.value?.username) return authenticatedUser.value.username === 'IT_MARK'
+    return false
+  })
+
   const fetchAuthenticatedUser = () => {
     const token = localStorage.getItem('access')
     if (token) {
@@ -208,6 +214,7 @@ export const useSessionStore = defineStore('session', () => {
     userHasPermissionForTabB,
     userHasPermissionForTabC,
     userHasPermissionForTabD,
+    userHasPermissionForTabE,
 
     fetchAuthenticatedUser,
 

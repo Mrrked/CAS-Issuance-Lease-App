@@ -10,6 +10,7 @@
   import { useForRecordingGroupStore } from '../../store/useForRecordingGroupStore';
 
   const BatchReprinting = defineAsyncComponent(() => import('../../components/Reprint/BatchReprinting.vue'))
+  const BatchSavingOfPDF = defineAsyncComponent(() => import('../../components/SavingPDF/BatchSavingOfPDF.vue'))
   const VerificationTableForIssuance = defineAsyncComponent(() => import('../../components/Issuance/Verification/VerificationTableForIssuance.vue'))
   // const PartialUnitInquiryBillGroup = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBillGroup.vue'))
   // const PartialUnitInquiryBatch = defineAsyncComponent(() => import('../../components/Issuance/InquiryForm/PartialUnitInquiryBatch.vue'))
@@ -26,7 +27,7 @@
   // const ALLOW_ADVANCE_BATCH = import.meta.env.VITE_ALLOW_ADVANCE_BATCH || 'FALSE';
   const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
 
-  const selectedTab = ref<'A'|'B'|'C'|'D'|''>('')
+  const selectedTab = ref<'A'|'B'|'C'|'D'|'E'|''>('')
 
   onMounted(() => {
     mainStore.fetchAllData()
@@ -60,6 +61,7 @@
           <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Recording Group</Tab>
           <Tab :value="'C'" v-if="sessionStore.userHasPermissionForTabC">Run Per Verification</Tab>
           <Tab :value="'D'" v-if="sessionStore.userHasPermissionForTabD">Batch Reprinting</Tab>
+          <Tab :value="'E'" v-if="sessionStore.userHasPermissionForTabE">Batch Saving of PDF</Tab>
         </TabList>
       </Tabs>
       <div class="flex flex-col items-center w-48 p-1 border rounded bg-opacity-5 border-primary bg-primary">
@@ -239,5 +241,8 @@
 
     <!-- BATCH REPRINTING -->
     <BatchReprinting v-else-if="selectedTab === 'D'"/>
+
+    <!-- BATCH REPRINTING -->
+    <BatchSavingOfPDF v-else-if="selectedTab === 'E'"/>
   </div>
 </template>

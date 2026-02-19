@@ -244,6 +244,11 @@ export interface BatchPrintingForm {
   company: CompanyRecord | null
 }
 
+export interface BatchPDFSavingForm {
+  valueDate: Date
+  company: CompanyRecord | null
+}
+
 export interface PerVerificationRunForm {
   invoiceDate: Date
 }
@@ -1425,4 +1430,58 @@ export interface InvoicePDF {
     reprintBy: string,
     reprintDateTime: string,
   }
+}
+
+export interface CORFXPF {
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+  ORCOD:  string
+  ORNUM:  number
+  DATOR: number
+  DATVAL: number
+  ISSUE: string
+}
+
+export interface DocumentRegistry {
+  DOCID: number
+  DOCNUM: string
+  DOCPTH: string
+
+  SYSVER: string
+  STAT: string
+
+  GENUSR: string
+  GENDAT: number
+  GENTIM: number
+  UPDUSR: string
+  UPDDAT: number
+  UPDTIM: number
+
+  SHA256: string
+}
+
+
+export interface InsertCORFXPF {
+  COMPCD: number
+  BRANCH: number
+  DEPTCD: number
+  ORCOD:  string
+  ORNUM:  number
+  DATOR: number
+  DATVAL: number
+  ISSUE: string
+}
+
+export interface InsertDocumentRegistry {
+  DOCNUM: string
+  DOCPTH: string
+
+  SYSVER: string
+  GENUSR: string
+}
+
+export interface InsertDocumentDetails {
+  CORFXPF: InsertCORFXPF
+  DOCUMENT_REGISTRY: InsertDocumentRegistry
 }

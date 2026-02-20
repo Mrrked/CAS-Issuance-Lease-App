@@ -72,10 +72,32 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
 
           invoicePDFDataS.forEach((invoicePDFData) => {
             const PDF_BLOB = issuanceStore.generateInvoicePDFBlob(invoicePDFData)
-            formData.append(`files`, PDF_BLOB, invoicePDFData.header.controlNumber);
+
+            formData.append(
+              `files`, PDF_BLOB,
+              `${invoicePDFData.header.controlNumber}.pdf`
+            );
+
+            formData.append(
+              "invoices",
+              JSON.stringify(invoicePDFData)
+            )
           })
 
-          loading.close()
+          console.log(formData.values());
+
+          axios.post(`issuance_lease/rerun_save_pdf/`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          })
+            .then((response) => {
+              console.log(response.data.data)
+            })
+            .catch(utilStore.handleAxiosError)
+            .finally(() => {
+              loading.close()
+            })
         },
         reject: () => {
         }
@@ -97,8 +119,12 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
 
     axios.post(`issuance_lease/invoices/all/`, data)
       .then((response) => {
-        // console.log('ALL ISSUED DOCUMENTS FOR SAVING PDF', response.data.data);
+        console.log('ALL ISSUED DOCUMENTS FOR SAVING PDF', response.data.data);
         issuedDocuments.value = response.data.data
+        issuedDocuments.value = issuedDocuments.value.filter((i) => i.ITEM_BREAKDOWNS.length > 0)
+        issuedDocuments.value.forEach((invoiceRecord) => {
+          console.log(invoiceRecord.ITEM_BREAKDOWNS.length);
+        })
       })
       .catch(utilStore.handleAxiosError)
       .finally(() => {

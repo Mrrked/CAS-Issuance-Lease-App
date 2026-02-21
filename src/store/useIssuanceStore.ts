@@ -278,7 +278,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const generateAccountingEntry = (invoiceRecord: InvoiceRecord): ACCOUNTING_ENTRIES | undefined => {
-    const RENTAL_CUSA_BT = [1, 4, 11, 41]
+    const RENTAL_CUSA_BT = [1, 4, 11, 41, 2, 21, 31, 10]
     const ELEC_GENSET_BT = [5, 7, 51, 71]
 
     // const RENTAL_PEN_BT = [1, 11]
@@ -316,9 +316,10 @@ export const useIssuanceStore = defineStore('issuance', () => {
       // MAIN PARTICULAR
       MAIN_PAR = 'RENT'
 
-      // ENTRIES (1,4)
+      // ENTRIES
       const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
-      // 1
+
+      // 1 2
       var RENTAL_VAT_DEBIT = 0
       var RENTAL_NVAT_DEBIT = 0
       var RENTAL_ZERO_DEBIT = 0
@@ -326,21 +327,42 @@ export const useIssuanceStore = defineStore('issuance', () => {
       var RENTAL_VAT_CREDIT = 0
       var RENTAL_NET_VAT_CREDIT = 0
 
+      // 11 21 31
+      var PENALTY_RENTAL_DEBIT = 0
+      var PENALTY_RENTAL_VAT_CREDIT = 0
+      var PENALTY_RENTAL_NET_VAT_CREDIT = 0
+
       // 4
       var CUSA_VAT_DEBIT = 0
-      var CUSA_ZERO_DEBIT = 0
-
-      var CUSA_NET_VAT_CREDIT = 0
       var CUSA_VAT_CREDIT = 0
+      var CUSA_VAT_NET_VAT_CREDIT = 0
+
+      var CUSA_ZERO_DEBIT = 0
+      var CUSA_ZERO_NET_VAT_CREDIT = 0
 
       // 41
       var PENALTY_CUSA_DEBIT = 0
       var PENALTY_CUSA_VAT_CREDIT = 0
       var PENALTY_CUSA_NET_VAT_CREDIT = 0
 
+      // 10
+      var NOTARIAL_FEE_DEBIT = 0
+      var NOTARIAL_FEE_VAT_CREDIT = 0
+      var NOTARIAL_FEE_NET_VAT_CREDIT = 0
+
+      // 81
+      var PERMIT_FEE_DEBIT = 0
+      var PERMIT_FEE_VAT_CREDIT = 0
+      var PERMIT_FEE_NET_VAT_CREDIT = 0
+
+      // 83
+      var VETTING_FEE_DEBIT = 0
+      var VETTING_FEE_VAT_CREDIT = 0
+      var VETTING_FEE_NET_VAT_CREDIT = 0
+
       invoiceRecord.BILLINGS.forEach((bill) => {
-        // RENTAL
-        if (bill.BILL_TYPE === 1) {
+        // RENTAL - ADVANCE RENTAL
+        if (bill.BILL_TYPE === 1 || bill.BILL_TYPE === 2) {
           if (bill.SALTYP === 'VAT') {
             RENTAL_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_DEBIT + bill.AMOUNT)
           } else if (bill.SALTYP === 'NVAT') {
@@ -356,20 +378,24 @@ export const useIssuanceStore = defineStore('issuance', () => {
           RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
         }
 
-        // PENALTY ON RENTAL [NONE]
+        // PENALTY ON RENTAL
+        if (bill.BILL_TYPE === 11 || bill.BILL_TYPE === 21 || bill.BILL_TYPE === 31) {
+          PENALTY_RENTAL_DEBIT = utilStore.convertNumberToRoundedNumber(PENALTY_RENTAL_DEBIT + bill.AMOUNT)
+          PENALTY_RENTAL_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_RENTAL_VAT_CREDIT + bill.VAT)
+          PENALTY_RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
 
         // CUSA
         else if (bill.BILL_TYPE === 4) {
           if (bill.SALTYP === 'VAT') {
             CUSA_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_DEBIT + bill.AMOUNT)
+            CUSA_VAT_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+            if (bill.VAT) {
+              CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_CREDIT + bill.VAT)
+            }
           } else if (bill.SALTYP === 'ZERO') {
             CUSA_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_ZERO_DEBIT + bill.AMOUNT)
-          }
-
-          CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
-
-          if (bill.VAT) {
-            CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_CREDIT + bill.VAT)
+            CUSA_ZERO_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_ZERO_NET_VAT_CREDIT + bill.AMOUNT)
           }
         }
 
@@ -379,7 +405,30 @@ export const useIssuanceStore = defineStore('issuance', () => {
           PENALTY_CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_VAT_CREDIT + bill.VAT)
           PENALTY_CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
         }
+
+        // NOTARIAL FEE
+        else if (bill.BILL_TYPE === 10) {
+          NOTARIAL_FEE_DEBIT = utilStore.convertNumberToRoundedNumber(NOTARIAL_FEE_DEBIT + bill.AMOUNT)
+          NOTARIAL_FEE_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(NOTARIAL_FEE_VAT_CREDIT + bill.VAT)
+          NOTARIAL_FEE_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(NOTARIAL_FEE_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
+
+        // PERMIT FEE
+        else if (bill.BILL_TYPE === 81) {
+          PERMIT_FEE_DEBIT = utilStore.convertNumberToRoundedNumber(PERMIT_FEE_DEBIT + bill.AMOUNT)
+          PERMIT_FEE_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PERMIT_FEE_VAT_CREDIT + bill.VAT)
+          PERMIT_FEE_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PERMIT_FEE_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
+
+        // VETTING FEE
+        else if (bill.BILL_TYPE === 83) {
+          VETTING_FEE_DEBIT = utilStore.convertNumberToRoundedNumber(VETTING_FEE_DEBIT + bill.AMOUNT)
+          VETTING_FEE_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(VETTING_FEE_VAT_CREDIT + bill.VAT)
+          VETTING_FEE_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(VETTING_FEE_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
       })
+
+      // RENTAL / ADVANCE RENTAL
 
       if (RENTAL_VAT_DEBIT > 0) {
         GFL2PF.push({
@@ -621,6 +670,77 @@ export const useIssuanceStore = defineStore('issuance', () => {
         })
       }
 
+      // PENALTY ON RENTAL / ADVANCE RENTAL / SECURITY DEPOSIT
+
+      if (PENALTY_RENTAL_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000009`,
+          DEBIT:  PENALTY_RENTAL_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PENALTY_RENTAL_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000001`,
+          DEBIT:  0,
+          CREDIT: PENALTY_RENTAL_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PENALTY_RENTAL_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6010${PROJ}0000001`,
+          DEBIT:  0,
+          CREDIT: PENALTY_RENTAL_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
       // CUSA
 
       if (CUSA_VAT_DEBIT > 0) {
@@ -637,52 +757,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
           ACCTCD: `1028${PROJ}0000003`,
           DEBIT:  CUSA_VAT_DEBIT,
           CREDIT: 0,
-          CHKNUM: 0,
-          PRNTCD: '',
-          MCCODE: '',
-          DATTRN: 0,
-          ORCOD:  '',
-          ORNUM:  0
-        })
-      }
-
-      if (CUSA_ZERO_DEBIT > 0) {
-        GFL2PF.push({
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `1028${PROJ}0000004`,
-          DEBIT:  CUSA_ZERO_DEBIT,
-          CREDIT: 0,
-          CHKNUM: 0,
-          PRNTCD: '',
-          MCCODE: '',
-          DATTRN: 0,
-          ORCOD:  '',
-          ORNUM:  0
-        })
-      }
-
-      if (CUSA_NET_VAT_CREDIT > 0) {
-        GFL2PF.push({
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `6012${PROJ}0000010`,
-          DEBIT:  0,
-          CREDIT: CUSA_NET_VAT_CREDIT,
           CHKNUM: 0,
           PRNTCD: '',
           MCCODE: '',
@@ -715,6 +789,75 @@ export const useIssuanceStore = defineStore('issuance', () => {
         })
       }
 
+      if (CUSA_VAT_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000010`,
+          DEBIT:  0,
+          CREDIT: CUSA_VAT_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (CUSA_ZERO_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000004`,
+          DEBIT:  CUSA_ZERO_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (CUSA_ZERO_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000011`,
+          DEBIT:  0,
+          CREDIT: CUSA_VAT_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
       // PENALTY ON CUSA
 
       if (PENALTY_CUSA_DEBIT > 0) {
@@ -728,7 +871,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           VRCOD:  '',
           'VOUCH#': 0,
           'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `1028${PROJ}0000005`,
+          ACCTCD: `1028${PROJ}0000010`,
           DEBIT:  PENALTY_CUSA_DEBIT,
           CREDIT: 0,
           CHKNUM: 0,
@@ -785,6 +928,220 @@ export const useIssuanceStore = defineStore('issuance', () => {
           ORNUM:  0
         })
       }
+
+      // NOTARIAL FEE
+
+      if (NOTARIAL_FEE_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000011`,
+          DEBIT:  NOTARIAL_FEE_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (NOTARIAL_FEE_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000002`,
+          DEBIT:  0,
+          CREDIT: NOTARIAL_FEE_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (NOTARIAL_FEE_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000003`,
+          DEBIT:  0,
+          CREDIT: NOTARIAL_FEE_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      // PERMIT FEE
+
+      if (PERMIT_FEE_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000012`,
+          DEBIT:  PERMIT_FEE_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PERMIT_FEE_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000002`,
+          DEBIT:  0,
+          CREDIT: PERMIT_FEE_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (PERMIT_FEE_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000007`,
+          DEBIT:  0,
+          CREDIT: PERMIT_FEE_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      // VETTING FEE
+
+      if (VETTING_FEE_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000013`,
+          DEBIT:  VETTING_FEE_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (VETTING_FEE_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000002`,
+          DEBIT:  0,
+          CREDIT: VETTING_FEE_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (VETTING_FEE_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000026`,
+          DEBIT:  0,
+          CREDIT: VETTING_FEE_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
 
       // SET FIRST ENTRY TO PRNTCD = 'P'
 
@@ -1355,23 +1712,96 @@ export const useIssuanceStore = defineStore('issuance', () => {
       MAIN_PAR = 'OTHER'
 
       // ENTRIES
-      //   FOR BTYPE 84:
+      const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
 
-      // - entry:
-      //     ACCTCD = '1028PRJ0013000'
-      //     DEBIT = invoice amount
-      //     CREDIT = 0
+      // 84
+      var OTHERS_DEBIT = 0
+      var OTHERS_VAT_CREDIT = 0
+      var OTHERS_NET_VAT_CREDIT = 0
 
-      // - entry:
-      //     ACCTCD = '6012PRJ0000007'
-      //     DEBIT = 0
-      //     CREDIT = net of vat
+      invoiceRecord.BILLINGS.forEach((bill) => {
+        // OTHERS FEE
+        if (bill.BILL_TYPE === 81) {
+          OTHERS_DEBIT = utilStore.convertNumberToRoundedNumber(OTHERS_DEBIT + bill.AMOUNT)
+          OTHERS_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(OTHERS_VAT_CREDIT + bill.VAT)
+          OTHERS_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(OTHERS_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+        }
+      })
 
-      // - entry:
-      //     ACCTCD = '2001PRJ0000002'
-      //     DEBIT = 0
-      //     CREDIT = vat amount
-    } else {
+      // OTHERS
+
+      if (OTHERS_DEBIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `1028${PROJ}0000014`,
+          DEBIT:  OTHERS_DEBIT,
+          CREDIT: 0,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (OTHERS_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `2001${PROJ}0000002`,
+          DEBIT:  0,
+          CREDIT: OTHERS_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+      if (OTHERS_NET_VAT_CREDIT > 0) {
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: `6012${PROJ}0000007`,
+          DEBIT:  0,
+          CREDIT: OTHERS_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+      }
+
+    }
+
+    else {
       return undefined
     }
 
@@ -1476,6 +1906,1206 @@ export const useIssuanceStore = defineStore('issuance', () => {
       GPARPF: GPARPF,
     }
   }
+
+  // const generateAccountingEntry = (invoiceRecord: InvoiceRecord): ACCOUNTING_ENTRIES | undefined => {
+  //   const RENTAL_CUSA_BT = [1, 4, 11, 41]
+  //   const ELEC_GENSET_BT = [5, 7, 51, 71]
+
+  //   // const RENTAL_PEN_BT = [1, 11]
+  //   const CUSA_PEN_BT   = [4, 41]
+  //   // const ELEC_BT   = [5, 51]
+  //   // const GENSET_BT = [7, 71]
+  //   const WATER_BT  = [6, 61]
+
+  //   var GPARPF: GPARPF[] = []
+  //   var GFL2PF: GFL2PF[] = []
+  //   var MAIN_PAR = ''
+
+  //   // RENTAL AND CUSA
+  //   if (invoiceRecord.BILLINGS.some((bill) => RENTAL_CUSA_BT.includes(bill.BILL_TYPE))) {
+
+  //     const hasCUSA = invoiceRecord.BILLINGS.some((bill) => CUSA_PEN_BT.includes(bill.BILL_TYPE))
+
+  //     // PARTICULARS
+  //     GPARPF  = [
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 1,
+  //         PARCLR: (hasCUSA ? 'RENTAL, CUSA, AND PEN BILLING ' : 'RENTAL AND PEN BILLING ') +
+  //           invoiceRecord.INVOICE_KEY.PROJCD
+  //       },
+  //     ]
+
+  //     // MAIN PARTICULAR
+  //     MAIN_PAR = 'RENT'
+
+  //     // ENTRIES (1,4)
+  //     const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+  //     // 1
+  //     var RENTAL_VAT_DEBIT = 0
+  //     var RENTAL_NVAT_DEBIT = 0
+  //     var RENTAL_ZERO_DEBIT = 0
+
+  //     var RENTAL_VAT_CREDIT = 0
+  //     var RENTAL_NET_VAT_CREDIT = 0
+
+  //     // 4
+  //     var CUSA_VAT_DEBIT = 0
+  //     var CUSA_ZERO_DEBIT = 0
+
+  //     var CUSA_NET_VAT_CREDIT = 0
+  //     var CUSA_VAT_CREDIT = 0
+
+  //     // 41
+  //     var PENALTY_CUSA_DEBIT = 0
+  //     var PENALTY_CUSA_VAT_CREDIT = 0
+  //     var PENALTY_CUSA_NET_VAT_CREDIT = 0
+
+  //     invoiceRecord.BILLINGS.forEach((bill) => {
+  //       // RENTAL
+  //       if (bill.BILL_TYPE === 1) {
+  //         if (bill.SALTYP === 'VAT') {
+  //           RENTAL_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_DEBIT + bill.AMOUNT)
+  //         } else if (bill.SALTYP === 'NVAT') {
+  //           RENTAL_NVAT_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_NVAT_DEBIT + bill.AMOUNT)
+  //         } else if (bill.SALTYP === 'ZERO') {
+  //           RENTAL_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(RENTAL_ZERO_DEBIT + bill.AMOUNT)
+  //         }
+
+  //         if (bill.VAT) {
+  //           RENTAL_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_VAT_CREDIT + bill.VAT)
+  //         }
+
+  //         RENTAL_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(RENTAL_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+  //       }
+
+  //       // PENALTY ON RENTAL [NONE]
+
+  //       // CUSA
+  //       else if (bill.BILL_TYPE === 4) {
+  //         if (bill.SALTYP === 'VAT') {
+  //           CUSA_VAT_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_DEBIT + bill.AMOUNT)
+  //         } else if (bill.SALTYP === 'ZERO') {
+  //           CUSA_ZERO_DEBIT = utilStore.convertNumberToRoundedNumber(CUSA_ZERO_DEBIT + bill.AMOUNT)
+  //         }
+
+  //         CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+
+  //         if (bill.VAT) {
+  //           CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(CUSA_VAT_CREDIT + bill.VAT)
+  //         }
+  //       }
+
+  //       // PENALTY ON CUSA
+  //       else if (bill.BILL_TYPE === 41) {
+  //         PENALTY_CUSA_DEBIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_DEBIT + bill.AMOUNT)
+  //         PENALTY_CUSA_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_VAT_CREDIT + bill.VAT)
+  //         PENALTY_CUSA_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(PENALTY_CUSA_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)
+  //       }
+  //     })
+
+  //     if (RENTAL_VAT_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000006`,
+  //         DEBIT:  RENTAL_VAT_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (RENTAL_NVAT_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000007`,
+  //         DEBIT:  RENTAL_NVAT_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (RENTAL_ZERO_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000008`,
+  //         DEBIT:  RENTAL_ZERO_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (RENTAL_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `2001${PROJ}0000001`,
+  //         DEBIT:  0,
+  //         CREDIT: RENTAL_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (RENTAL_NET_VAT_CREDIT > 0) {
+  //       var account_code = `4006${PROJ}`
+
+  //       // OLD
+  //       // if (PROJ.startsWith('CL')) {
+  //       //   // IF PARKING FOR LEASE
+  //       //   if (
+  //       //     ['LP', 'LM'].includes(invoiceRecord.CODEA) ||
+  //       //     ['P',  'B'].includes(invoiceRecord.CODEE.trim())
+  //       //   ) {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       account_code += '0000020'
+  //       //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //       account_code += '0000021'
+  //       //     }
+  //       //   }
+
+  //       //   // IF SIGNAGE FOR LEASE
+  //       //   else if (
+  //       //     ['LC', 'LB'].includes(invoiceRecord.CODEA) ||
+  //       //     ['C'].includes(invoiceRecord.CODEE.trim())
+  //       //   ) {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       account_code += '0000030'
+  //       //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //       account_code += '0000031'
+  //       //     }
+  //       //   }
+
+  //       //   else {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       account_code += '0000010'
+  //       //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //       account_code += '0000011'
+  //       //     }
+  //       //   }
+
+  //       // } else {
+  //       //   // 1
+  //       //   if (PROJ === 'O16') {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       if (invoiceRecord.CODEE.trim() === 'P') {
+  //       //         account_code += '0000001'
+  //       //       } else {
+  //       //         account_code += '0000000'
+  //       //       }
+  //       //     } else if (invoiceRecord.SALTYP === 'NVAT') {
+  //       //       account_code += '0000002'
+  //       //     }
+  //       //   }
+
+  //       //   // 2
+  //       //   else if (PROJ !== 'O16' && PROJ.startsWith('O')) {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       account_code += '0000010'
+  //       //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //       account_code += '0000011'
+  //       //     }
+  //       //   }
+
+  //       //   // 3
+  //       //   else if (['C60', 'C65'].includes(PROJ)) {
+  //       //     if (['P','B'].includes(invoiceRecord.CODEE.trim())) {
+  //       //       if (invoiceRecord.SALTYP === 'VAT') {
+  //       //         account_code += '0000020'
+  //       //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //         account_code += '0000021'
+  //       //       }
+  //       //     }
+
+  //       //     else if (['C'].includes(invoiceRecord.CODEE.trim())) {
+  //       //       if (invoiceRecord.SALTYP === 'VAT') {
+  //       //         account_code += '0000030'
+  //       //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //         account_code += '0000031'
+  //       //       }
+  //       //     }
+
+  //       //     else {
+  //       //       if (invoiceRecord.SALTYP === 'VAT') {
+  //       //         account_code += '0000010'
+  //       //       } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //         account_code += '0000011'
+  //       //       }
+  //       //     }
+  //       //   }
+
+  //       //   // 4
+  //       //   else {
+  //       //     if (invoiceRecord.SALTYP === 'VAT') {
+  //       //       account_code += '0000000'
+  //       //     } else if (invoiceRecord.SALTYP === 'ZERO') {
+  //       //       account_code += '0000002'
+  //       //     }
+  //       //   }
+  //       // }
+
+  //       // NEW
+  //       if(invoiceRecord.SALTYP === 'VAT'){
+  //         if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
+  //           account_code += '0000000'
+  //         } else {
+  //           if (['R'].includes(invoiceRecord.CODEE.trim())) {
+  //             account_code += '0000010'
+  //           } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+  //             account_code += '0000020'
+  //           } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
+  //             account_code += '0000030'
+  //           } else {
+  //             account_code += '0000000'
+  //           }
+  //         }
+  //       }
+
+  //       else if(invoiceRecord.SALTYP === 'NVAT'){
+  //         account_code += '0000002'
+  //       }
+
+  //       else if(invoiceRecord.SALTYP === 'ZERO'){
+  //         if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+  //           account_code += '0000021'
+  //         } else {
+  //           account_code += '0000011'
+  //         }
+  //       }
+
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: account_code,
+  //         DEBIT:  0,
+  //         CREDIT: RENTAL_NET_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     // CUSA
+
+  //     if (CUSA_VAT_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000003`,
+  //         DEBIT:  CUSA_VAT_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (CUSA_ZERO_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000004`,
+  //         DEBIT:  CUSA_ZERO_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (CUSA_NET_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000010`,
+  //         DEBIT:  0,
+  //         CREDIT: CUSA_NET_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (CUSA_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `2001${PROJ}0000015`,
+  //         DEBIT:  0,
+  //         CREDIT: CUSA_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     // PENALTY ON CUSA
+
+  //     if (PENALTY_CUSA_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0000005`,
+  //         DEBIT:  PENALTY_CUSA_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (PENALTY_CUSA_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `2001${PROJ}0000015`,
+  //         DEBIT:  0,
+  //         CREDIT: PENALTY_CUSA_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (PENALTY_CUSA_NET_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6010${PROJ}0000003`,
+  //         DEBIT:  0,
+  //         CREDIT: PENALTY_CUSA_NET_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     // SET FIRST ENTRY TO PRNTCD = 'P'
+
+  //     GFL2PF = GFL2PF.map((entry, index) => {
+  //       if (index === 0) {
+  //         return {
+  //           ...entry,
+  //           PRNTCD: 'P',
+  //         }
+  //       }
+  //       return entry
+  //     })
+  //   }
+
+  //   // ELECTRICITY AND GENSET
+  //   else if (invoiceRecord.BILLINGS.some((bill) => ELEC_GENSET_BT.includes(bill.BILL_TYPE))) {
+  //     // PARTICULARS
+  //     GPARPF  = [
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 1,
+  //         PARCLR: 'ELEC AND PEN BILLING ' +
+  //           invoiceRecord.INVOICE_KEY.PROJCD
+  //       },
+  //     ]
+
+  //     // MAIN PARTICULAR
+  //     MAIN_PAR = 'ELEC'
+
+  //     // ENTRIES (51,53,54,55)
+  //     const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+  //     // 51
+  //     var ELEC_PENALTY_DEBIT = 0
+  //     var ELEC_PENALTY_CREDIT = 0
+  //     // 53
+  //     var ELEC_VAT_SALES_SP_DEBIT = 0
+  //     var ELEC_VAT_SALES_DEBIT = 0
+  //     var ELEC_VAT_SALES_CREDIT = 0
+  //     // 54
+  //     var ELEC_VAT_CREDIT = 0
+  //     // 55
+  //     var ELEC_VAT_EXEMPT_SP_DEBIT = 0
+  //     var ELEC_VAT_EXEMPT_DEBIT = 0
+  //     var ELEC_VAT_EXEMPT_CREDIT = 0
+
+  //     invoiceRecord.BILLINGS.forEach((bill) => {
+  //       if (bill.BILL_TYPE === 51) {
+  //         ELEC_PENALTY_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_PENALTY_DEBIT + bill.AMOUNT)
+  //         ELEC_PENALTY_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_PENALTY_CREDIT + bill.AMOUNT - bill.VAT)
+
+  //         ELEC_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_CREDIT + bill.VAT)
+  //       } else if (bill.BILL_TYPE === 5) {
+  //         if (PROJ === 'O25') {
+  //           ELEC_VAT_SALES_SP_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_SALES_SP_DEBIT + bill.VAT_SALES + bill.VAT)
+  //           ELEC_VAT_EXEMPT_SP_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_EXEMPT_SP_DEBIT + bill.VAT_EXEMPT)
+  //         } else {
+  //           ELEC_VAT_SALES_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_SALES_DEBIT + bill.VAT_SALES + bill.VAT)
+  //           ELEC_VAT_EXEMPT_DEBIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_EXEMPT_DEBIT + bill.VAT_EXEMPT)
+  //         }
+  //         ELEC_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_CREDIT + bill.VAT)
+  //         ELEC_VAT_SALES_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_SALES_CREDIT + bill.VAT_SALES)
+  //         ELEC_VAT_EXEMPT_CREDIT = utilStore.convertNumberToRoundedNumber(ELEC_VAT_EXEMPT_CREDIT + bill.VAT_EXEMPT)
+  //       }
+  //     })
+
+  //     if (ELEC_VAT_SALES_SP_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0030000`,
+  //         DEBIT:  ELEC_VAT_SALES_SP_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_EXEMPT_SP_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0030001`,
+  //         DEBIT:  ELEC_VAT_EXEMPT_SP_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_SALES_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0009001`,
+  //         DEBIT:  ELEC_VAT_SALES_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_EXEMPT_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0009002`,
+  //         DEBIT:  ELEC_VAT_EXEMPT_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `2001${PROJ}0000011`,
+  //         DEBIT:  0,
+  //         CREDIT: ELEC_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_SALES_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000028`,
+  //         DEBIT:  0,
+  //         CREDIT: ELEC_VAT_SALES_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_VAT_EXEMPT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000029`,
+  //         DEBIT:  0,
+  //         CREDIT: ELEC_VAT_EXEMPT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_PENALTY_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0009005`,
+  //         DEBIT:  ELEC_PENALTY_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (ELEC_PENALTY_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6010${PROJ}0000005`,
+  //         DEBIT:  0,
+  //         CREDIT: ELEC_PENALTY_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+  //   }
+
+  //   // WATER
+  //   else if (invoiceRecord.BILLINGS.some((bill) => WATER_BT.includes(bill.BILL_TYPE))){
+  //     // PARTICULARS
+  //     GPARPF  = [
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 1,
+  //         PARCLR: 'WATER AND PEN BILLING ' +
+  //           invoiceRecord.INVOICE_KEY.PROJCD
+  //       },
+  //     ]
+
+  //     // MAIN PARTICULAR
+  //     MAIN_PAR = 'WATER'
+
+  //     // ENTRIES (61,63,64,65,66)
+  //     const PROJ = invoiceRecord.INVOICE_KEY.PROJCD
+  //     // 61
+  //     var WATER_PENALTY_DEBIT = 0
+  //     var WATER_PENALTY_CREDIT = 0
+  //     // 63
+  //     var WATER_VAT_SALES_DEBIT = 0
+  //     var WATER_VAT_SALES_CREDIT = 0
+  //     // 64
+  //     var WATER_VAT_CREDIT = 0
+  //     // 65
+  //     var WATER_VAT_EXEMPT_DEBIT = 0
+  //     var WATER_VAT_EXEMPT_CREDIT = 0
+  //     // 66
+  //     var WATER_GOVT_TAX_DEBIT = 0
+  //     var WATER_GOVT_TAX_CREDIT = 0
+
+  //     invoiceRecord.BILLINGS.forEach((bill) => {
+  //       if (bill.BILL_TYPE === 61) {
+  //         WATER_PENALTY_DEBIT = utilStore.convertNumberToRoundedNumber(WATER_PENALTY_DEBIT + bill.AMOUNT)
+  //         WATER_PENALTY_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_PENALTY_CREDIT + bill.AMOUNT - bill.VAT)
+
+  //         WATER_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_CREDIT + bill.VAT)
+  //       } else if (bill.BILL_TYPE === 6) {
+  //         WATER_VAT_SALES_DEBIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_SALES_DEBIT + bill.VAT_SALES + bill.VAT)
+  //         WATER_VAT_SALES_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_SALES_CREDIT + bill.VAT_SALES)
+
+  //         WATER_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_CREDIT + bill.VAT)
+
+  //         WATER_VAT_EXEMPT_DEBIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_EXEMPT_DEBIT + bill.VAT_EXEMPT)
+  //         WATER_VAT_EXEMPT_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_VAT_EXEMPT_CREDIT + bill.VAT_EXEMPT)
+
+  //         WATER_GOVT_TAX_DEBIT = utilStore.convertNumberToRoundedNumber(WATER_GOVT_TAX_DEBIT + bill.GOVT_TAX)
+  //         WATER_GOVT_TAX_CREDIT = utilStore.convertNumberToRoundedNumber(WATER_GOVT_TAX_CREDIT + bill.GOVT_TAX)
+  //       }
+  //     })
+
+  //     if (WATER_VAT_SALES_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0010001`,
+  //         DEBIT:  WATER_VAT_SALES_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_VAT_SALES_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000030`,
+  //         DEBIT:  0,
+  //         CREDIT: WATER_VAT_SALES_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_VAT_EXEMPT_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0010002`,
+  //         DEBIT:  WATER_VAT_EXEMPT_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_VAT_EXEMPT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000031`,
+  //         DEBIT:  0,
+  //         CREDIT: WATER_VAT_EXEMPT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_VAT_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `2001${PROJ}0000012`,
+  //         DEBIT:  0,
+  //         CREDIT: WATER_VAT_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_GOVT_TAX_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0010003`,
+  //         DEBIT:  WATER_GOVT_TAX_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_GOVT_TAX_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6012${PROJ}0000033`,
+  //         DEBIT:  0,
+  //         CREDIT: WATER_GOVT_TAX_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_PENALTY_DEBIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `1028${PROJ}0010005`,
+  //         DEBIT:  WATER_PENALTY_DEBIT,
+  //         CREDIT: 0,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+
+  //     if (WATER_PENALTY_CREDIT > 0) {
+  //       GFL2PF.push({
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         'ACCT#': GFL2PF.length + 1,
+  //         ACCTCD: `6010${PROJ}0000006`,
+  //         DEBIT:  0,
+  //         CREDIT: WATER_PENALTY_CREDIT,
+  //         CHKNUM: 0,
+  //         PRNTCD: '',
+  //         MCCODE: '',
+  //         DATTRN: 0,
+  //         ORCOD:  '',
+  //         ORNUM:  0
+  //       })
+  //     }
+  //   }
+
+  //   // OTHERS (BTYPE 84)
+  //   else if (invoiceRecord.BILLINGS.some((bill) => bill.BILL_TYPE === 84 )){
+  //     // PARTICULARS
+  //     GPARPF  = [
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 1,
+  //         PARCLR: 'OTHERS BILLING ' +
+  //           invoiceRecord.INVOICE_KEY.PROJCD
+  //       },
+  //     ]
+
+  //     // MAIN PARTICULAR
+  //     MAIN_PAR = 'OTHER'
+
+  //     // ENTRIES
+  //     //   FOR BTYPE 84:
+
+  //     // - entry:
+  //     //     ACCTCD = '1028PRJ0013000'
+  //     //     DEBIT = invoice amount
+  //     //     CREDIT = 0
+
+  //     // - entry:
+  //     //     ACCTCD = '6012PRJ0000007'
+  //     //     DEBIT = 0
+  //     //     CREDIT = net of vat
+
+  //     // - entry:
+  //     //     ACCTCD = '2001PRJ0000002'
+  //     //     DEBIT = 0
+  //     //     CREDIT = vat amount
+  //   } else {
+  //     return undefined
+  //   }
+
+
+  //   // OTHER PARTICULARS
+  //   GPARPF = [
+  //     ...GPARPF,
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 2,
+  //         PARCLR: invoiceRecord.DETAILS.CLTNME.substring(0, 35)
+  //       },
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 3,
+  //         PARCLR: invoiceRecord.DETAILS.CLTKEY + '/' +
+  //           invoiceRecord.PBL_KEY + '/' +
+  //           invoiceRecord.TCLTNO
+  //       },
+  //   ]
+
+  //   if (invoiceRecord.NOTICE_NUMBER) {
+  //     GPARPF = [
+  //       ...GPARPF,
+  //       {
+  //         VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //         COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //         BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //         DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //         YY:     invoiceRecord.INVOICE_KEY.YY,
+  //         MM:     invoiceRecord.INVOICE_KEY.MM,
+  //         VRCOD:  '',
+  //         'VOUCH#': 0,
+  //         PARTNO: 4,
+  //         PARCLR: 'NOTICE NO. ' +
+  //           invoiceRecord.NOTICE_NUMBER
+  //       },
+  //     ]
+  //   }
+
+  //   // MAIN PARTICULAR
+  //   const earliestFRDATE = invoiceRecord.BILLINGS.reduce(
+  //     (earliest, b) => (b.FRBILL < earliest ? b.FRBILL : earliest),
+  //     invoiceRecord.BILLINGS[0].FRBILL
+  //   );
+
+  //   const latestTODATE = invoiceRecord.BILLINGS
+  //     .reduce(
+  //       (latest, b) => (b.TOBILL > latest ? b.TOBILL : latest),
+  //       invoiceRecord.BILLINGS[0].TOBILL
+  //     );
+
+  //   MAIN_PAR = MAIN_PAR +
+  //     ' BILL ' + // (5<= + 6)11
+  //     invoiceRecord.DETAILS.CLTNME.substring(0, 9) + ' ' // 10
+  //     getParticularsPeriod(earliestFRDATE, latestTODATE) //14
+
+  //   return {
+  //     GFL1PF: {
+  //       VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+  //       COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+  //       BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+  //       DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+  //       YY:     invoiceRecord.INVOICE_KEY.YY,
+  //       MM:     invoiceRecord.INVOICE_KEY.MM,
+  //       VRCOD: '',   // on backend processing
+  //       'VOUCH#': 0, // on backend processing
+  //       // ---------------------
+  //       NOACCT: GFL2PF.length,
+  //       DATTRN: 0,   // frontend on issue click
+  //       DATECR: 0,   // frontend on issue click
+  //       PAYCOD: '',  // frontend on issue click
+  //       PAYEE:  '',  // frontend on issue click
+  //       PARCLR: MAIN_PAR,
+  //       AMPAID: 0,
+  //       BALNCE: 0,
+  //       CONTNO: 0,
+  //       PARTNO: GPARPF.length,
+  //       BRNHCD: 0,
+  //       'PN#': 0,
+  //       FAO: '',
+  //       FAOCOD: 0,
+  //       VSCODE: '',
+  //       ORCOD: '',  // on backend processing
+  //       ORNUM: 0,   // on backend processing
+  //     },
+  //     GFL2PF: GFL2PF,
+  //     GPARPF: GPARPF,
+  //   }
+  // }
 
   const processBillings = (billings: LeaseBill[]): LeaseBill[] => {
     // console.log('Raw Billings', billings);
@@ -2340,13 +3970,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
     //   selectedInvoiceRecord.BILLINGS[0].LTYPCD,
     //   selectedInvoiceRecord.CODEA,
     //   selectedInvoiceRecord.CODEE
-    // )
-    // console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
-    //   'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
-    // ])
-    // console.table(selectedInvoiceRecord.ENTRY?.GPARPF, [
-    //   'PARTNO', 'PARCLR'
-    // ])
+    // ) 
+    if (selectedInvoiceRecord.ENTRY?.GFL2PF) {
+      console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
+        'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
+      ])
+    }
+    if (selectedInvoiceRecord.ENTRY?.GPARPF) {
+      console.table(selectedInvoiceRecord.ENTRY?.GPARPF, [
+        'PARTNO', 'PARCLR'
+      ])
+    }
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
     // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);

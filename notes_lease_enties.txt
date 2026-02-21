@@ -1,0 +1,208 @@
+NOTES:
+    - PRJ is the project code
+    - 3 files are going to be affected:
+        GFL1PF, GFL2PF, GPARPF
+
+---------------------------------------------------------
+    FOR GFL2PF
+
+    note:
+        for first record, set PRNTCD to 'P'
+---------------------------------------------------------
+FOR RENTAL (01) AND ADVANCE RENTAL (02):
+    entry 1028 (A/R):
+        if unit SALTYP in LEASEPF is VAT:
+            ACCTCD = 1028PRJ0000006
+
+        if unit SALTYP in LEASEPF is NVAT:
+            ACCTCD = 1028PRJ0000007
+
+        if unit SALTYP in LEASEPF is ZERO:
+            ACCTCD = 1028PRJ0000008
+
+        DEBIT = gross rental amount
+        CREDIT = 0
+
+    entry 2001 (Vat Payable):
+        if with vat:
+            ACCTCD = 2001PRJ0000001
+            DEBIT = 0
+            CREDIT = rental vat amount
+
+    entry 4006 (Rental Income):
+        if SALTYP is VAT:
+            if Regular Lease (LTYPCD in LEASE2PF is 'R' or record not exist in LEASE2PF)
+                ACCTCD = 4006PRJ0000000
+            
+            else:
+                if Special/VIP Unit (CODEE in INV7PF is 'R')
+                    ACCTCD = 4006PRJ0000010
+        
+                elif Special/VIP Parking (CODEE in INV7PF is 'P' or 'B')
+                    ACCTCD = 4006PRJ0000020
+            
+                elif Special/VIP Signage (CODEE in INV7PF is 'C')
+                    ACCTCD = 4006PRJ0000030
+            
+                else:
+                    ACCTCD = 4006PRJ0000000
+
+        if SALTYP is NVAT:
+            ACCTCD = 4006PRJ0000002
+
+        if SALTYP is ZERO:
+            if Special/VIP Parking (CODEE in INV7PF is 'P' or 'B')
+                ACCTCD = 4006PRJ0000021
+
+            else
+                ACCTCD = 4006PRJ0000011
+
+        DEBIT = 0
+        CREDIT = rental vat sales (gross rental - rental vat amount)
+
+
+FOR PENALTY ON RENTAL (11) AND PENALTY ON ADVANCE RENTAL (21) AND PENALTY ON SECURITY DEPOSIT (31):
+    ACCTCD = 1028PRJ0000009 (A/R)
+    DEBIT = gross penalty amount
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000001 (Vat Payable)
+    DEBIT = 0
+    CREDIT = penalty vat amount
+
+    ACCTCD = 6010PRJ0000001 (Other Income)
+    DEBIT = 0
+    CREDIT = penalty vat sales (gross penalty amount - penalty vat amount)
+
+
+FOR CUSA (04):
+    if unit SALTYP in LEASEPF is VAT:
+        ACCTCD = 1028PRJ0000003 (A/R)
+        DEBIT = gross cusa amount
+        CREDIT = 0
+
+        ACCTCD = 2001PRJ0000015 (Vat Payable)
+        DEBIT = 0
+        CREDIT = cusa vat amount
+
+        ACCTCD = 6012PRJ0000010 (Miscellaneous Income)
+        DEBIT = 0
+        CREDIT = cusa vat sales (gross cusa amount - cusa vat amount)
+
+    if unit SALTYP in LEASEPF is ZERO:
+        ACCTCD = 1028PRJ0000004 (A/R)
+        DEBIT = gross cusa amount
+        CREDIT = 0
+
+        ACCTCD = 6012PRJ0000011 (Miscellaneous Income)
+        DEBIT = 0
+        CREDIT = gross cusa amount
+
+
+FOR PENALTY ON CUSA (41):
+    ACCTCD = 1028PRJ0000010 (A/R)
+    DEBIT = gross cusa penalty amount
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000015 (Vat Payable)
+    DEBIT = 0
+    CREDIT = cusa penalty vat amount
+
+    ACCTCD = 6010PRJ0000003 (Other Income)
+    DEBIT = 0
+    CREDIT = cusa penalty vat sales (gross cusa penalty amount - cusa penalty vat amount)
+
+
+FOR NOTARIAL FEE (10):
+    ACCTCD = 1028PRJ0000011 (A/R)
+    DEBIT = gross notarial fee
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000002 (Vat Payable)
+    DEBIT = 0
+    CREDIT = notarial fee vat amount
+
+    ACCTCD = 6012PRJ0000023 (Miscellaneous Income)
+    DEBIT = 0
+    CREDIT = notarial fee vat sales (gross notarial fee - notarial fee vat amount)
+
+
+FOR PERMIT FEE (81):
+    ACCTCD = 1028PRJ0000012 (A/R)
+    DEBIT = gross permit fee
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000002 (Vat Payable)
+    DEBIT = 0
+    CREDIT = permit fee vat amount
+
+    ACCTCD = 6012PRJ0000007 (Miscellaneous Income)
+    DEBIT = 0
+    CREDIT = permit fee vat sales (gross permit fee - permit fee vat amount)
+
+
+FOR VETTING FEE (83):
+    ACCTCD = 1028PRJ0000013 (A/R)
+    DEBIT = gross vetting fee
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000002 (Vat Payable)
+    DEBIT = 0
+    CREDIT = vetting fee vat amount
+
+    ACCTCD = 6012PRJ0000026 (Miscellaneous Income)
+    DEBIT = 0
+    CREDIT = vetting fee vat sales (gross vetting fee - vetting fee vat amount)
+
+
+FOR OTHERS (84):
+    ACCTCD = 1028PRJ0000014 (A/R)
+    DEBIT = gross others
+    CREDIT = 0
+
+    ACCTCD = 2001PRJ0000002 (Vat Payable)
+    DEBIT = 0
+    CREDIT = others vat amount
+
+    ACCTCD = 6012PRJ0000007 (Miscellaneous Income)
+    DEBIT = 0
+    CREDIT = others vat sales (gross others - others vat amount)
+
+
+---------------------------------------------------------
+    FOR GPARPF
+---------------------------------------------------------
+first particular:
+    for rental and no cusa:
+        'RENTAL AND PEN BILLING ' || PRJ
+    for rental with cusa:
+        'RENTAL, CUSA, AND PEN BILLING ' || PRJ 
+
+second particular:
+    client name - trim to 35 chars
+
+third particular:
+    client key || '/' || pbl key || '/' || temp client number
+
+fourth particular - if notice number exists:
+    'NOTICE NO. ' || notice number
+
+
+---------------------------------------------------------
+    FOR GFL1PF
+---------------------------------------------------------
+    NOACCT = number of entries saved in GFL2PF
+    DATTRN = invoice date
+    DATECR = DATTRN
+    PAYCOD = '8888' for BILLING GROUP, '9999' for batch invoice
+    PAYEE = 'N.A.' for BILLING GROUP,
+        client key || '/' || pbl key || '/' || temp client number for batch invoice
+    PARCLR = get the first word of bill type description || ' BILL ' ||
+        9 chracters of client name ||
+        'MM/DD - MM/DD/YY' of billing period
+        (sample WATER BILL UNIONBANK 10/02-11/03/25)
+    PARTNO = total count of particulars saved in GPARPF
+    ORCOD = invoice code
+    ORNUM = invoice number
+
+    other fields are blank or zero

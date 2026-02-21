@@ -1,10 +1,9 @@
-import { BatchPDFSavingForm, InvoicePDF, InvoicePrintStatus, InvoiceRecord } from './types';
+import { BatchPDFSavingForm, InsertDocumentDetails, InvoiceDetails, InvoicePrintStatus, InvoiceRecord } from './types';
 import { computed, ref } from 'vue';
 
 import axios from '../axios';
 import { defineStore } from 'pinia';
 import { useConfirm } from 'primevue/useconfirm';
-import { useFileStore } from './useFileStore';
 import { useIssuanceStore } from './useIssuanceStore';
 import { useUtilitiesStore } from './useUtilitiesStore';
 
@@ -12,7 +11,6 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
 
   const confirm = useConfirm()
 
-  const fileStore = useFileStore()
   const utilStore = useUtilitiesStore()
   const issuanceStore = useIssuanceStore()
 
@@ -27,6 +25,16 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
   const issued_documents_data = computed((): InvoiceRecord[] => {
     return issuedDocuments.value
   })
+
+  const generateDocumentPath = (invoiceDetails: InvoiceDetails) => {
+
+    const valueDate = invoiceDetails.DATVAL.toString();
+
+    const year = parseInt(valueDate.substring(0, 4));
+    const month = parseInt(valueDate.substring(4, 6));
+
+    return `/CAS_DOCUMENTS/${invoiceDetails.COMPCD}/${invoiceDetails.RECTYP}/${year}/${month}/${valueDate}/${invoiceDetails.RECTYP}${invoiceDetails.ORNUM}.pdf`
+  }
 
   const handleActionSaveSelectedInvoices = () => {
     if (selectedIssuedDocuments.value.length > 0) {
@@ -66,11 +74,8 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
               return a.DETAILS.ORNUM.localeCompare(b.DETAILS.ORNUM);
             });
 
-          const invoicePDFDataS: InvoicePDF[] = ORIGINAL_INVOICES.map((invoiceRecord) =>
-            issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord)
-          )
-
-          invoicePDFDataS.forEach((invoicePDFData) => {
+          ORIGINAL_INVOICES.forEach((invoiceRecord) => {
+            const invoicePDFData = issuanceStore.convertInvoiceRecordsToInvoicePDFs(invoiceRecord)
             const PDF_BLOB = issuanceStore.generateInvoicePDFBlob(invoicePDFData)
 
             formData.append(
@@ -78,9 +83,30 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
               `${invoicePDFData.header.controlNumber}.pdf`
             );
 
+            const pdfSavingData: InsertDocumentDetails = {
+              CORFXPF: {
+                COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+                BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+                DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+                ORCOD:  invoiceRecord.INVOICE_KEY.ORCOD,
+                ORNUM:  invoiceRecord.INVOICE_KEY.ORNUM,
+                DATOR:  invoiceRecord.DETAILS.RUNDAT,
+                DATVAL: invoiceRecord.DETAILS.DATVAL,
+                ISSUE: '0',
+              },
+              DOCUMENT_REGISTRY: {
+                DOCNUM: invoiceRecord.DETAILS.RECTYP + invoiceRecord.DETAILS.ORNUM,
+                DOCPTH: generateDocumentPath(invoiceRecord.DETAILS),
+
+                SYSVER: 'v.1.0.0',
+                // GENUSR: invoiceRecord.DETAILS.RUNBY,
+                GENUSR: 'IT_MARK'
+              }
+            }
+
             formData.append(
               "invoices",
-              JSON.stringify(invoicePDFData)
+              JSON.stringify(pdfSavingData)
             )
           })
 

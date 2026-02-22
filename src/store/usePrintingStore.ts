@@ -1,4 +1,4 @@
-import { CheckDetails, Client, ClientForm, GenHeader, HistoryOfPayment, InquiryType, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
+import { CORFXPF, CheckDetails, Client, ClientForm, GenHeader, HistoryOfPayment, InquiryType, InvoicePDF, InvoicePrintStatus, InvoiceRecord, LeaseHeader, LedgerRemark, Unit, UnitForm } from './types';
 import { computed, defineAsyncComponent, onMounted, ref } from 'vue';
 
 import axios from '../axios';
@@ -572,11 +572,13 @@ export const usePrintingStore = defineStore('print', () => {
         const stampTime = utilStore.getCurrentTimeNumberHHMMSS(currentDate)
 
         const FOR_UPDATE_CIRCLTPF: object[] = []
+        const FOR_UPDATE_CORFXPF: CORFXPF[] = []
+
         const REPRINTED_ISSUED_DOCUMENTS: InvoiceRecord[] =
           selectedHistoryOfIssuedDocument.value
             .map((selected) => {
 
-              const FOR_UPDATE = {
+              const UPDATE_CIRCLTPF = {
                 PRSTAT: 'R' as InvoicePrintStatus,
                 PRCNT:  selected.DETAILS.PRCNT + 1,
 
@@ -592,20 +594,33 @@ export const usePrintingStore = defineStore('print', () => {
                 ORNUM: selected.DETAILS.ORNUM,
               }
 
-              FOR_UPDATE_CIRCLTPF.push(FOR_UPDATE)
+              const UPDATE_CORFXPF: CORFXPF = {
+                COMPCD: selected.INVOICE_KEY.COMPCD,
+                BRANCH: selected.INVOICE_KEY.BRANCH,
+                DEPTCD: selected.INVOICE_KEY.DEPTCD,
+                ORCOD:  selected.INVOICE_KEY.ORCOD,
+                ORNUM:  selected.INVOICE_KEY.ORNUM,
+                DATOR:  selected.DETAILS.RUNDAT,
+                DATVAL: selected.DETAILS.DATVAL,
+                ISSUE:  'Z',
+              }
+
+              FOR_UPDATE_CIRCLTPF.push(UPDATE_CIRCLTPF)
+              FOR_UPDATE_CORFXPF.push(UPDATE_CORFXPF)
 
               return {
                 ...selected,
                 DETAILS: {
                   ...selected.DETAILS,
-                  ...FOR_UPDATE,
+                  ...UPDATE_CIRCLTPF,
                 }
               }
             })
             .sort((a,b) => a.INVOICE_KEY.INVOICE_NUMBER.localeCompare(b.INVOICE_KEY.INVOICE_NUMBER))
 
         const data = {
-          FOR_UPDATE_CIRCLTPF: FOR_UPDATE_CIRCLTPF
+          FOR_UPDATE_CIRCLTPF: FOR_UPDATE_CIRCLTPF,
+          FOR_UPDATE_CORFXPF: FOR_UPDATE_CORFXPF
         }
 
         axios.put('issuance_lease/invoice/', data)

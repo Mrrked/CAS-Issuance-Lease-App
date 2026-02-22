@@ -112,7 +112,7 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
 
           console.log(formData.values());
 
-          axios.post(`issuance_lease/rerun_save_pdf/`, formData, {
+          axios.post(`issuance_lease/run_save_pdf/`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
@@ -174,6 +174,8 @@ export const useBatchPDFSavingStore = defineStore('BatchPDFSaving', () => {
     selectedIssuedDocuments,
 
     issued_documents_data,
+
+    generateDocumentPath,
 
     handleActionSaveSelectedInvoices,
     handleActionSearch,

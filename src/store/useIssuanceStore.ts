@@ -1,10 +1,11 @@
-import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PROJECT, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
+import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PROJECT, InsertDocumentDetails, InvoicePDF, InvoiceRecord, LeaseBill } from './types';
 import jsPDF, { jsPDFOptions } from 'jspdf';
 
 import JSZip from 'jszip'
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
+import { useBatchPDFSavingStore } from './useBatchPDFSavingStore';
 import { useCompanyHeaderStore } from './useCompanyHeaderStore';
 import { useFileStore } from './useFileStore';
 import { useForBillingGroupStore } from './useForBillingGroupStore';
@@ -4502,8 +4503,68 @@ export const useIssuanceStore = defineStore('issuance', () => {
     console.log('FOR ISSUANCE OF INVOICES', data.type, data.invoices);
     axios.post('issuance_lease/invoice/', data)
     .then(async (response) => {
-      // console.log(response.data.data);
+      console.log(response.data.data);
       await callback(response)
+
+      if (response.data.data.success && response.data.data.success.length > 0) {
+        const loading = utilStore.startLoadingModal('Saving PDF copy of invoices...')
+
+        const formData = new FormData()
+
+        const ORIGINAL_INVOICES: InvoiceRecord[] = response.data.data.success as InvoiceRecord[]
+
+        ORIGINAL_INVOICES.forEach((invoiceRecord) => {
+          const invoicePDFData = convertInvoiceRecordsToInvoicePDFs(invoiceRecord)
+          const PDF_BLOB = generateInvoicePDFBlob(invoicePDFData)
+
+          const batchPDFSavingStore = useBatchPDFSavingStore()
+
+          formData.append(
+            `files`, PDF_BLOB,
+            `${invoicePDFData.header.controlNumber}.pdf`
+          );
+
+          const pdfSavingData: InsertDocumentDetails = {
+            CORFXPF: {
+              COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+              BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+              DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+              ORCOD:  invoiceRecord.INVOICE_KEY.ORCOD,
+              ORNUM:  invoiceRecord.INVOICE_KEY.ORNUM,
+              DATOR:  invoiceRecord.DETAILS.RUNDAT,
+              DATVAL: invoiceRecord.DETAILS.DATVAL,
+              ISSUE: '0',
+            },
+            DOCUMENT_REGISTRY: {
+              DOCNUM: invoiceRecord.DETAILS.RECTYP + invoiceRecord.DETAILS.ORNUM,
+              DOCPTH: batchPDFSavingStore.generateDocumentPath(invoiceRecord.DETAILS),
+
+              SYSVER: 'v.1.0.0',
+              GENUSR: invoiceRecord.DETAILS.RUNBY,
+            }
+          }
+
+          formData.append(
+            "invoices",
+            JSON.stringify(pdfSavingData)
+          )
+        })
+
+        console.log(formData.values());
+
+        axios.post(`issuance_lease/run_save_pdf/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+          .then((response) => {
+            console.log(response.data.data)
+          })
+          .catch(utilStore.handleAxiosError)
+          .finally(() => {
+            loading.close()
+          })
+      }
     })
     .catch(utilStore.handleAxiosError)
     .finally(() => {

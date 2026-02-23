@@ -147,7 +147,7 @@ export const usePerVerificationRunStore = defineStore('3_PerVerificationRun', ()
               DATENT: stampDate,
               TIMENT: stampTime,
             },
-            ENTRY: undefined
+            ENTRY: entry
           }
 
           // console.log("FOR ISSUANCE", SELECTED_INVOICE);

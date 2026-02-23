@@ -3984,7 +3984,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
-    console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);
+    // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);
 
     const company_logo = companyHeaderStore.getCompanyLogoByCompanyCode(selectedInvoiceRecord.DETAILS.COMPCD)
 

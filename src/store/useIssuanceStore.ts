@@ -3472,6 +3472,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
   const convertBillingsToInvoiceRecords = (billings: LeaseBill[], invoice_date: Date): InvoiceRecord[] => {
     const mergedMap: { [key: string]: InvoiceRecord } = {};
+    // console.log(billings)
 
     billings.forEach((bill) => {
       const key = bill.ID;
@@ -3613,7 +3614,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             ...mergedMap[key].LOPH2PF,
             ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.ORAMT + bill.TOTAL_AMOUNT),
             VATOR:          utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.VATOR + bill.VAT),
-            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.PRPTAX + bill.PRPTAX)
+            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LOPH2PF.PRPTAX + bill.WITHHOLDING_TAX)
           },
 
           LOPD2PF: [
@@ -3630,7 +3631,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
             ...mergedMap[key].CORF3PF,
             ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.ORAMT + bill.TOTAL_AMOUNT),
             VATAMT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.VATAMT + bill.VAT),
-            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.PRPTAX + bill.PRPTAX)
+            PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.PRPTAX + bill.WITHHOLDING_TAX)
           }
         }
       }
@@ -3970,7 +3971,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     //   selectedInvoiceRecord.BILLINGS[0].LTYPCD,
     //   selectedInvoiceRecord.CODEA,
     //   selectedInvoiceRecord.CODEE
-    // ) 
+    // )
     if (selectedInvoiceRecord.ENTRY?.GFL2PF) {
       console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
         'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
@@ -3983,7 +3984,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
     }
 
     const isSample: boolean = import.meta.env.VITE_IS_TEST === 'TRUE' || false
-    // console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);
+    console.log('SELECTED INVOICE RECORD', selectedInvoiceRecord);
 
     const company_logo = companyHeaderStore.getCompanyLogoByCompanyCode(selectedInvoiceRecord.DETAILS.COMPCD)
 

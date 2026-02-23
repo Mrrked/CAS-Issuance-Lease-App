@@ -28,11 +28,12 @@ export const useForRecordingGroupStore = defineStore('ForRecordingGroup', () => 
   const BILL_TYPE_OPTIONS: ForRecordingGroupOption[] = [
     // { value: 'A', name: '(A) Electricity and Generator Set',  billTypes: [5, 7, 51, 71]},
     // { value: 'B', name: '(B) Water',                          billTypes: [6, 61]},
-    { value: 'C', name: '(C) Rental and CUSA',                billTypes: [1, 4, 2, 10, 11, 41, 31]},
+    { value: 'C', name: '(C) Rental and CUSA',                billTypes: [1, 2, 4, 11, 21, 31, 41]},
     { value: 'D', name: '(D) Rental Only',                    billTypes: [1]},
     { value: 'E', name: '(E) CUSA Only',                      billTypes: [4]},
     { value: 'F', name: '(F) Penalty on Rental Only',         billTypes: [11]},
     { value: 'G', name: '(G) Penalty on CUSA Only',           billTypes: [41]},
+    { value: 'H', name: '(H) Other Fees',                     billTypes: [10, 81, 83, 84]},
   ]
 
   const forRecordingGroupForm = ref<ForRecordingGroupForm>({

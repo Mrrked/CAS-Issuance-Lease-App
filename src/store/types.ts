@@ -96,7 +96,8 @@ export type ForBillingGroupOptionLabel =
   '(D) Rental Only' |
   '(E) CUSA Only'   |
   '(F) Penalty on Rental Only' |
-  '(G) Penalty on CUSA Only'
+  '(G) Penalty on CUSA Only' |
+  '(H) Other Fees'
 
 export type ForRecordingGroupOptionLabel =
   '(A) Electricity and Generator Set' |
@@ -105,16 +106,17 @@ export type ForRecordingGroupOptionLabel =
   '(D) Rental Only' |
   '(E) CUSA Only'   |
   '(F) Penalty on Rental Only' |
-  '(G) Penalty on CUSA Only'
+  '(G) Penalty on CUSA Only' |
+  '(H) Other Fees'
 
 export type ForBillingGroupOption = {
-  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H',
   name: ForBillingGroupOptionLabel
   billTypes: number[]
 }
 
 export type ForRecordingGroupOption = {
-  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G',
+  value: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H',
   name: ForRecordingGroupOptionLabel
   billTypes: number[]
 }

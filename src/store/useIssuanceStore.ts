@@ -6624,9 +6624,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               forBillingGroupStore.billings = []
               forBillingGroupStore.billings = response.data.data as LeaseBill[];
               forBillingGroupStore.handleActionViewMainDialog()
-              forBillingGroupStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
-              })
+              // forBillingGroupStore.billings.forEach((bill) => {
+              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
+              // })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {
@@ -6669,9 +6669,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
               forRecordingGroupStore.billings = []
               forRecordingGroupStore.billings = response.data.data as LeaseBill[];
               forRecordingGroupStore.handleActionViewMainDialog()
-              forRecordingGroupStore.billings.forEach((bill) => {
-                console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
-              })
+              // forRecordingGroupStore.billings.forEach((bill) => {
+              //   console.log(bill.NOTICE_NUMBER, bill.SALTYP, bill.CODEA, bill.CODEE, bill.LTYPCD);
+              // })
             })
             .catch(utilStore.handleAxiosError)
             .finally(() => {

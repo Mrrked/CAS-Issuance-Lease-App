@@ -2,6 +2,7 @@ import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PRO
 import jsPDF, { jsPDFOptions } from 'jspdf';
 
 import JSZip from 'jszip'
+import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -14,7 +15,6 @@ import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
-import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 
 // import { usePerBatchRunStore } from './usePerBatchRunStore';
 // import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
@@ -137,20 +137,21 @@ export const useIssuanceStore = defineStore('issuance', () => {
     const [bill_desc, date] = [
       bill.BDESC,
       // ${dateObj.toLocaleString('default', { month: 'long' })} ${dateObj.getFullYear()},
-      (() => {
-        // Trim and normalize the dash spacing (handles: " - ", "-", "  -   ", etc.)
-        const period = bill.PERIOD.trim().replace(/\s*-\s*/, " - ");
-        const [start, end] = period.split(" - ");
+      // (() => {
+      //   // Trim and normalize the dash spacing (handles: " - ", "-", "  -   ", etc.)
+      //   const period = bill.PERIOD.trim().replace(/\s*-\s*/, " - ");
+      //   const [start, end] = period.split(" - ");
 
-        // Safely extract years (support both "04/30/26" and "04/30/2026")
-        const startYear = start.split("/")[2];
-        const endYear = end.split("/")[2];
+      //   // Safely extract years (support both "04/30/26" and "04/30/2026")
+      //   const startYear = start.split("/")[2];
+      //   const endYear = end.split("/")[2];
 
-        // Return formatted period
-        return startYear === endYear
-          ? `${start.slice(0, 5)} - ${end}`
-          : period;
-      })(),
+      //   // Return formatted period
+      //   return startYear === endYear
+      //     ? `${start.slice(0, 5)} - ${end}`
+      //     : period;
+      // })(),
+      bill.PERIOD.trim()
     ];
 
     if (BILL_TYPES_WITH_UNIQUE_STYPE.includes(bill.BILL_TYPE)) {

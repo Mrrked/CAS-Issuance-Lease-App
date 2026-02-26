@@ -3780,6 +3780,11 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       let key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}`;
 
+      // SEPARATE VAT EXEMPT
+      if ([55,65].includes(bill.OLD_BILL_TYPE)) {
+        key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}-${bill.OLD_BILL_TYPE}`;
+      }
+
       if (bill.BILL_TYPE === 6 && bill.OLD_BILL_TYPE === 66) {
         key = `${bill.PBL_KEY}-${bill.YYYYMM}-${bill.PERIOD}-${bill.BILL_TYPE}-${bill.OLD_BILL_TYPE}`;
       }
@@ -5338,7 +5343,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               var BODY_CONTENTS = invoicePDFData.body.billings
 
               // console.log(invoicePDFData.header.controlNumber, LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber));
-
+              // SWITCH
               // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1) {
               //   BODY_CONTENTS = [
               //     ...BODY_CONTENTS,

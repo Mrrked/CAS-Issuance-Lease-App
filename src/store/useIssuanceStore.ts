@@ -14,6 +14,7 @@ import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 
 // import { usePerBatchRunStore } from './usePerBatchRunStore';
 // import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
@@ -5333,6 +5334,23 @@ export const useIssuanceStore = defineStore('issuance', () => {
               doc.setLineWidth(0.01)
               doc.setDrawColor(0,0,0)
 
+              var BODY_CONTENTS = invoicePDFData.body.billings
+
+              // console.log(invoicePDFData.header.controlNumber, LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber));
+
+              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1) {
+              //   BODY_CONTENTS = [
+              //     ...BODY_CONTENTS,
+              //     {
+              //       itemDescription: 'TOTAL AMOUNT',
+              //       qty: '',
+              //       unitCost: '',
+              //       vatAmount: '',
+              //       amount: invoicePDFData.body.breakdowns.section2.totalSales,
+              //     }
+              //   ]
+              // }
+
               autoTable(doc, {
                 // POSITION
                 startY: sectionStartLineY,
@@ -5345,7 +5363,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                 // CONTENT
                 head: [],
-                body: invoicePDFData.body.billings,
+                body: BODY_CONTENTS,
 
                 // STYLE
                 tableWidth: 'auto',
@@ -5376,14 +5394,58 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
                 // HOOKS
                 didParseCell: (data) => {
-                  // You can still bold body cells if needed
                   if (data.section === 'body') {
-                    if (data.column.index === 0) {
-                      data.cell.styles.halign = 'left'
-                    } else if (data.column.index === 1) {
-                      data.cell.styles.halign = 'center'
-                    } else {
-                      data.cell.styles.halign = 'right'
+                    const lastIndex = data.table.body.length - 1;
+                    const secondLastIndex = lastIndex - 1;
+
+                    // Safe check if table has at least 1 row
+                    if (lastIndex < 0) return;
+
+                    const lastRowFirstCol = data.table.body[lastIndex]?.cells[0]?.raw;
+                    const isTotalRow = lastRowFirstCol === 'TOTAL AMOUNT';
+                    const isLastRow = data.row.index === lastIndex;
+
+                    // Normal alignment for all non-TOTAL rows
+                    if (!(isTotalRow && isLastRow)) {
+                      if (data.column.index === 0) {
+                        data.cell.styles.halign = 'left';
+                      } else if (data.column.index === 1) {
+                        data.cell.styles.halign = 'center';
+                      } else {
+                        data.cell.styles.halign = 'right';
+                      }
+                    }
+
+                    // ✅ Add spacing to row before TOTAL only if TOTAL exists
+                    if (isTotalRow && data.row.index === secondLastIndex) {
+                      data.cell.styles.cellPadding = {
+                        top: PAGE_CONFIG.TABLE_CELL_PADDING,
+                        right: PAGE_CONFIG.TABLE_CELL_PADDING,
+                        bottom: PAGE_CONFIG.TABLE_CELL_PADDING,
+                        left: PAGE_CONFIG.TABLE_CELL_PADDING,
+                      };
+                    }
+
+                    if (isTotalRow && isLastRow) {
+                      if (data.column.index === 0) data.cell.text = ['']; // blank first column
+
+                      if (data.column.index === data.table.columns.length - 1) {
+                        data.cell.styles.lineWidth = {
+                          top: 0.01,
+                          bottom: 0.01,
+                          left: 0,
+                          right: 0
+                        }
+                      }
+
+                      data.cell.styles.valign = 'middle';
+                      data.cell.styles.halign = 'right';
+                      data.cell.styles.cellPadding = {
+                        top: PAGE_CONFIG.TABLE_CELL_PADDING / 1.5,
+                        bottom: PAGE_CONFIG.TABLE_CELL_PADDING / 1.5,
+                        left: PAGE_CONFIG.TABLE_CELL_PADDING,
+                        right: PAGE_CONFIG.TABLE_CELL_PADDING
+                      }
                     }
                   }
                 },

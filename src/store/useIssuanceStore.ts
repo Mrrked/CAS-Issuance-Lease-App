@@ -2,7 +2,6 @@ import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PRO
 import jsPDF, { jsPDFOptions } from 'jspdf';
 
 import JSZip from 'jszip'
-import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -15,6 +14,8 @@ import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+
+// import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 
 // import { usePerBatchRunStore } from './usePerBatchRunStore';
 // import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';

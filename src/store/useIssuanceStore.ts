@@ -2,6 +2,7 @@ import { ACCOUNTING_ENTRIES, CRMKPF, GFL2PF, GPARPF, INVOICE_PER_COMPANY_AND_PRO
 import jsPDF, { jsPDFOptions } from 'jspdf';
 
 import JSZip from 'jszip'
+import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 import autoTable from 'jspdf-autotable'
 import axios from '../axios'
 import { defineStore } from 'pinia'
@@ -14,20 +15,6 @@ import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
-
-// import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { usePerBatchRunStore } from './usePerBatchRunStore';
 // import { usePerBillTypeRunStore } from './usePerBillTypeRunStore';
@@ -5357,7 +5344,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
               // console.log(invoicePDFData.header.controlNumber, LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber));
               // SWITCH
-              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1) {
+              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1 && invoicePDFData.header.invoiceTypeName.toUpperCase() === 'BILLING') {
               //   BODY_CONTENTS = [
               //     ...BODY_CONTENTS,
               //     {
@@ -5490,6 +5477,32 @@ export const useIssuanceStore = defineStore('issuance', () => {
               doc.setFont('helvetica', 'bold')
               doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
 
+              // SWITCH
+              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1 && invoicePDFData.header.invoiceTypeName.toUpperCase() === 'BILLING') {
+              //   doc.setLineWidth(0.01)
+
+              //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)
+              //   doc.setFont('helvetica', 'normal')
+
+              //   doc.line(
+              //     PAGE_CONFIG.endLineX - 1.125 - 0.025,
+              //     lastContentY + (LARGE_LINE_HEIGHT * 2) + (LARGE_LINE_HEIGHT * 2) - 0.2,
+              //     PAGE_CONFIG.endLineX - 0.025,
+              //     lastContentY + (LARGE_LINE_HEIGHT * 2) + (LARGE_LINE_HEIGHT * 2) - 0.2
+              //   )
+              //   doc.text(
+              //     invoicePDFData.body.breakdowns.section2.totalSales,
+              //     PAGE_CONFIG.endLineX - 0.1,
+              //     lastContentY + (LARGE_LINE_HEIGHT * 2) + (LARGE_LINE_HEIGHT * 2),
+              //     { align: 'right' }
+              //   )
+              //   doc.line(
+              //     PAGE_CONFIG.endLineX - 1.125 - 0.025,
+              //     lastContentY + (LARGE_LINE_HEIGHT * 2) + (LARGE_LINE_HEIGHT * 2) + 0.1,
+              //     PAGE_CONFIG.endLineX - 0.025,
+              //     lastContentY + (LARGE_LINE_HEIGHT * 2) + (LARGE_LINE_HEIGHT * 2) + 0.1,
+              //   )
+              // }
 
               const tableLastCursorLineHeight = (doc as any).lastAutoTable.finalY;
               // doc.line(PAGE_CONFIG.startLineX, tableLastCursorLineHeight, PAGE_CONFIG.endLineX, tableLastCursorLineHeight)

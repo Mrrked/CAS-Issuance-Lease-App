@@ -2371,7 +2371,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
       invoiceRecord.BILLINGS.forEach((bill) => {
         // OTHERS FEE
-        if (bill.BILL_TYPE === 81) {
+        if (bill.BILL_TYPE === 84) {
           OTHERS_DEBIT = utilStore.convertNumberToRoundedNumber(OTHERS_DEBIT + bill.AMOUNT)
           OTHERS_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(OTHERS_VAT_CREDIT + bill.VAT)
           OTHERS_NET_VAT_CREDIT = utilStore.convertNumberToRoundedNumber(OTHERS_NET_VAT_CREDIT + bill.AMOUNT - bill.VAT)

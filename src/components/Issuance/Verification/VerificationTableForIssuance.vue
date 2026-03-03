@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { onMounted, ref, } from 'vue';
+  import { computed, onMounted, ref, } from 'vue';
   import { FilterMatchMode } from '@primevue/core/api';
   import DataTable from 'primevue/datatable';
   import { useUtilitiesStore } from '../../../store/useUtilitiesStore';
@@ -23,6 +23,16 @@
     'TOTAL_BREAKDOWN.AMTDUE': { value: null, matchMode: FilterMatchMode.CONTAINS },
   })
 
+  const getInvoiceRecords = computed(() => {
+    return perVerificationRunStore.invoice_records_data
+      .map((record, index) => {
+        return {
+          ...record,
+          INDEX: index + 1
+        }
+      })
+  })
+
   onMounted(() => {
     perVerificationRunStore.selectedInvoiceRecord = undefined
     issuanceStore.handleActionSearch('C')
@@ -33,8 +43,8 @@
 <template>
   <div class="flex flex-col gap-5 text-sm">
     <DataTable
-      :value="perVerificationRunStore.invoice_records_data"
-      dataKey="PBL_KEY"
+      :value="getInvoiceRecords"
+      dataKey="INDEX"
       selectionMode="single"
       v-model:selection="perVerificationRunStore.selectedInvoiceRecord"
 

@@ -162,6 +162,7 @@ export const usePerVerificationRunStore = defineStore('3_PerVerificationRun', ()
 
           const callback = async (response?: AxiosResponse) => {
             // console.log('RESPONSE', response?.data);
+            selectedInvoiceRecord.value = undefined
             issuanceStore.handleActionSearch('C')
 
             const issuedInvoiceRecords = response?.data.data.success as InvoiceRecord[] || [];

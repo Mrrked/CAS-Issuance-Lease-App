@@ -1084,6 +1084,56 @@ export const useIssuanceStore = defineStore('issuance', () => {
       if (RENTAL_NET_VAT_CREDIT > 0) {
         var account_code = `4006${PROJ}`
 
+        // NEW
+        if(invoiceRecord.SALTYP === 'VAT'){
+          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
+            account_code += '0000000'
+          } else {
+            if (['R'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000010'
+            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000020'
+            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000030'
+            } else {
+              account_code += '0000000'
+            }
+          }
+        }
+
+        else if(invoiceRecord.SALTYP === 'NVAT'){
+          account_code += '0000002'
+        }
+
+        else if(invoiceRecord.SALTYP === 'ZERO'){
+          if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+            account_code += '0000021'
+          } else {
+            account_code += '0000011'
+          }
+        }
+
+        GFL2PF.push({
+          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+          YY:     invoiceRecord.INVOICE_KEY.YY,
+          MM:     invoiceRecord.INVOICE_KEY.MM,
+          VRCOD:  '',
+          'VOUCH#': 0,
+          'ACCT#': GFL2PF.length + 1,
+          ACCTCD: account_code,
+          DEBIT:  0,
+          CREDIT: RENTAL_NET_VAT_CREDIT,
+          CHKNUM: 0,
+          PRNTCD: '',
+          MCCODE: '',
+          DATTRN: 0,
+          ORCOD:  '',
+          ORNUM:  0
+        })
+
         // OLD
         // if (PROJ.startsWith('CL')) {
         //   // IF PARKING FOR LEASE
@@ -1177,56 +1227,6 @@ export const useIssuanceStore = defineStore('issuance', () => {
         //     }
         //   }
         // }
-
-        // NEW
-        if(invoiceRecord.SALTYP === 'VAT'){
-          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
-            account_code += '0000000'
-          } else {
-            if (['R'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000010'
-            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000020'
-            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000030'
-            } else {
-              account_code += '0000000'
-            }
-          }
-        }
-
-        else if(invoiceRecord.SALTYP === 'NVAT'){
-          account_code += '0000002'
-        }
-
-        else if(invoiceRecord.SALTYP === 'ZERO'){
-          if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
-            account_code += '0000021'
-          } else {
-            account_code += '0000011'
-          }
-        }
-
-        GFL2PF.push({
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          'ACCT#': GFL2PF.length + 1,
-          ACCTCD: account_code,
-          DEBIT:  0,
-          CREDIT: RENTAL_NET_VAT_CREDIT,
-          CHKNUM: 0,
-          PRNTCD: '',
-          MCCODE: '',
-          DATTRN: 0,
-          ORCOD:  '',
-          ORNUM:  0
-        })
       }
 
       // PENALTY ON ADVANCE RENTAL

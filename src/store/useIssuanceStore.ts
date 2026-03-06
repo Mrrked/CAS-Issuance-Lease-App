@@ -2067,7 +2067,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           VRCOD:  '',
           'VOUCH#': 0,
           'ACCT#': GFL2PF.length + 1,
-          ACCTCD: `6012${PROJ}0000003`,
+          ACCTCD: `6012${PROJ}0000023`,
           DEBIT:  0,
           CREDIT: NOTARIAL_FEE_NET_VAT_CREDIT,
           CHKNUM: 0,

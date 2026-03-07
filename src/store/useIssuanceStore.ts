@@ -828,7 +828,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           'ACCT#': GFL2PF.length + 1,
           ACCTCD: `6012${PROJ}0000011`,
           DEBIT:  0,
-          CREDIT: CUSA_VAT_NET_VAT_CREDIT,
+          CREDIT: CUSA_ZERO_NET_VAT_CREDIT,
           CHKNUM: 0,
           PRNTCD: '',
           MCCODE: '',
@@ -2470,32 +2470,32 @@ export const useIssuanceStore = defineStore('issuance', () => {
     // OTHER PARTICULARS
     GPARPF = [
       ...GPARPF,
-        {
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          PARTNO: 2,
-          PARCLR: invoiceRecord.DETAILS.CLTNME.substring(0, 35)
-        },
-        {
-          VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
-          COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
-          BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
-          DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
-          YY:     invoiceRecord.INVOICE_KEY.YY,
-          MM:     invoiceRecord.INVOICE_KEY.MM,
-          VRCOD:  '',
-          'VOUCH#': 0,
-          PARTNO: 3,
-          PARCLR: invoiceRecord.DETAILS.CLTKEY + '/' +
-            invoiceRecord.PBL_KEY + '/' +
-            invoiceRecord.TCLTNO
-        },
+      {
+        VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+        COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+        BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+        DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+        YY:     invoiceRecord.INVOICE_KEY.YY,
+        MM:     invoiceRecord.INVOICE_KEY.MM,
+        VRCOD:  '',
+        'VOUCH#': 0,
+        PARTNO: 2,
+        PARCLR: invoiceRecord.DETAILS.CLTNME.substring(0, 35)
+      },
+      {
+        VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+        COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+        BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+        DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+        YY:     invoiceRecord.INVOICE_KEY.YY,
+        MM:     invoiceRecord.INVOICE_KEY.MM,
+        VRCOD:  '',
+        'VOUCH#': 0,
+        PARTNO: 3,
+        PARCLR: invoiceRecord.DETAILS.CLTKEY + '/' +
+          invoiceRecord.PBL_KEY + '/' +
+          invoiceRecord.TCLTNO
+      },
     ]
 
     if (invoiceRecord.NOTICE_NUMBER) {
@@ -2533,6 +2533,33 @@ export const useIssuanceStore = defineStore('issuance', () => {
       ' BILL ' + // (5<= + 6)11
       invoiceRecord.DETAILS.CLTNME.substring(0, 9) + ' ' // 10
       getParticularsPeriod(earliestFRDATE, latestTODATE) //14
+
+    // REMOVE DUPLICATES IN ACCOUNT CODES (GFL2PF)
+
+    const acctMap = new Map();
+
+    GFL2PF.forEach(rec => {
+      const acct = rec.ACCTCD;
+
+      if (!acctMap.has(acct)) {
+        acctMap.set(acct, { ...rec });
+      } else {
+        const existing = acctMap.get(acct);
+
+        // merge amounts
+        existing.DEBIT = utilStore.convertNumberToRoundedNumber(existing.DEBIT + (rec.DEBIT || 0));
+        existing.CREDIT = utilStore.convertNumberToRoundedNumber(existing.CREDIT + (rec.CREDIT || 0));
+      }
+    });
+
+    // convert to array
+    GFL2PF = Array.from(acctMap.values());
+
+    // reassign ACCT#
+    GFL2PF = GFL2PF.map((rec, index) => ({
+      ...rec,
+      "ACCT#": index + 1
+    }));
 
     return {
       GFL1PF: {

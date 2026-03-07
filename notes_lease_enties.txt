@@ -33,17 +33,17 @@ FOR RENTAL (01) AND ADVANCE RENTAL (02):
         if SALTYP is VAT:
             if Regular Lease (LTYPCD in LEASE2PF is 'R' or record not exist in LEASE2PF)
                 ACCTCD = 4006PRJ0000000
-            
+
             else:
                 if Special/VIP Unit (CODEE in INV7PF is 'R')
                     ACCTCD = 4006PRJ0000010
-        
+
                 elif Special/VIP Parking (CODEE in INV7PF is 'P' or 'B')
                     ACCTCD = 4006PRJ0000020
-            
+
                 elif Special/VIP Signage (CODEE in INV7PF is 'C')
                     ACCTCD = 4006PRJ0000030
-            
+
                 else:
                     ACCTCD = 4006PRJ0000000
 

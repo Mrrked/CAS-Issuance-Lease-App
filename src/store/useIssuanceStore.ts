@@ -5506,7 +5506,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
               doc.text('***NOTHING FOLLOWS***', PAGE_CONFIG.middleLineX, lastContentY + (LARGE_LINE_HEIGHT * 2), { align: 'center' })
 
               // SWITCH
-              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1 && invoicePDFData.header.invoiceTypeName.toUpperCase() === 'BILLING') {
+              // if(!LIST_OF_INVOICES_FOR_OLD_FORMAT.includes(invoicePDFData.header.controlNumber) && BODY_CONTENTS.length > 1) {
               //   doc.setLineWidth(0.01)
 
               //   doc.setFontSize(NORMAL_TEXT_FONT_SIZE + 1)

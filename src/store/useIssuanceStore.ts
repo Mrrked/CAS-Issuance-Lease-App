@@ -505,111 +505,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
       if (RENTAL_NET_VAT_CREDIT > 0) {
         var account_code = `4006${PROJ}`
 
-        // OLD
-        // if (PROJ.startsWith('CL')) {
-        //   // IF PARKING FOR LEASE
-        //   if (
-        //     ['LP', 'LM'].includes(invoiceRecord.CODEA) ||
-        //     ['P',  'B'].includes(invoiceRecord.CODEE.trim())
-        //   ) {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       account_code += '0000020'
-        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //       account_code += '0000021'
-        //     }
-        //   }
-
-        //   // IF SIGNAGE FOR LEASE
-        //   else if (
-        //     ['LC', 'LB'].includes(invoiceRecord.CODEA) ||
-        //     ['C'].includes(invoiceRecord.CODEE.trim())
-        //   ) {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       account_code += '0000030'
-        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //       account_code += '0000031'
-        //     }
-        //   }
-
-        //   else {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       account_code += '0000010'
-        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //       account_code += '0000011'
-        //     }
-        //   }
-
-        // } else {
-        //   // 1
-        //   if (PROJ === 'O16') {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       if (invoiceRecord.CODEE.trim() === 'P') {
-        //         account_code += '0000001'
-        //       } else {
-        //         account_code += '0000000'
-        //       }
-        //     } else if (invoiceRecord.SALTYP === 'NVAT') {
-        //       account_code += '0000002'
-        //     }
-        //   }
-
-        //   // 2
-        //   else if (PROJ !== 'O16' && PROJ.startsWith('O')) {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       account_code += '0000010'
-        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //       account_code += '0000011'
-        //     }
-        //   }
-
-        //   // 3
-        //   else if (['C60', 'C65'].includes(PROJ)) {
-        //     if (['P','B'].includes(invoiceRecord.CODEE.trim())) {
-        //       if (invoiceRecord.SALTYP === 'VAT') {
-        //         account_code += '0000020'
-        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //         account_code += '0000021'
-        //       }
-        //     }
-
-        //     else if (['C'].includes(invoiceRecord.CODEE.trim())) {
-        //       if (invoiceRecord.SALTYP === 'VAT') {
-        //         account_code += '0000030'
-        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //         account_code += '0000031'
-        //       }
-        //     }
-
-        //     else {
-        //       if (invoiceRecord.SALTYP === 'VAT') {
-        //         account_code += '0000010'
-        //       } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //         account_code += '0000011'
-        //       }
-        //     }
-        //   }
-
-        //   // 4
-        //   else {
-        //     if (invoiceRecord.SALTYP === 'VAT') {
-        //       account_code += '0000000'
-        //     } else if (invoiceRecord.SALTYP === 'ZERO') {
-        //       account_code += '0000002'
-        //     }
-        //   }
-        // }
-
         // NEW
         if(invoiceRecord.SALTYP === 'VAT'){
-          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
-            account_code += '0000000'
+          if (['R'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000010'
+          } else if (['P', 'B'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000020'
+          } else if (['C'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000030'
           } else {
-            if (['R'].includes(invoiceRecord.CODEE.trim())) {
+            if (['E'].includes(invoiceRecord.CODEF?.trim() || '')) {
               account_code += '0000010'
-            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000020'
-            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000030'
             } else {
               account_code += '0000000'
             }
@@ -1086,15 +992,15 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
         // NEW
         if(invoiceRecord.SALTYP === 'VAT'){
-          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
-            account_code += '0000000'
+          if (['R'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000010'
+          } else if (['P', 'B'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000020'
+          } else if (['C'].includes(invoiceRecord.CODEE?.trim() || '')) {
+            account_code += '0000030'
           } else {
-            if (['R'].includes(invoiceRecord.CODEE.trim())) {
+            if (['E'].includes(invoiceRecord.CODEF?.trim() || '')) {
               account_code += '0000010'
-            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000020'
-            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
-              account_code += '0000030'
             } else {
               account_code += '0000000'
             }
@@ -4347,6 +4253,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           NOTICE_NUMBER:    bill.NOTICE_NUMBER,
           CODEA:            bill.CODEA,
           CODEE:            bill.CODEE,
+          CODEF:            bill.CODEF,
           SALTYP:           bill.SALTYP,
 
           BILLINGS:         [ bill ],
@@ -5351,7 +5258,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
 
               const sectionStartLineY = PAGE_CONFIG.bodyStartLineY + TABLE_HEADER_HEIGHT
               // let sectionEndLineY = PAGE_CONFIG.firstPageBodyEndLineY - PAGE_CONFIG.SECTION_GAP
-              // const sectionHeigt = PAGE_CONFIG.headerEndLineY - cursorLineHeight
+              // const sectionHeight = PAGE_CONFIG.headerEndLineY - cursorLineHeight
 
               // doc.line(0, sectionStartLineY, PAGE_CONFIG.pageSizeX, sectionStartLineY)
               // doc.line(0, sectionEndLineY, PAGE_CONFIG.pageSizeX, sectionEndLineY)

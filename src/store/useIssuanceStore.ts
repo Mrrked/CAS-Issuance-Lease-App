@@ -4234,6 +4234,16 @@ export const useIssuanceStore = defineStore('issuance', () => {
             ORAMT:          utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.ORAMT + bill.TOTAL_AMOUNT),
             VATAMT:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.VATAMT + bill.VAT),
             PRPTAX:         utilStore.convertNumberToRoundedNumber(mergedMap[key].CORF3PF.PRPTAX + bill.WITHHOLDING_TAX)
+          },
+
+          LPAYPF: {
+            ...mergedMap[key].LPAYPF,
+            OTHERS:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LPAYPF.OTHERS + bill.AMOUNT)
+          },
+
+          LPY1PF: {
+            ...mergedMap[key].LPY1PF,
+            VATPAY:         utilStore.convertNumberToRoundedNumber(mergedMap[key].LPY1PF.VATPAY + bill.VAT)
           }
         }
       }
@@ -4544,6 +4554,44 @@ export const useIssuanceStore = defineStore('issuance', () => {
             TIMENT:         0,
             USRENT:         sessionStore.authenticatedUser?.username.toUpperCase() || '',
           },
+          LPAYPF: {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            DATOR:          invoiceDate,
+            PROJCD:         bill.PROJCD,
+            CLTKEY:         bill.CLTNUM,
+            PDSCOD:         bill.PDSCOD,
+            PDSNUM:         bill.PDSNUM,
+            ORAMT:          0,
+            PAYTYP:         bill.PAYTYP,
+            INSTNO:         0,
+            DATINS:         0,
+            PRNPAL:         0,
+            PNALTY:         0,
+            OTHERS:         bill.AMOUNT || 0, //UPDATE ON FINAL
+            ACTBAL:         0,
+            SCHEDB:         0,
+            RGPCUR:         0,
+            TAXINT:         0,
+            NONINT:         0,
+            REFCOD:         ''
+          },
+          LPY1PF: {
+            COMPCD:         bill.INVOICE_KEY.COMPCD,
+            BRANCH:         bill.INVOICE_KEY.BRANCH,
+            DEPTCD:         bill.INVOICE_KEY.DEPTCD,
+            ORCOD:          bill.INVOICE_KEY.ORCOD,
+            ORNUM:          bill.INVOICE_KEY.ORNUM,
+            PROJCD:         bill.PROJCD,
+            CLTKEY:         bill.CLTNUM,
+            PDSCOD:         bill.PDSCOD,
+            PDSNUM:         bill.PDSNUM,
+            VATDEF:         0,
+            VATPAY:         bill.VAT
+          }
         }
       }
     })
@@ -4569,6 +4617,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
   }
 
   const convertInvoiceRecordsToInvoicePDFs = (selectedInvoiceRecord: InvoiceRecord): InvoicePDF => {
+    // console.log(selectedInvoiceRecord)
     // console.log(
     //   selectedInvoiceRecord.SALTYP,
     //   selectedInvoiceRecord.BILLINGS[0].LTYPCD,

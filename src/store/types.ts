@@ -991,6 +991,9 @@ export interface InvoiceRecord {
   LOPD2PF: LOPD2PF[]
   CORF3PF: CORF3PF
 
+  LPAYPF: LPAYPF
+  LPY1PF: LPY1PF
+
   // ENTRIES
   ENTRY?: ACCOUNTING_ENTRIES
 }
@@ -1296,6 +1299,46 @@ interface CORF3PF { //CD OR File 3 (VAT reflected on OR Issued)
   DATENT: number;   // DATE ENTERED (ZONED 8,0)
   TIMENT: number;   // TIME ENTERED (ZONED 6,0)
   USRENT: string;   // USER NAME (CHAR 10)
+}
+
+export interface LPAYPF {
+  COMPCD: number;
+  BRANCH: number;
+  DEPTCD: number;
+  ORCOD: string;
+  ORNUM: number;
+  DATOR: number;
+  PROJCD: string;
+  CLTKEY: number;
+  PDSCOD: string;
+  PDSNUM: number;
+  ORAMT: number;
+  PAYTYP: string;
+  INSTNO: number;
+  DATINS: number;
+  PRNPAL: number;
+  PNALTY: number;
+  OTHERS: number;
+  ACTBAL: number;
+  SCHEDB: number;
+  RGPCUR: number;
+  TAXINT: number;
+  NONINT: number;
+  REFCOD: string;
+}
+
+export interface LPY1PF {
+  COMPCD: number;
+  BRANCH: number;
+  DEPTCD: number;
+  ORCOD: string;
+  ORNUM: number;
+  PROJCD: string;
+  CLTKEY: number;
+  PDSCOD: string;
+  PDSNUM: number;
+  VATDEF: number;
+  VATPAY: number;
 }
 
 interface FAILED_INVOICE_RECORD {

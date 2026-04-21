@@ -14,6 +14,7 @@ import { usePerVerificationRunStore } from './usePerVerificationStore';
 import { useSessionStore } from './useSessionStore';
 import { useToast } from 'primevue/usetoast';
 import { useUtilitiesStore } from './useUtilitiesStore';
+import { computed, ref } from 'vue';
 
 // import { LIST_OF_INVOICES_FOR_OLD_FORMAT } from './config';
 
@@ -68,6 +69,12 @@ export const useIssuanceStore = defineStore('issuance', () => {
     VAT_EXEMPT: [55, 65],
     GOVT_TAX:   [56, 66],
   }
+
+  const selectedTab = ref<'A'|'B'|'C'|'D'|''>('')
+
+  const isBillingGroup = computed((): boolean => {
+    return selectedTab.value === 'A'
+  })
 
   const getSplitClientAddress = (CLIENT_ADDRESS: string) => {
     const firstPart = CLIENT_ADDRESS.slice(0, 80);
@@ -502,20 +509,76 @@ export const useIssuanceStore = defineStore('issuance', () => {
         })
       }
 
+      // BILLING GROUP NEW ENTRIES
+      // if (RENTAL_NET_VAT_CREDIT > 0) {
+      //   var account_code = `4006${PROJ}`
+
+      //   // NEW
+      //   if(invoiceRecord.SALTYP === 'VAT'){
+      //     if (['R'].includes(invoiceRecord.CODEE?.trim() || '')) {
+      //       account_code += '0000010'
+      //     } else if (['P', 'B'].includes(invoiceRecord.CODEE?.trim() || '')) {
+      //       account_code += '0000020'
+      //     } else if (['C'].includes(invoiceRecord.CODEE?.trim() || '')) {
+      //       account_code += '0000030'
+      //     } else {
+      //       if (['E'].includes(invoiceRecord.CODEF?.trim() || '')) {
+      //         account_code += '0000010'
+      //       } else {
+      //         account_code += '0000000'
+      //       }
+      //     }
+      //   }
+
+      //   else if(invoiceRecord.SALTYP === 'NVAT'){
+      //     account_code += '0000002'
+      //   }
+
+      //   else if(invoiceRecord.SALTYP === 'ZERO'){
+      //     if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+      //       account_code += '0000021'
+      //     } else {
+      //       account_code += '0000011'
+      //     }
+      //   }
+
+      //   GFL2PF.push({
+      //     VTYPE:  invoiceRecord.INVOICE_KEY.TRNTYP,
+      //     COMPCD: invoiceRecord.INVOICE_KEY.COMPCD,
+      //     BRANCH: invoiceRecord.INVOICE_KEY.BRANCH,
+      //     DEPTCD: invoiceRecord.INVOICE_KEY.DEPTCD,
+      //     YY:     invoiceRecord.INVOICE_KEY.YY,
+      //     MM:     invoiceRecord.INVOICE_KEY.MM,
+      //     VRCOD:  '',
+      //     'VOUCH#': 0,
+      //     'ACCT#': GFL2PF.length + 1,
+      //     ACCTCD: account_code,
+      //     DEBIT:  0,
+      //     CREDIT: RENTAL_NET_VAT_CREDIT,
+      //     CHKNUM: 0,
+      //     PRNTCD: '',
+      //     MCCODE: '',
+      //     DATTRN: 0,
+      //     ORCOD:  '',
+      //     ORNUM:  0
+      //   })
+      // }
+
+      // OLD
       if (RENTAL_NET_VAT_CREDIT > 0) {
         var account_code = `4006${PROJ}`
 
         // NEW
         if(invoiceRecord.SALTYP === 'VAT'){
-          if (['R'].includes(invoiceRecord.CODEE?.trim() || '')) {
-            account_code += '0000010'
-          } else if (['P', 'B'].includes(invoiceRecord.CODEE?.trim() || '')) {
-            account_code += '0000020'
-          } else if (['C'].includes(invoiceRecord.CODEE?.trim() || '')) {
-            account_code += '0000030'
+          if (['', 'R'].includes(invoiceRecord.BILLINGS[0].LTYPCD.trim())) {
+            account_code += '0000000'
           } else {
-            if (['E'].includes(invoiceRecord.CODEF?.trim() || '')) {
+            if (['R'].includes(invoiceRecord.CODEE.trim())) {
               account_code += '0000010'
+            } else if (['P', 'B'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000020'
+            } else if (['C'].includes(invoiceRecord.CODEE.trim())) {
+              account_code += '0000030'
             } else {
               account_code += '0000000'
             }
@@ -6924,6 +6987,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
     UTILITY_BILL_TYPES_WITH_PENALTY,
     UTILITY_MOTHER_BILL_TYPE_GROUPS,
     UTILITY_BILL_TYPE_PER_CLASSIFICATION,
+
+    selectedTab,
+    isBillingGroup,
 
     getSplitClientAddress,
     getDeptCode,

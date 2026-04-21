@@ -187,7 +187,7 @@ export const usePrintingStore = defineStore('print', () => {
 
           const name = queryClientForm.value.name.toUpperCase()
 
-          axios.get(`general/client/${name}`)
+          axios.get(`general/client/${name}/`)
           .then((response) => {
             // console.log('RESPONSE ', response);
             clients.value = response.data.data

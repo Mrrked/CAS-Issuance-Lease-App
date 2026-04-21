@@ -3,7 +3,7 @@
   // import { usePerBatchRunStore } from '../../store/usePerBatchRunStore';
   import { useIssuanceStore } from '../../store/useIssuanceStore';
   import { useMainStore } from '../../store/useMainStore';
-  import { defineAsyncComponent, onMounted, ref, watch } from 'vue'
+  import { defineAsyncComponent, onMounted, watch } from 'vue'
   import { useUtilitiesStore } from '../../store/useUtilitiesStore';
   import { useSessionStore } from '../../store/useSessionStore';
   import { useForBillingGroupStore } from '../../store/useForBillingGroupStore';
@@ -26,7 +26,6 @@
   // const ALLOW_ADVANCE_BATCH = import.meta.env.VITE_ALLOW_ADVANCE_BATCH || 'FALSE';
   const ALLOW_ADVANCE_SINGLE = import.meta.env.VITE_ALLOW_ADVANCE_SINGLE || 'FALSE';
 
-  const selectedTab = ref<'A'|'B'|'C'|'D'|''>('')
 
   onMounted(() => {
     mainStore.fetchAllData()
@@ -36,15 +35,15 @@
     () => sessionStore.authenticatedUser?.username,
     () => {
       if (sessionStore.userHasPermissionForTabA) {
-        selectedTab.value = 'A'
+        issuanceStore.selectedTab = 'A'
       } else if (sessionStore.userHasPermissionForTabB) {
-        selectedTab.value = 'B'
+        issuanceStore.selectedTab = 'B'
       } else if (sessionStore.userHasPermissionForTabC) {
-        selectedTab.value = 'C'
+        issuanceStore.selectedTab = 'C'
       } else if (sessionStore.userHasPermissionForTabD) {
-        selectedTab.value = 'D'
+        issuanceStore.selectedTab = 'D'
       } else {
-        selectedTab.value = ''
+        issuanceStore.selectedTab = ''
       }
     },
     { immediate: true }
@@ -54,7 +53,7 @@
 <template>
   <div class="flex flex-col w-full h-full gap-3 pt-4">
     <div class="flex justify-between">
-      <Tabs v-model:value="selectedTab">
+      <Tabs v-model:value="issuanceStore.selectedTab">
         <TabList>
           <Tab :value="'A'" v-if="sessionStore.userHasPermissionForTabA">Billing Group</Tab>
           <Tab :value="'B'" v-if="sessionStore.userHasPermissionForTabB">Recording Group</Tab>
@@ -73,7 +72,7 @@
     </div>
 
     <!-- FOR BILLING GROUP -->
-    <div v-if="selectedTab === 'A'" class="flex flex-col items-center justify-start">
+    <div v-if="issuanceStore.selectedTab === 'A'" class="flex flex-col items-center justify-start">
       <Fieldset legend="For Billing Group" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
           <div v-focustrap class="flex flex-col gap-2">
@@ -144,7 +143,7 @@
     </div>
 
     <!-- FOR RECORDING GROUP -->
-    <div v-if="selectedTab === 'B'" class="flex flex-col items-center justify-start">
+    <div v-if="issuanceStore.selectedTab === 'B'" class="flex flex-col items-center justify-start">
       <Fieldset legend="For Recording Group" class="min-w-[700px] max-w-[700px]">
         <div class="flex flex-col">
           <div v-focustrap class="flex flex-col gap-2">
@@ -235,9 +234,9 @@
     </div>
 
     <!-- PER VERIFICATION -->
-    <VerificationTableForIssuance v-else-if="selectedTab === 'C'"/>
+    <VerificationTableForIssuance v-else-if="issuanceStore.selectedTab === 'C'"/>
 
     <!-- BATCH REPRINTING -->
-    <BatchReprinting v-else-if="selectedTab === 'D'"/>
+    <BatchReprinting v-else-if="issuanceStore.selectedTab === 'D'"/>
   </div>
 </template>

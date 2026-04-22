@@ -2498,10 +2498,17 @@ export const useIssuanceStore = defineStore('issuance', () => {
         invoiceRecord.BILLINGS[0].TOBILL
       );
 
-    MAIN_PAR = MAIN_PAR +
-      ' BILL ' + // (5<= + 6)11
-      invoiceRecord.DETAILS.CLTNME.substring(0, 9) + ' ' // 10
-      getParticularsPeriod(earliestFRDATE, latestTODATE) //14
+    // console.log(earliestFRDATE, latestTODATE, getParticularsPeriod(earliestFRDATE, latestTODATE));
+
+    if (invoiceRecord.BILLINGS.some((bill) => UTILITY_BILL_TYPES_WITH_PENALTY.includes(bill.BILL_TYPE))) {
+      MAIN_PAR = MAIN_PAR +
+        ' BILL ' + // (5<= + 6)11
+        invoiceRecord.DETAILS.CLTNME.substring(0, 9).trim() + ' ' + // 10
+        getParticularsPeriod(earliestFRDATE, latestTODATE) //14
+    } else {
+      MAIN_PAR = invoiceRecord.LAST_NAME.trim() + ' ' + // LAST NAME (20)
+        getParticularsPeriod(earliestFRDATE, latestTODATE) //14
+    }
 
     // REMOVE DUPLICATES IN ACCOUNT CODES (GFL2PF)
 
@@ -4324,6 +4331,7 @@ export const useIssuanceStore = defineStore('issuance', () => {
           TCLTNO:           bill.TCLTNO || 0,
           CLIENT_KEY_RAW:   bill.CLIENT_KEY_RAW || '',
           NOTICE_NUMBER:    bill.NOTICE_NUMBER,
+          LAST_NAME:        bill.CLIENT_LAST_NAME,
           CODEA:            bill.CODEA,
           CODEE:            bill.CODEE,
           CODEF:            bill.CODEF,
@@ -4687,6 +4695,9 @@ export const useIssuanceStore = defineStore('issuance', () => {
     //   selectedInvoiceRecord.CODEA,
     //   selectedInvoiceRecord.CODEE
     // )
+    if (selectedInvoiceRecord.ENTRY?.GFL1PF) {
+      console.log(selectedInvoiceRecord.ENTRY?.GFL1PF.PARCLR)
+    }
     if (selectedInvoiceRecord.ENTRY?.GFL2PF) {
       console.table(selectedInvoiceRecord.ENTRY?.GFL2PF, [
         'ACCT#', 'PRNTCD', 'ACCTCD', 'DEBIT', 'CREDIT'
